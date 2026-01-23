@@ -5,7 +5,7 @@ import { createServiceClient } from '@/lib/supabase';
 import { generateDownloadUrl, getBeatFilePaths } from '@/lib/r2';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2024-12-18.acacia',
+  apiVersion: '2025-12-15.clover',
 });
 
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!;
@@ -45,7 +45,7 @@ export async function POST(request: NextRequest) {
         const filePaths = getBeatFilePaths(metadata.beat_id);
         
         // Generate download URLs
-        const downloadUrls: Record<string, string> = {};
+        const downloadUrls: Record<string, any> = {};
         
         // Get license to check what files are included
         const { data: license } = await supabase
@@ -54,13 +54,15 @@ export async function POST(request: NextRequest) {
           .eq('id', metadata.license_id)
           .single();
 
-        if (license?.files_included?.includes('mp3')) {
+        const licenseData = license as any;
+
+        if (licenseData?.files_included?.includes('mp3')) {
           downloadUrls.mp3 = await generateDownloadUrl(filePaths.preview);
         }
-        if (license?.files_included?.includes('wav')) {
+        if (licenseData?.files_included?.includes('wav')) {
           downloadUrls.wav = await generateDownloadUrl(filePaths.original);
         }
-        if (license?.files_included?.includes('stems')) {
+        if (licenseData?.files_included?.includes('stems')) {
           downloadUrls.stems = {
             drums: await generateDownloadUrl(filePaths.stems.drums),
             melody: await generateDownloadUrl(filePaths.stems.melody),
@@ -73,8 +75,8 @@ export async function POST(request: NextRequest) {
         const producerPayout = paymentIntent.amount - applicationFee;
 
         // Create purchase record
-        const { error: purchaseError } = await supabase
-          .from('purchases')
+        const { error: purchaseError } = await (supabase
+          .from('purchases') as any)
           .insert({
             buyer_id: metadata.buyer_id,
             beat_id: metadata.beat_id,
@@ -93,8 +95,8 @@ export async function POST(request: NextRequest) {
         }
 
         // Log analytics event
-        await supabase
-          .from('analytics_events')
+        await (supabase
+          .from('analytics_events') as any)
           .insert({
             event_type: 'purchase',
             user_id: metadata.buyer_id,
@@ -122,8 +124,8 @@ export async function POST(request: NextRequest) {
         const userId = account.metadata?.user_id;
 
         if (userId && account.details_submitted && account.charges_enabled) {
-          await supabase
-            .from('profiles')
+          await (supabase
+            .from('profiles') as any)
             .update({ stripe_onboarding_complete: true })
             .eq('id', userId);
         }

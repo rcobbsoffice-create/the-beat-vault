@@ -31,15 +31,17 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Profile not found' }, { status: 404 });
     }
 
-    if (profile.role !== 'producer') {
+    const profileData = profile as any;
+
+    if (profileData.role !== 'producer') {
       return NextResponse.json({ error: 'Only producers can connect Stripe' }, { status: 403 });
     }
 
     // Check if already has Connect account
-    if (profile.stripe_connect_account_id) {
+    if (profileData.stripe_connect_account_id) {
       // Generate new account link for existing account
       const accountLink = await createAccountLink(
-        profile.stripe_connect_account_id,
+        profileData.stripe_connect_account_id,
         `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/producer?stripe=success`,
         `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/producer?stripe=refresh`
       );
@@ -48,11 +50,11 @@ export async function POST(request: NextRequest) {
     }
 
     // Create new Connect account
-    const account = await createConnectAccount(profile.email, user.id);
+    const account = await createConnectAccount(profileData.email, user.id);
 
     // Save account ID to profile
-    await supabase
-      .from('profiles')
+    await (supabase
+      .from('profiles') as any)
       .update({ stripe_connect_account_id: account.id })
       .eq('id', user.id);
 
@@ -96,14 +98,16 @@ export async function GET(request: NextRequest) {
       .eq('id', user.id)
       .single();
 
-    if (!profile?.stripe_connect_account_id) {
+    const profileData = profile as any;
+
+    if (!profileData?.stripe_connect_account_id) {
       return NextResponse.json({ connected: false });
     }
 
     return NextResponse.json({
       connected: true,
-      accountId: profile.stripe_connect_account_id,
-      onboardingComplete: profile.stripe_onboarding_complete,
+      accountId: profileData.stripe_connect_account_id,
+      onboardingComplete: profileData.stripe_onboarding_complete,
     });
   } catch (error: any) {
     return NextResponse.json(

@@ -90,8 +90,8 @@ export default function DashboardPage() {
                   <div>
                     <p className="text-sm text-gray-400 mb-1">{stat.label}</p>
                     <p className="text-2xl font-bold text-white">{stat.value}</p>
-                    {stat.change && (
-                      <p className="text-xs text-success mt-1">{stat.change}</p>
+                    {(stat as any).change && (
+                      <p className="text-xs text-success mt-1">{(stat as any).change}</p>
                     )}
                   </div>
                   <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">

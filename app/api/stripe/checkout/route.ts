@@ -43,19 +43,22 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Beat not found' }, { status: 404 });
     }
 
-    const license = beat.licenses?.find((l: any) => l.id === licenseId);
+    // Cast beat to any to handle joined relations that aren't in the default type
+    const beatData = beat as any;
+
+    const license = beatData.licenses?.find((l: any) => l.id === licenseId);
     if (!license || !license.is_active) {
       return NextResponse.json({ error: 'License not found or inactive' }, { status: 404 });
     }
 
     // Check producer has Stripe Connect
-    if (!beat.producer?.stripe_connect_account_id) {
+    if (!beatData.producer?.stripe_connect_account_id) {
       return NextResponse.json(
         { error: 'Producer has not set up payments' },
         { status: 400 }
       );
     }
-
+    
     // Calculate platform fee (15% default)
     const platformFeePercent = parseInt(process.env.PLATFORM_FEE_PERCENTAGE || '15');
     const platformFee = Math.round(license.price * (platformFeePercent / 100));
@@ -63,7 +66,7 @@ export async function POST(request: NextRequest) {
     // Create payment intent with application fee
     const paymentIntent = await createPaymentIntent(
       license.price,
-      beat.producer.stripe_connect_account_id,
+      beatData.producer.stripe_connect_account_id,
       platformFee,
       {
         beat_id: beatId,
