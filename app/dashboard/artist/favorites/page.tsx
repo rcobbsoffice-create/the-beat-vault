@@ -1,12 +1,8 @@
 'use client';
 
-import { Header } from '@/components/Header';
-import { Footer } from '@/components/Footer';
 import { BeatCard } from '@/components/BeatCard';
-import { AudioPlayer } from '@/components/AudioPlayer';
 import { Card } from '@/components/ui/Card';
-import { Badge } from '@/components/ui/Badge';
-import { Music, Grid } from 'lucide-react';
+import { Music } from 'lucide-react';
 import type { Beat } from '@/types/supabase';
 
 // Demo favorites
@@ -37,35 +33,25 @@ const demoFavorites: Beat[] = [
 
 export default function ArtistFavoritesPage() {
   return (
-    <div className="min-h-screen flex flex-col bg-dark-950">
-      <Header />
-      
-      <main className="flex-1 pt-24 pb-32">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Header */}
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold text-white mb-2">My Favorites</h1>
-            <p className="text-gray-400">Beats you&apos;ve saved for later</p>
-          </div>
+    <div className="space-y-8">
+      <div>
+        <h1 className="text-3xl font-bold text-white mb-2">My Favorites</h1>
+        <p className="text-gray-400">Beats you&apos;ve saved for later</p>
+      </div>
 
-          {demoFavorites.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {demoFavorites.map((beat) => (
-                <BeatCard key={beat.id} beat={beat} isFavorited />
-              ))}
-            </div>
-          ) : (
-            <Card className="p-12 text-center">
-              <Music className="w-16 h-16 text-gray-500 mx-auto mb-4" />
-              <h2 className="text-xl font-semibold text-white mb-2">No favorites yet</h2>
-              <p className="text-gray-400">Browse the marketplace and save beats you like</p>
-            </Card>
-          )}
+      {demoFavorites.length > 0 ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {demoFavorites.map((beat) => (
+            <BeatCard key={beat.id} beat={beat} isFavorited />
+          ))}
         </div>
-      </main>
-
-      <AudioPlayer />
-      <Footer />
+      ) : (
+        <Card className="p-12 text-center">
+          <Music className="w-16 h-16 text-gray-500 mx-auto mb-4" />
+          <h2 className="text-xl font-semibold text-white mb-2">No favorites yet</h2>
+          <p className="text-gray-400">Browse the marketplace and save beats you like</p>
+        </Card>
+      )}
     </div>
   );
 }

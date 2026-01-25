@@ -1,243 +1,172 @@
 'use client';
 
-import { useState } from 'react';
-import Link from 'next/link';
-import { Header } from '@/components/Header';
-import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
-import {
-  Music,
+import { Button } from '@/components/ui/Button';
+import { 
+  Music, 
+  Search, 
+  Plus, 
+  MoreVertical, 
+  Play, 
+  Eye, 
   DollarSign,
-  Play,
-  TrendingUp,
-  Upload,
-  MoreHorizontal,
-  Edit,
-  Trash2,
-  Eye,
-  Search,
-  Filter,
+  Edit2,
+  Trash2
 } from 'lucide-react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { usePlayer } from '@/stores/player';
+import { useCatalogStore } from '@/stores/catalog';
+import toast from 'react-hot-toast';
+import type { Beat } from '@/types/supabase';
 
-// Demo data
-const demoBeats = [
-  { 
-    id: '1', 
-    title: 'Midnight Dreams', 
-    genre: 'Trap', 
-    bpm: 140, 
-    status: 'published', 
-    plays: 1250, 
-    sales: 8, 
-    revenue: 239.92,
-    created: '2026-01-15'
-  },
-  { 
-    id: '2', 
-    title: 'Street Anthem', 
-    genre: 'Drill', 
-    bpm: 145, 
-    status: 'published', 
-    plays: 890, 
-    sales: 5, 
-    revenue: 174.95,
-    created: '2026-01-10'
-  },
-  { 
-    id: '3', 
-    title: 'Summer Vibes', 
-    genre: 'R&B', 
-    bpm: 85, 
-    status: 'draft', 
-    plays: 0, 
-    sales: 0, 
-    revenue: 0,
-    created: '2026-01-20'
-  },
-];
+// Demo beats are now moved to the catalog store
 
 export default function ProducerBeatsPage() {
-  const [beats] = useState(demoBeats);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [openMenu, setOpenMenu] = useState<string | null>(null);
+  const router = useRouter();
+  const { setCurrentBeat, togglePlayPause, currentBeat, isPlaying } = usePlayer();
+  const { beats } = useCatalogStore();
 
-  const filteredBeats = beats.filter(beat => 
-    beat.title.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const handlePlayBeat = (beat: any) => {
+    // Transform demo beat to match player expected type briefly or 
+    // just pass enough for the player to handle it.
+    const beatData = {
+      id: beat.id,
+      title: beat.title,
+      genre: beat.genre,
+      bpm: beat.bpm.toString(),
+      // Mocking URLs for demo
+      audio_url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3',
+      cover_url: '',
+    } as any;
 
-  const totalRevenue = beats.reduce((acc, beat) => acc + beat.revenue, 0);
-  const totalPlays = beats.reduce((acc, beat) => acc + beat.plays, 0);
-  const totalSales = beats.reduce((acc, beat) => acc + beat.sales, 0);
+    if (currentBeat?.id === beat.id) {
+      togglePlayPause();
+    } else {
+      setCurrentBeat(beatData);
+    }
+  };
+
+  const handleEdit = (beat: any) => {
+    router.push(`/dashboard/producer/beats/${beat.id}/edit`);
+  };
+
+  const handleMore = (beat: any) => {
+    toast('More options coming soon!', { icon: '✨' });
+  };
 
   return (
-    <div className="min-h-screen bg-dark-950">
-      <Header />
-      
-      <main className="pt-24 pb-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Header */}
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
-            <div>
-              <h1 className="text-3xl font-bold text-white mb-2">My Beats</h1>
-              <p className="text-gray-400">Manage your beat catalog</p>
-            </div>
-            <Link href="/dashboard/producer/upload">
-              <Button className="gap-2">
-                <Upload className="w-4 h-4" />
-                Upload New Beat
-              </Button>
-            </Link>
-          </div>
-
-          {/* Stats */}
-          <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 mb-8">
-            <Card className="p-4">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                  <Music className="w-5 h-5 text-primary" />
-                </div>
-                <div>
-                  <p className="text-sm text-gray-400">Total Beats</p>
-                  <p className="text-xl font-bold text-white">{beats.length}</p>
-                </div>
-              </div>
-            </Card>
-            <Card className="p-4">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-success/10 flex items-center justify-center">
-                  <DollarSign className="w-5 h-5 text-success" />
-                </div>
-                <div>
-                  <p className="text-sm text-gray-400">Total Revenue</p>
-                  <p className="text-xl font-bold text-white">${totalRevenue.toFixed(2)}</p>
-                </div>
-              </div>
-            </Card>
-            <Card className="p-4">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-secondary/10 flex items-center justify-center">
-                  <Play className="w-5 h-5 text-secondary" />
-                </div>
-                <div>
-                  <p className="text-sm text-gray-400">Total Plays</p>
-                  <p className="text-xl font-bold text-white">{totalPlays.toLocaleString()}</p>
-                </div>
-              </div>
-            </Card>
-            <Card className="p-4">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-warning/10 flex items-center justify-center">
-                  <TrendingUp className="w-5 h-5 text-warning" />
-                </div>
-                <div>
-                  <p className="text-sm text-gray-400">Total Sales</p>
-                  <p className="text-xl font-bold text-white">{totalSales}</p>
-                </div>
-              </div>
-            </Card>
-          </div>
-
-          {/* Search & Filter */}
-          <div className="flex gap-4 mb-6">
-            <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-              <input
-                type="text"
-                placeholder="Search beats..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 bg-dark-800 border border-dark-600 rounded-lg"
-              />
-            </div>
-            <Button variant="outline" className="gap-2">
-              <Filter className="w-4 h-4" />
-              Filter
-            </Button>
-          </div>
-
-          {/* Beats Table */}
-          <Card className="overflow-hidden">
-            <table className="w-full">
-              <thead className="bg-dark-800">
-                <tr>
-                  <th className="text-left py-4 px-6 text-sm font-medium text-gray-400">Beat</th>
-                  <th className="text-left py-4 px-6 text-sm font-medium text-gray-400">Status</th>
-                  <th className="text-left py-4 px-6 text-sm font-medium text-gray-400">Plays</th>
-                  <th className="text-left py-4 px-6 text-sm font-medium text-gray-400">Sales</th>
-                  <th className="text-left py-4 px-6 text-sm font-medium text-gray-400">Revenue</th>
-                  <th className="text-right py-4 px-6 text-sm font-medium text-gray-400">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-dark-700">
-                {filteredBeats.map((beat) => (
-                  <tr key={beat.id} className="hover:bg-dark-800/50 transition-colors">
-                    <td className="py-4 px-6">
-                      <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-primary/30 to-secondary/30 flex items-center justify-center">
-                          <Music className="w-6 h-6 text-white" />
-                        </div>
-                        <div>
-                          <p className="font-medium text-white">{beat.title}</p>
-                          <p className="text-sm text-gray-400">{beat.genre} • {beat.bpm} BPM</p>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="py-4 px-6">
-                      <Badge variant={beat.status === 'published' ? 'success' : 'default'}>
-                        {beat.status}
-                      </Badge>
-                    </td>
-                    <td className="py-4 px-6 text-white">{beat.plays.toLocaleString()}</td>
-                    <td className="py-4 px-6 text-white">{beat.sales}</td>
-                    <td className="py-4 px-6 text-success font-medium">${beat.revenue.toFixed(2)}</td>
-                    <td className="py-4 px-6 text-right">
-                      <div className="relative inline-block">
-                        <button
-                          onClick={() => setOpenMenu(openMenu === beat.id ? null : beat.id)}
-                          className="p-2 hover:bg-dark-700 rounded-lg"
-                        >
-                          <MoreHorizontal className="w-5 h-5 text-gray-400" />
-                        </button>
-                        {openMenu === beat.id && (
-                          <div className="absolute right-0 mt-2 w-40 bg-dark-800 border border-dark-600 rounded-lg shadow-xl z-10">
-                            <Link href={`/beats/${beat.id}`}>
-                              <button className="w-full flex items-center gap-2 px-4 py-2 text-sm text-gray-300 hover:bg-dark-700">
-                                <Eye className="w-4 h-4" />
-                                View
-                              </button>
-                            </Link>
-                            <button className="w-full flex items-center gap-2 px-4 py-2 text-sm text-gray-300 hover:bg-dark-700">
-                              <Edit className="w-4 h-4" />
-                              Edit
-                            </button>
-                            <button className="w-full flex items-center gap-2 px-4 py-2 text-sm text-error hover:bg-dark-700">
-                              <Trash2 className="w-4 h-4" />
-                              Delete
-                            </button>
-                          </div>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-
-            {filteredBeats.length === 0 && (
-              <div className="text-center py-12">
-                <Music className="w-12 h-12 text-gray-500 mx-auto mb-4" />
-                <p className="text-gray-400">No beats found</p>
-                <Link href="/dashboard/producer/upload">
-                  <Button variant="outline" className="mt-4">
-                    Upload Your First Beat
-                  </Button>
-                </Link>
-              </div>
-            )}
-          </Card>
+    <div className="space-y-8">
+      {/* Header */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold text-white mb-2">My Catalog</h1>
+          <p className="text-gray-400">Manage your tracks, track performance, and edit listings</p>
         </div>
-      </main>
+        <Link href="/dashboard/producer/upload">
+          <Button className="bg-primary text-black font-bold gap-2">
+            <Plus className="w-4 h-4" />
+            Upload New Beat
+          </Button>
+        </Link>
+      </div>
+
+      {/* Catalog List */}
+      <div className="space-y-4">
+        {beats.map((beat) => (
+          <Card key={beat.id} className="p-4 hover:border-white/20 transition-all group">
+            <div className="flex flex-col md:flex-row items-center gap-6">
+              {/* Cover Art Preview */}
+              <div className="w-20 h-20 rounded-xl bg-dark-800 shrink-0 relative overflow-hidden flex items-center justify-center">
+                {beat.cover_url ? (
+                  <img src={beat.cover_url} alt={beat.title} className="w-full h-full object-cover" />
+                ) : (
+                  <Music className="w-6 h-6 text-gray-600" />
+                )}
+                <button 
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handlePlayBeat(beat);
+                  }}
+                  className={`absolute inset-0 bg-primary/20 flex items-center justify-center transition-opacity z-10 ${
+                    currentBeat?.id === beat.id && isPlaying ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
+                  }`}
+                >
+                   {currentBeat?.id === beat.id && isPlaying ? (
+                     <div className="flex gap-1 items-end h-4">
+                        <div className="w-1 bg-black animate-bounce-short" style={{ animationDelay: '0ms' }} />
+                        <div className="w-1 bg-black animate-bounce-short" style={{ animationDelay: '100ms' }} />
+                        <div className="w-1 bg-black animate-bounce-short" style={{ animationDelay: '200ms' }} />
+                     </div>
+                   ) : (
+                     <Play className="w-4 h-4 fill-current ml-0.5 text-black" />
+                   )}
+                </button>
+              </div>
+
+              {/* Title & Info */}
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-3 mb-1">
+                  <h3 className="text-lg font-bold text-white truncate">{beat.title}</h3>
+                  <Badge className={
+                    beat.status === 'published' ? 'bg-success/10 text-success border-success/20' : 'bg-gray-800 text-gray-400'
+                  }>
+                    {beat.status}
+                  </Badge>
+                </div>
+                <p className="text-sm text-gray-400">
+                  {beat.genre} • {beat.bpm} BPM • 44.1kHz WAV
+                </p>
+              </div>
+
+              {/* Stats */}
+              <div className="flex items-center gap-8 px-6 border-x border-white/5 hidden lg:flex">
+                <div className="text-center">
+                  <p className="text-xs text-gray-500 uppercase font-bold tracking-widest mb-1">Plays</p>
+                  <p className="text-white font-bold">{beat.plays}</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-xs text-gray-500 uppercase font-bold tracking-widest mb-1">Sales</p>
+                  <p className="text-white font-bold">{beat.sales}</p>
+                </div>
+                <div className="text-center text-primary">
+                  <p className="text-xs text-gray-500 uppercase font-bold tracking-widest mb-1">Earned</p>
+                  <p className="font-bold">{beat.earnings}</p>
+                </div>
+              </div>
+
+              {/* Actions */}
+              <div className="flex items-center gap-2">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="gap-2"
+                  onClick={() => handleEdit(beat)}
+                >
+                  <Edit2 className="w-3.5 h-3.5" />
+                  Edit
+                </Button>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="px-2 text-gray-500 hover:text-white"
+                  onClick={() => handleMore(beat)}
+                >
+                  <MoreVertical className="w-5 h-5" />
+                </Button>
+              </div>
+            </div>
+          </Card>
+        ))}
+      </div>
+
+      <div className="text-center py-6">
+        <Button variant="ghost" className="text-gray-500">
+          Load more tracks
+        </Button>
+      </div>
     </div>
   );
 }

@@ -12,9 +12,9 @@ interface AuthContextType {
   session: Session | null;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
-  signUp: (email: string, password: string, displayName: string, role: 'artist' | 'producer') => Promise<{ error: any }>;
+  signUp: (email: string, password: string, displayName: string, role: 'producer' | 'customer') => Promise<{ error: any }>;
   signOut: () => Promise<void>;
-  isRole: (role: string) => boolean;
+  isRole: (role: 'producer' | 'customer' | 'admin') => boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -69,6 +69,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setProfile(data);
     } catch (error) {
       console.error('Error loading profile:', error);
+      if (error && typeof error === 'object' && 'code' in error) {
+        console.log('Error code:', (error as any).code);
+      }
     } finally {
       setLoading(false);
     }
@@ -91,7 +94,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     email: string, 
     password: string, 
     displayName: string, 
-    role: 'artist' | 'producer'
+    role: 'producer' | 'customer'
   ) => {
     const { error } = await supabase.auth.signUp({
       email,
@@ -105,7 +108,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     });
 
     if (!error) {
-      router.push('/onboarding');
+      router.push(role === 'producer' ? '/onboarding' : '/');
     }
 
     return { error };

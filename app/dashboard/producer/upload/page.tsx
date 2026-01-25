@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Header } from '@/components/Header';
+import Link from 'next/link';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Card } from '@/components/ui/Card';
@@ -21,6 +21,9 @@ import {
   Loader2,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { SampleAuditor } from '@/components/SampleAuditor';
+import { ShieldCheck } from 'lucide-react';
+
 
 const steps = ['Files', 'Details', 'Licenses', 'Review'];
 
@@ -31,6 +34,7 @@ const keys = ['C Major', 'C Minor', 'D Major', 'D Minor', 'E Major', 'E Minor', 
 export default function UploadPage() {
   const [currentStep, setCurrentStep] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
   const [aiGenerating, setAiGenerating] = useState(false);
 
   // Form state
@@ -45,12 +49,20 @@ export default function UploadPage() {
   const [bpm, setBpm] = useState('');
   const [key, setKey] = useState('');
   const [useAiMastering, setUseAiMastering] = useState(false);
+  
+  // Rights & Distribution
+  const [isSyncReady, setIsSyncReady] = useState(false);
+  const [label, setLabel] = useState('');
+  const [publisher, setPublisher] = useState('');
+  const [isrc, setIsrc] = useState('');
+  const [upc, setUpc] = useState('');
 
   // License pricing
   const [licenses, setLicenses] = useState({
     basic: { enabled: true, price: 29.99 },
     premium: { enabled: true, price: 49.99 },
     exclusive: { enabled: false, price: 199.99 },
+    sync: { enabled: false, price: 499.99 },
   });
 
   const handleAudioDrop = (e: React.DragEvent) => {
@@ -78,6 +90,8 @@ export default function UploadPage() {
       setKey(keys[Math.floor(Math.random() * keys.length)]);
       setGenre(genres[Math.floor(Math.random() * genres.length)]);
       setDescription(`Professionally produced ${genres[Math.floor(Math.random() * genres.length)]} beat with ready-to-use stems. Perfect for recording artists looking for a unique sound.`);
+      setLabel('TrackFlow Independent');
+      setPublisher('TrackFlow Publishing (ASCAP)');
       setAiGenerating(false);
       toast.success('AI Metadata Generated!', {
         icon: '✨',
@@ -102,8 +116,8 @@ export default function UploadPage() {
     setLoading(true);
     // Simulate upload
     await new Promise(resolve => setTimeout(resolve, 2000));
-    toast.success(`${audioFiles.length > 1 ? 'Beats' : 'Beat'} uploaded successfully!`);
     setLoading(false);
+    setIsSuccess(true);
   };
 
   const canProceed = () => {
@@ -115,13 +129,46 @@ export default function UploadPage() {
     }
   };
 
+  if (isSuccess) {
+    return (
+      <div className="flex flex-col items-center justify-center py-12 text-center space-y-8 animate-in fade-in zoom-in duration-500">
+        <div className="w-24 h-24 rounded-full bg-success/20 flex items-center justify-center text-success shadow-xl shadow-success/10 border-2 border-success/30">
+          <Check className="w-12 h-12" />
+        </div>
+        <div>
+          <h1 className="text-4xl font-black text-white mb-2">Beat Published!</h1>
+          <p className="text-gray-400 max-w-sm mx-auto">
+            Your {audioFiles.length > 1 ? 'beats have' : 'beat has'} been successfully uploaded and finalized.
+          </p>
+        </div>
+        
+        <div className="flex flex-col sm:flex-row gap-4 w-full max-w-md px-4">
+          <Link href="/dashboard/producer/beats" className="flex-1">
+            <Button fullWidth className="bg-primary text-black font-bold h-14">
+              View My Catalog
+            </Button>
+          </Link>
+          <Button 
+            fullWidth 
+            variant="outline" 
+            className="flex-1 h-14"
+            onClick={() => {
+              setIsSuccess(false);
+              setCurrentStep(0);
+              setAudioFiles([]);
+              setArtworkFile(null);
+            }}
+          >
+            Upload Another
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-dark-950">
-      <Header />
-      
-      <main className="pt-24 pb-12">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Header */}
+    <div className="space-y-8">
+      {/* Header */}
           <div className="mb-8">
             <h1 className="text-3xl font-bold text-white mb-2">Upload Beat</h1>
             <p className="text-gray-400">Add new beats to your catalog</p>
@@ -223,7 +270,7 @@ export default function UploadPage() {
                         </div>
                       </div>
                       <p className="text-white mb-2">Drag & drop your audio files here</p>
-                      <p className="text-sm text-gray-400 mb-4">Supports Batch Upload (WAV, MP3)</p>
+                      <p className="text-sm text-gray-400 mb-4">Supports Batch Upload (WAV, MP3, Stems / Zip)</p>
                       <label className="cursor-pointer">
                         <span className="px-4 py-2 bg-primary text-black font-semibold rounded-lg hover:bg-primary-dark transition-colors">
                           Browse Files
@@ -248,13 +295,16 @@ export default function UploadPage() {
 
                 {/* AI Mastering Option */}
                 <div 
-                  className={`p-4 rounded-xl border transition-all cursor-pointer flex items-start gap-4 ${
+                  className={`p-4 rounded-xl border transition-all cursor-pointer flex items-start gap-4 relative overflow-hidden group ${
                     useAiMastering 
-                      ? 'border-primary bg-primary/10' 
+                      ? 'border-primary bg-primary/10 shadow-lg shadow-primary/5' 
                       : 'border-dark-600 hover:border-dark-500 bg-dark-800'
                   }`} 
                   onClick={() => setUseAiMastering(!useAiMastering)}
                 >
+                  {useAiMastering && (
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-[100%] animate-slide-in pointer-events-none" />
+                  )}
                   <div className="mt-1">
                     <div className={`w-5 h-5 rounded border flex items-center justify-center transition-colors ${
                         useAiMastering ? 'bg-primary border-primary' : 'border-gray-500'
@@ -425,6 +475,74 @@ export default function UploadPage() {
                     ))}
                   </div>
                 </div>
+
+                {/* Rights & Distribution */}
+                <div className="pt-6 border-t border-dark-700 space-y-6">
+                  <div className="flex items-center justify-between">
+                    <h2 className="text-xl font-semibold text-white">Rights & Distribution</h2>
+                    <Badge variant="outline" className="bg-emerald-500/10 text-emerald-500 border-emerald-500/20 gap-1">
+                      <ShieldCheck className="w-3 h-3" /> Rights Aware
+                    </Badge>
+                  </div>
+
+                  <SampleAuditor onComplete={(cleared) => console.log('Rights cleared:', cleared)} />
+
+                  <div 
+                    className={`p-4 rounded-xl border transition-all cursor-pointer flex items-start gap-4 relative overflow-hidden group ${
+                      isSyncReady 
+                        ? 'border-success bg-success/10 shadow-lg shadow-success/5' 
+                        : 'border-dark-600 hover:border-dark-500 bg-dark-800'
+                    }`} 
+                    onClick={() => setIsSyncReady(!isSyncReady)}
+                  >
+                    <div className="mt-1">
+                      <div className={`w-5 h-5 rounded border flex items-center justify-center transition-colors ${
+                          isSyncReady ? 'bg-success border-success' : 'border-gray-500'
+                      }`}>
+                        {isSyncReady && <Check className="w-3 h-3 text-white" />}
+                      </div>
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <h3 className="font-semibold text-white">Opt-in to Sync Licensing</h3>
+                        <Badge variant="success" className="bg-success text-white border-success">Sync Ready</Badge>
+                      </div>
+                      <p className="text-sm text-gray-400 mt-1">
+                        Make this track available for film, TV, and advertising licensing via TrackFlow API.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <Input
+                      label="Record Label"
+                      placeholder="e.g. Independent"
+                      value={label}
+                      onChange={(e) => setLabel(e.target.value)}
+                    />
+                    <Input
+                      label="Publisher"
+                      placeholder="e.g. Self-Published"
+                      value={publisher}
+                      onChange={(e) => setPublisher(e.target.value)}
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <Input
+                      label="ISRC (Optional)"
+                      placeholder="e.g. US-ABC-12-34567"
+                      value={isrc}
+                      onChange={(e) => setIsrc(e.target.value)}
+                    />
+                    <Input
+                      label="UPC (Optional)"
+                      placeholder="e.g. 190296991234"
+                      value={upc}
+                      onChange={(e) => setUpc(e.target.value)}
+                    />
+                  </div>
+                </div>
               </div>
             )}
 
@@ -544,6 +662,46 @@ export default function UploadPage() {
                     <Badge variant="warning">Unlimited</Badge>
                   </div>
                 </div>
+
+                {/* Sync License */}
+                <div className={`p-6 rounded-xl border-2 transition-all ${
+                  licenses.sync.enabled ? 'border-success bg-success/5' : 'border-dark-600'
+                }`}>
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-3">
+                      <input
+                        type="checkbox"
+                        checked={licenses.sync.enabled}
+                        onChange={(e) => setLicenses(l => ({ ...l, sync: { ...l.sync, enabled: e.target.checked } }))}
+                        className="w-5 h-5 accent-success"
+                      />
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <h3 className="font-semibold text-white">Sync Licensing</h3>
+                          <Badge variant="success">API Ready</Badge>
+                        </div>
+                        <p className="text-sm text-gray-400">TV, Film, Ads, and Creator Platform usage</p>
+                      </div>
+                    </div>
+                    <div className="w-32">
+                      <div className="relative">
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">$</span>
+                        <input
+                          type="number"
+                          value={licenses.sync.price}
+                          onChange={(e) => setLicenses(l => ({ ...l, sync: { ...l.sync, price: parseFloat(e.target.value) } }))}
+                          className="w-full pl-8 pr-4 py-2 bg-dark-800 border border-dark-600 rounded-lg"
+                          disabled={!licenses.sync.enabled}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex gap-2">
+                    <Badge variant="success">Programmatic</Badge>
+                    <Badge variant="success">Standard Sync</Badge>
+                    <Badge variant="success">Rights-Locked</Badge>
+                  </div>
+                </div>
               </div>
             )}
 
@@ -646,8 +804,6 @@ export default function UploadPage() {
               )}
             </div>
           </Card>
-        </div>
-      </main>
     </div>
   );
 }

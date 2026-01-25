@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/components/providers/AuthProvider';
-import { Header } from '@/components/Header';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import {
@@ -17,9 +16,14 @@ import {
   Store,
   BarChart3,
 } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 export default function DashboardPage() {
   const { profile, loading } = useAuth();
+
+  const handleStripeConnect = () => {
+    toast('Redirecting to Stripe onboarding...', { icon: '💳' });
+  };
 
   if (loading) {
     return (
@@ -44,6 +48,7 @@ export default function DashboardPage() {
     ],
     admin: [
       { name: 'Users', href: '/dashboard/admin/users', icon: Users, description: 'Manage users' },
+      { name: 'Upload', href: '/dashboard/producer/upload', icon: Upload, description: 'Add new beats' },
       { name: 'All Beats', href: '/dashboard/admin/beats', icon: Music, description: 'Moderate content' },
       { name: 'Revenue', href: '/dashboard/admin/revenue', icon: DollarSign, description: 'Platform revenue' },
     ],
@@ -64,12 +69,8 @@ export default function DashboardPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-dark-950">
-      <Header />
-      
-      <main className="pt-24 pb-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Welcome Header */}
+    <div className="space-y-8">
+      {/* Welcome Header */}
           <div className="mb-8">
             <h1 className="text-3xl font-bold text-white mb-2">
               Welcome back, {profile?.display_name || 'User'}!
@@ -133,7 +134,7 @@ export default function DashboardPage() {
                     Connect your Stripe account to receive payments for your beat sales.
                   </p>
                 </div>
-                <Button variant="primary">
+                <Button variant="primary" onClick={handleStripeConnect}>
                   Connect Stripe
                 </Button>
               </div>
@@ -161,8 +162,6 @@ export default function DashboardPage() {
               </div>
             </Card>
           </div>
-        </div>
-      </main>
     </div>
   );
 }

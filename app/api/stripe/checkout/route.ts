@@ -70,6 +70,7 @@ export async function POST(request: NextRequest) {
       platformFee,
       {
         beat_id: beatId,
+        producer_id: beatData.producer_id,
         license_id: licenseId,
         buyer_id: user.id,
         license_type: license.type,

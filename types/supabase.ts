@@ -1,5 +1,5 @@
 // Database type definitions
-export type UserRole = 'artist' | 'producer' | 'admin';
+export type UserRole = 'producer' | 'customer' | 'admin';
 export type BeatStatus = 'draft' | 'published' | 'archived';
 export type LicenseType = 'basic' | 'premium' | 'exclusive';
 export type PurchaseStatus = 'pending' | 'completed' | 'refunded';
@@ -12,10 +12,17 @@ export interface Profile {
   display_name: string | null;
   bio: string | null;
   avatar_url: string | null;
-  stripe_connect_account_id: string | null;
-  stripe_onboarding_complete: boolean;
   created_at: string;
-  updated_at: string;
+}
+
+export interface Producer {
+  id: string;
+  profile_id: string;
+  store_slug: string;
+  branding: Record<string, any>;
+  stripe_account_id: string | null;
+  status: 'pending' | 'active' | 'disabled';
+  created_at: string;
 }
 
 export interface Beat {
@@ -34,6 +41,11 @@ export interface Beat {
   waveform_data: WaveformData | null;
   status: BeatStatus;
   play_count: number;
+  is_sync_ready: boolean;
+  isrc: string | null;
+  upc: string | null;
+  label: string | null;
+  publisher: string | null;
   metadata: Record<string, any> | null;
   created_at: string;
   updated_at: string;
@@ -123,6 +135,7 @@ export interface BeatFilters {
   priceMax?: number;
   moods?: string[];
   search?: string;
+  isSyncReady?: boolean;
 }
 
 // Sort options

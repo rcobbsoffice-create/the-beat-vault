@@ -29,7 +29,7 @@ export function Header() {
               <Music className="w-6 h-6 text-white" />
             </div>
             <span className="text-xl font-bold gradient-text hidden sm:block">
-              The Beat Vault
+              TrackFlow
             </span>
           </Link>
 

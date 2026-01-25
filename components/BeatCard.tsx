@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Play, Pause, Heart, ShoppingCart, Clock } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
 import { usePlayer } from '@/stores/player';
+import toast from 'react-hot-toast';
 import type { Beat } from '@/types/supabase';
 
 interface BeatCardProps {
@@ -106,7 +107,11 @@ export function BeatCard({ beat, onFavorite, isFavorited = false }: BeatCardProp
           <div className="flex flex-wrap gap-2 mt-3">
             {beat.genre && <Badge variant="primary">{beat.genre}</Badge>}
             {beat.bpm && <Badge>{beat.bpm} BPM</Badge>}
-            {beat.key && <Badge>{beat.key}</Badge>}
+            {beat.is_sync_ready && (
+              <Badge className="bg-emerald-500/10 text-emerald-500 border-emerald-500/20">
+                Sync Ready
+              </Badge>
+            )}
           </div>
 
           {/* Price & Cart */}
@@ -120,11 +125,14 @@ export function BeatCard({ beat, onFavorite, isFavorited = false }: BeatCardProp
             <button 
               onClick={(e) => {
                 e.preventDefault();
-                // Add to cart logic
+                e.stopPropagation();
+                toast.success(`${beat.title} added to cart!`, {
+                  style: { background: '#0A0A0A', color: '#D4AF37', border: '1px solid #1C1C1C' }
+                });
               }}
-              className="w-10 h-10 rounded-lg bg-dark-800 flex items-center justify-center transition-all hover:bg-primary hover:shadow-lg hover:shadow-primary/30"
+              className="w-10 h-10 rounded-lg bg-dark-800 flex items-center justify-center transition-all hover:bg-primary hover:shadow-lg hover:shadow-primary/30 group/cart"
             >
-              <ShoppingCart className="w-4 h-4" />
+              <ShoppingCart className="w-4 h-4 group-hover/cart:text-black transition-colors" />
             </button>
           </div>
         </div>

@@ -40,6 +40,11 @@ const demoBeats: Beat[] = [
     waveform_data: null,
     status: 'published',
     play_count: 1250,
+    is_sync_ready: true,
+    isrc: 'US-TF1-26-00001',
+    upc: '190000000001',
+    label: 'TrackFlow Independent',
+    publisher: 'TrackFlow Publishing',
     metadata: null,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
@@ -65,6 +70,11 @@ const demoBeats: Beat[] = [
     waveform_data: null,
     status: 'published',
     play_count: 890,
+    is_sync_ready: false,
+    isrc: null,
+    upc: null,
+    label: null,
+    publisher: null,
     metadata: null,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
@@ -89,6 +99,11 @@ const demoBeats: Beat[] = [
     waveform_data: null,
     status: 'published',
     play_count: 2100,
+    is_sync_ready: true,
+    isrc: 'US-TF1-26-00003',
+    upc: '190000000003',
+    label: 'Smooth Records',
+    publisher: 'Urban Flow Music',
     metadata: null,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
@@ -114,6 +129,11 @@ const demoBeats: Beat[] = [
     waveform_data: null,
     status: 'published',
     play_count: 560,
+    is_sync_ready: true,
+    isrc: 'US-TF1-26-00004',
+    upc: '190000000004',
+    label: 'TrackFlow Independent',
+    publisher: 'TrackFlow Publishing',
     metadata: null,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
@@ -137,6 +157,8 @@ function MarketplaceContent() {
     search: '',
     bpmMin: undefined,
     bpmMax: undefined,
+    key: undefined,
+    isSyncReady: false,
   });
 
   const [activeFilters, setActiveFilters] = useState<string[]>([]);
@@ -147,6 +169,7 @@ function MarketplaceContent() {
     if (filters.bpmMin || filters.bpmMax) {
       newActiveFilters.push(`BPM: ${filters.bpmMin || 0}-${filters.bpmMax || 200}`);
     }
+    if (filters.key) newActiveFilters.push(`Key: ${filters.key}`);
     setActiveFilters(newActiveFilters);
   }, [filters]);
 
@@ -155,6 +178,8 @@ function MarketplaceContent() {
       setFilters(f => ({ ...f, genre: undefined }));
     } else if (filter.startsWith('BPM:')) {
       setFilters(f => ({ ...f, bpmMin: undefined, bpmMax: undefined }));
+    } else if (filter.startsWith('Key:')) {
+      setFilters(f => ({ ...f, key: undefined }));
     }
   };
 
@@ -167,6 +192,8 @@ function MarketplaceContent() {
     if (filters.search && !beat.title.toLowerCase().includes(filters.search.toLowerCase())) return false;
     if (filters.bpmMin && beat.bpm && beat.bpm < filters.bpmMin) return false;
     if (filters.bpmMax && beat.bpm && beat.bpm > filters.bpmMax) return false;
+    if (filters.key && !beat.key?.startsWith(filters.key)) return false;
+    if (filters.isSyncReady && !beat.is_sync_ready) return false;
     return true;
   });
 
@@ -297,24 +324,30 @@ function MarketplaceContent() {
                 {/* Key */}
                 <div>
                   <label className="block text-sm font-medium text-gray-300 mb-3">Key</label>
-                  <select className="w-full px-3 py-2 bg-dark-800 border border-dark-600 rounded-lg text-sm">
-                    <option>Any Key</option>
+                  <select 
+                    value={filters.key || ''}
+                    onChange={(e) => setFilters(f => ({ ...f, key: e.target.value || undefined }))}
+                    className="w-full px-3 py-2 bg-dark-800 border border-dark-600 rounded-lg text-sm"
+                  >
+                    <option value="">Any Key</option>
                     {keys.map((key) => (
-                      <option key={key}>{key} Major / Minor</option>
+                      <option key={key} value={key}>{key} Major / Minor</option>
                     ))}
                   </select>
                 </div>
 
-                {/* Mood */}
+                {/* Sync Ready */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-3">Mood</label>
-                  <div className="flex flex-wrap gap-2">
-                    {moods.slice(0, 4).map((mood) => (
-                      <Badge key={mood} variant="default" className="cursor-pointer hover:bg-dark-600">
-                        {mood}
-                      </Badge>
-                    ))}
-                  </div>
+                  <label className="block text-sm font-medium text-gray-300 mb-3">Rights Status</label>
+                  <label className="flex items-center gap-2 cursor-pointer group">
+                    <input 
+                      type="checkbox" 
+                      checked={filters.isSyncReady}
+                      onChange={(e) => setFilters(f => ({ ...f, isSyncReady: e.target.checked }))}
+                      className="w-5 h-5 accent-emerald-500 rounded border-dark-600 bg-dark-800"
+                    />
+                    <span className="text-sm text-gray-400 group-hover:text-white transition-colors">Sync Ready Only</span>
+                  </label>
                 </div>
               </div>
             </div>

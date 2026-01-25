@@ -1,6 +1,10 @@
-# The Beat Vault
+# TrackFlow
 
-A multi-vendor beat marketplace with instant licensing and downloads.
+A unified platform that combines beat licensing, music distribution, royalty splitting, and sync licensing into a single rights-aware system.
+
+## One-Sentence Summary
+
+Enabling creators and companies to license and monetize music instantly without legal or operational friction.
 
 ## Tech Stack
 

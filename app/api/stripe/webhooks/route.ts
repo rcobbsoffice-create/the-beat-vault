@@ -3,6 +3,7 @@ import { headers } from 'next/headers';
 import Stripe from 'stripe';
 import { createServiceClient } from '@/lib/supabase';
 import { generateDownloadUrl, getBeatFilePaths } from '@/lib/r2';
+import { generateLicenseMarkdown } from '@/lib/licenses';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: '2025-12-15.clover',
@@ -41,28 +42,40 @@ export async function POST(request: NextRequest) {
           break;
         }
 
-        // Get beat file paths
-        const filePaths = getBeatFilePaths(metadata.beat_id);
-        
-        // Generate download URLs
-        const downloadUrls: Record<string, any> = {};
-        
-        // Get license to check what files are included
+        // Fetch beat and license details
+        const { data: beat } = await supabase
+          .from('beats')
+          .select('*')
+          .eq('id', metadata.beat_id)
+          .single();
+
         const { data: license } = await supabase
           .from('licenses')
           .select('*')
           .eq('id', metadata.license_id)
           .single();
 
+        if (!beat || !license) {
+          console.error('Beat or license not found in webhook');
+          break;
+        }
+
+        const beatData = beat as any;
         const licenseData = license as any;
 
-        if (licenseData?.files_included?.includes('mp3')) {
+        // Get beat file paths
+        const filePaths = getBeatFilePaths(metadata.beat_id);
+        
+        // Generate download URLs
+        const downloadUrls: Record<string, any> = {};
+        
+        if (licenseData.files_included?.includes('mp3')) {
           downloadUrls.mp3 = await generateDownloadUrl(filePaths.preview);
         }
-        if (licenseData?.files_included?.includes('wav')) {
+        if (licenseData.files_included?.includes('wav')) {
           downloadUrls.wav = await generateDownloadUrl(filePaths.original);
         }
-        if (licenseData?.files_included?.includes('stems')) {
+        if (licenseData.files_included?.includes('stems')) {
           downloadUrls.stems = {
             drums: await generateDownloadUrl(filePaths.stems.drums),
             melody: await generateDownloadUrl(filePaths.stems.melody),
@@ -73,6 +86,32 @@ export async function POST(request: NextRequest) {
         // Calculate amounts (from application_fee_amount)
         const applicationFee = paymentIntent.application_fee_amount || 0;
         const producerPayout = paymentIntent.amount - applicationFee;
+
+        // Generate License Markdown
+        const { data: producer } = await supabase
+          .from('profiles')
+          .select('display_name')
+          .eq('id', metadata.producer_id)
+          .single();
+          
+        const { data: buyer } = await supabase
+          .from('profiles')
+          .select('display_name')
+          .eq('id', metadata.buyer_id)
+          .single();
+
+        const licenseMarkdown = generateLicenseMarkdown({
+          beatTitle: beatData.title,
+          producerName: (producer as any)?.display_name || 'Producer',
+          artistName: (buyer as any)?.display_name || 'Artist',
+          licenseType: metadata.license_type as any,
+          price: paymentIntent.amount,
+          date: new Date(),
+          isrc: beatData.isrc,
+          upc: beatData.upc,
+          label: beatData.label,
+          publisher: beatData.publisher,
+        });
 
         // Create purchase record
         const { error: purchaseError } = await (supabase
@@ -87,6 +126,7 @@ export async function POST(request: NextRequest) {
             producer_payout: producerPayout,
             status: 'completed',
             download_urls: downloadUrls,
+            license_agreement_markdown: licenseMarkdown,
             download_expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(), // 7 days
           });
 

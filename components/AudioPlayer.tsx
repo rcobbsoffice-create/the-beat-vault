@@ -52,14 +52,14 @@ export function AudioPlayer() {
 
     const wavesurfer = WaveSurfer.create({
       container: waveformRef.current,
-      waveColor: 'rgba(139, 92, 246, 0.4)',
-      progressColor: '#8B5CF6',
-      cursorColor: '#EC4899',
+      waveColor: 'rgba(255, 255, 255, 0.2)',
+      progressColor: '#D4AF37',
+      cursorColor: '#D4AF37',
       barWidth: 2,
-      barRadius: 3,
-      cursorWidth: 0,
+      barRadius: 2,
+      cursorWidth: 1,
       height: 40,
-      barGap: 2,
+      barGap: 3,
       normalize: true,
     });
 
@@ -125,7 +125,7 @@ export function AudioPlayer() {
   if (!currentBeat) return null;
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 glass border-t border-dark-700">
+    <div className="fixed bottom-0 left-0 right-0 z-50 glass border-t border-white/10 backdrop-blur-xl bg-dark-950/80">
       <div className="max-w-7xl mx-auto px-4 py-3">
         <div className="flex items-center gap-4">
           {/* Beat Info */}

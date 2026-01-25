@@ -3,7 +3,7 @@ import { Music, Instagram, Twitter, Youtube } from 'lucide-react';
 
 export function Footer() {
   return (
-    <footer className="bg-dark-950 border-t border-dark-800 py-12 mt-auto">
+    <footer className="relative z-10 bg-dark-950 border-t border-white/10 py-16 mt-auto">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Brand */}
@@ -12,11 +12,11 @@ export function Footer() {
               <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
                 <Music className="w-6 h-6 text-white" />
               </div>
-              <span className="text-xl font-bold gradient-text">The Beat Vault</span>
+              <span className="text-xl font-bold gradient-text">TrackFlow</span>
             </Link>
             <p className="text-gray-400 text-sm">
-              The premium marketplace for beats and instrumentals. 
-              Connect with top producers and find your sound.
+              Unified music infrastructure for creation, distribution, and licensing.
+              Empowering creators with rights-locked digital assets.
             </p>
             <div className="flex items-center gap-4">
               <a href="#" className="text-gray-400 hover:text-primary transition-colors">
@@ -116,7 +116,7 @@ export function Footer() {
         {/* Bottom */}
         <div className="mt-12 pt-8 border-t border-dark-800 flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-gray-500 text-sm">
-            © {new Date().getFullYear()} The Beat Vault. All rights reserved.
+            © {new Date().getFullYear()} TrackFlow. All rights reserved.
           </p>
           <div className="flex items-center gap-6">
             <span className="text-gray-500 text-sm">

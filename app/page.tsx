@@ -66,8 +66,8 @@ export default function HomePage() {
             </h1>
 
             <p className="text-xl text-gray-400 max-w-2xl mx-auto mb-10">
-              The premium marketplace for beats and instrumentals. 
-              Browse thousands of professionally crafted beats from top producers.
+              The unified rights-locked platform for music creation, distribution, and sync licensing. 
+              Monetize your music instantly with automated royalty splits.
             </p>
 
             {/* CTA Buttons */}
@@ -87,7 +87,7 @@ export default function HomePage() {
             </div>
 
             {/* Stats */}
-            <div className="flex items-center justify-center gap-12 mt-16">
+            <div className="flex items-center justify-center gap-12 mt-16 animate-fade-in" style={{ animationDelay: '0.2s' }}>
               <div className="text-center">
                 <p className="text-3xl font-bold text-white">10K+</p>
                 <p className="text-gray-400">Beats</p>
@@ -107,11 +107,12 @@ export default function HomePage() {
         </section>
 
         {/* Features Section */}
-        <section className="py-24 bg-dark-900">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <section className="py-24 bg-dark-900 relative">
+          <div className="absolute inset-0 bg-gradient-to-b from-dark-950 to-transparent pointer-events-none" />
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             <div className="text-center mb-16">
               <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">
-                Why Choose The Beat Vault
+                Why Choose TrackFlow
               </h2>
               <p className="text-gray-400 max-w-2xl mx-auto">
                 The complete platform for buying and selling beats with everything you need to succeed.
@@ -122,13 +123,13 @@ export default function HomePage() {
               {features.map((feature, index) => (
                 <div
                   key={index}
-                  className="group p-8 bg-dark-800 border border-dark-700 rounded-2xl transition-all duration-300 hover:border-primary/50 hover:shadow-xl hover:shadow-primary/5"
+                  className="group p-8 bg-dark-800/50 backdrop-blur-sm border border-dark-700 rounded-2xl transition-all duration-300 hover:border-primary/50 hover:bg-dark-800 hover:-translate-y-1 hover:shadow-2xl hover:shadow-primary/10"
                 >
-                  <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center mb-6">
-                    <feature.icon className="w-7 h-7 text-white" />
+                  <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-primary/20 to-secondary/20 border border-white/5 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+                    <feature.icon className="w-7 h-7 text-primary" />
                   </div>
                   <h3 className="text-xl font-semibold text-white mb-3">{feature.title}</h3>
-                  <p className="text-gray-400">{feature.description}</p>
+                  <p className="text-gray-400 leading-relaxed">{feature.description}</p>
                 </div>
               ))}
             </div>
@@ -136,8 +137,9 @@ export default function HomePage() {
         </section>
 
         {/* Genres Section */}
-        <section className="py-24 bg-dark-950">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <section className="py-24 bg-dark-950 relative overflow-hidden">
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[500px] bg-primary/5 rounded-full blur-[100px] pointer-events-none" />
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             <div className="flex items-center justify-between mb-12">
               <div>
                 <h2 className="text-3xl sm:text-4xl font-bold text-white mb-2">
@@ -148,25 +150,25 @@ export default function HomePage() {
                 </p>
               </div>
               <Link href="/marketplace">
-                <Button variant="ghost" className="gap-2">
+                <Button variant="ghost" className="gap-2 hover:text-primary">
                   View All
                   <ArrowRight className="w-4 h-4" />
                 </Button>
               </Link>
             </div>
 
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
               {genres.map((genre, index) => (
                 <Link
                   key={index}
                   href={`/marketplace?genre=${genre.name.toLowerCase()}`}
-                  className="group relative aspect-square rounded-2xl overflow-hidden"
+                  className="group relative aspect-square rounded-2xl overflow-hidden border border-dark-700/50 hover:border-primary/50 transition-colors"
                 >
-                  <div className={`absolute inset-0 bg-gradient-to-br ${genre.gradient}`} />
-                  <div className="absolute inset-0 bg-dark-950/40 group-hover:bg-dark-950/20 transition-colors" />
-                  <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-4">
-                    <p className="text-lg font-bold text-white">{genre.name}</p>
-                    <p className="text-sm text-white/70">{genre.count} beats</p>
+                  <div className={`absolute inset-0 bg-gradient-to-br ${genre.gradient} opacity-80 group-hover:opacity-100 transition-opacity duration-500`} />
+                  <div className="absolute inset-0 bg-dark-950/20 group-hover:bg-transparent transition-colors duration-300" />
+                  <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-4 transform group-hover:scale-105 transition-transform duration-300">
+                    <p className="text-lg font-bold text-white drop-shadow-lg">{genre.name}</p>
+                    <p className="text-xs font-medium text-white/90 bg-black/20 px-2 py-0.5 rounded-full mt-1 backdrop-blur-sm">{genre.count}</p>
                   </div>
                 </Link>
               ))}
@@ -175,21 +177,35 @@ export default function HomePage() {
         </section>
 
         {/* CTA Section */}
-        <section className="py-24 bg-gradient-to-r from-primary/20 to-secondary/20">
-          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <Music className="w-16 h-16 text-primary mx-auto mb-6" />
-            <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">
-              Ready to Start Your Journey?
+        <section className="py-32 pb-48 relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-r from-dark-900 to-dark-950" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-primary/10 via-transparent to-transparent opacity-50" />
+          <div className="absolute inset-0 border-y border-white/5" />
+          
+          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
+            <div className="inline-flex p-3 rounded-2xl bg-gradient-to-br from-primary/20 to-secondary/20 border border-white/5 mb-8 animate-pulse">
+              <Music className="w-12 h-12 text-primary" />
+            </div>
+            
+            <h2 className="text-4xl sm:text-5xl font-bold mb-6">
+              <span className="text-white">Ready to Start </span>
+              <span className="gradient-text">Your Journey?</span>
             </h2>
-            <p className="text-xl text-gray-300 mb-8">
-              Join thousands of artists and producers already using The Beat Vault.
+            
+            <p className="text-xl text-gray-400 mb-10 max-w-2xl mx-auto">
+              Join thousands of artists and producers already using TrackFlow to power their music careers.
             </p>
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
               <Link href="/signup">
-                <Button size="lg">Create Free Account</Button>
+                <Button size="lg" className="h-14 px-8 text-lg shadow-xl shadow-primary/20 hover:shadow-primary/40 transition-all hover:-translate-y-1">
+                  Create Free Account
+                </Button>
               </Link>
               <Link href="/marketplace">
-                <Button variant="outline" size="lg">Browse Beats</Button>
+                <Button variant="outline" size="lg" className="h-14 px-8 text-lg border-dark-600 hover:bg-dark-800">
+                  Browse Beats
+                </Button>
               </Link>
             </div>
           </div>

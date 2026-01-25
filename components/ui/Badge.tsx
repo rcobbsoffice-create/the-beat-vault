@@ -1,6 +1,6 @@
 interface BadgeProps {
   children: React.ReactNode;
-  variant?: 'default' | 'primary' | 'secondary' | 'success' | 'warning';
+  variant?: 'default' | 'primary' | 'secondary' | 'success' | 'warning' | 'outline';
   className?: string;
 }
 
@@ -11,6 +11,7 @@ export function Badge({ children, variant = 'default', className = '' }: BadgePr
     secondary: 'bg-secondary/20 text-secondary border border-secondary/30',
     success: 'bg-success/20 text-success border border-success/30',
     warning: 'bg-warning/20 text-warning border border-warning/30',
+    outline: 'bg-transparent border border-white/10 text-gray-400',
   };
 
   return (

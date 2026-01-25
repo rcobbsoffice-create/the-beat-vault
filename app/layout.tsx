@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { Toaster } from 'react-hot-toast';
 import { AuthProvider } from '@/components/providers/AuthProvider';
+import { AudioPlayer } from '@/components/AudioPlayer';
 import "./globals.css";
 
 const inter = Inter({ 
@@ -10,9 +11,9 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "The Beat Vault - Premium Beat Marketplace",
-  description: "Multi-vendor beat marketplace with instant licensing and downloads. Find professional beats from top producers.",
-  keywords: ["beats", "instrumentals", "hip hop", "music", "licensing", "producers"],
+  title: "TrackFlow - Unified Music Creation, Distribution & Sync",
+  description: "A unified platform combining beat licensing, music distribution, royalty splitting, and sync licensing into a single rights-aware system.",
+  keywords: ["beats", "music distribution", "royalty splits", "sync licensing", "producers", "rights management"],
 };
 
 export default function RootLayout({
@@ -21,10 +22,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="dark">
+    <html lang="en" className="dark" suppressHydrationWarning>
       <body className={`${inter.variable} antialiased`}>
         <AuthProvider>
           {children}
+          <AudioPlayer />
         </AuthProvider>
         <Toaster
           position="top-right"
