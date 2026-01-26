@@ -1,3 +1,5 @@
+'use client';
+
 import { use, useState, useEffect } from 'react';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
@@ -11,7 +13,7 @@ import { supabase } from '@/lib/supabase/client';
 
 export default function ProducerProfilePage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = use(params);
-  const { addToCart } = useMerchStore();
+  const { items: merchItems } = useMerchStore();
   const player = usePlayer();
   const [mounted, setMounted] = useState(false);
   const [waveformHeights, setWaveformHeights] = useState<number[]>([]);
@@ -158,10 +160,10 @@ export default function ProducerProfilePage({ params }: { params: Promise<{ slug
       <main className="flex-1 pt-20">
         {/* Hero Section */}
         <section className="relative h-[400px] w-full">
-          {/* Cover Image/Gradient */}
-          <div className="absolute inset-0 bg-gradient-to-r from-dark-900 to-dark-800">
+          {/* Cover Image/Linear */}
+          <div className="absolute inset-0 bg-linear-to-r from-dark-900 to-dark-800">
              <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?q=80&w=2070&auto=format&fit=crop')] bg-cover bg-center opacity-30 mix-blend-overlay" />
-             <div className="absolute inset-0 bg-gradient-to-t from-dark-950 via-dark-950/50 to-transparent" />
+             <div className="absolute inset-0 bg-linear-to-t from-dark-950 via-dark-950/50 to-transparent" />
           </div>
 
           <div className="absolute bottom-0 left-0 right-0 p-8 pt-0 z-10">
@@ -172,7 +174,7 @@ export default function ProducerProfilePage({ params }: { params: Promise<{ slug
                   {producer.avatar_url ? (
                     <img src={producer.avatar_url} alt={producer.display_name} className="w-full h-full object-cover" />
                   ) : (
-                    <div className="absolute inset-0 bg-gradient-to-br from-primary via-secondary to-purple-600 animate-gradient-xy flex items-center justify-center">
+                    <div className="absolute inset-0 bg-linear-to-br from-primary via-secondary to-purple-600 animate-gradient-xy flex items-center justify-center">
                       <Music className="w-16 h-16 text-white/50" />
                     </div>
                   )}
@@ -255,11 +257,11 @@ export default function ProducerProfilePage({ params }: { params: Promise<{ slug
                   </div>
                   
                   <div className="glass p-6 rounded-2xl border border-white/5 relative overflow-hidden group">
-                    <div className="absolute inset-0 bg-gradient-to-r from-primary/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+                    <div className="absolute inset-0 bg-linear-to-r from-primary/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
                     
                     <div className="flex flex-col md:flex-row gap-6 items-center">
                       <div className="w-32 h-32 rounded-xl bg-dark-800 relative shrink-0 overflow-hidden shadow-2xl">
-                        <div className="absolute inset-0 bg-gradient-to-br from-dark-700 to-black flex items-center justify-center">
+                        <div className="absolute inset-0 bg-linear-to-br from-dark-700 to-black flex items-center justify-center">
                           {featuredBeat.artwork_url ? (
                             <img src={featuredBeat.artwork_url} alt={featuredBeat.title} className="w-full h-full object-cover" />
                           ) : (
@@ -341,7 +343,7 @@ export default function ProducerProfilePage({ params }: { params: Promise<{ slug
                       <span className="text-gray-500 w-6 text-center font-mono text-sm">{i + 1}</span>
                       
                       <div className="w-12 h-12 rounded-lg bg-dark-800 shrink-0 relative overflow-hidden">
-                         <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-gray-800 to-black">
+                         <div className="absolute inset-0 flex items-center justify-center bg-linear-to-br from-gray-800 to-black">
                            {beat.artwork_url ? (
                              <img src={beat.artwork_url} alt={beat.title} className="w-full h-full object-cover" />
                            ) : (
