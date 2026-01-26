@@ -1,17 +1,25 @@
 import Stripe from 'stripe';
 
-// Fallback for build time if keys aren't set
+// Fallback for build time is not needed if we use lazy init, but good to have
 const STRIPE_KEY = process.env.STRIPE_SECRET_KEY || 'dummy_key_to_pass_build';
 
-export const stripe = new Stripe(STRIPE_KEY, {
-  apiVersion: '2025-12-15.clover',
-  typescript: true,
-});
+let stripeInstance: Stripe;
+
+export const getStripe = () => {
+  if (!stripeInstance) {
+    stripeInstance = new Stripe(process.env.STRIPE_SECRET_KEY || STRIPE_KEY, {
+      apiVersion: '2025-12-15.clover',
+      typescript: true,
+    });
+  }
+  return stripeInstance;
+};
 
 /**
  * Create a Stripe Connect Express account for a producer
  */
 export async function createConnectAccount(email: string, userId: string) {
+  const stripe = getStripe();
   const account = await stripe.accounts.create({
     type: 'express',
     email,
@@ -31,6 +39,7 @@ export async function createConnectAccount(email: string, userId: string) {
  * Create an account link for Connect onboarding
  */
 export async function createAccountLink(accountId: string, returnUrl: string, refreshUrl: string) {
+  const stripe = getStripe();
   const accountLink = await stripe.accountLinks.create({
     account: accountId,
     return_url: returnUrl,
@@ -50,6 +59,7 @@ export async function createPaymentIntent(
   platformFee: number,
   metadata: Record<string, string>
 ) {
+  const stripe = getStripe();
   const paymentIntent = await stripe.paymentIntents.create({
     amount,
     currency: 'usd',
@@ -67,6 +77,7 @@ export async function createPaymentIntent(
  * Get Connect account status
  */
 export async function getAccountStatus(accountId: string) {
+  const stripe = getStripe();
   const account = await stripe.accounts.retrieve(accountId);
   
   return {

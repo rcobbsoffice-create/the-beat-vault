@@ -5,12 +5,6 @@ import { createServiceClient } from '@/lib/supabase/server';
 import { generateDownloadUrl, getBeatFilePaths } from '@/lib/r2';
 import { generateLicenseMarkdown } from '@/lib/licenses';
 
-// Use fallback key during build time if env var is missing
-const stripeKey = process.env.STRIPE_SECRET_KEY || 'sk_test_dummy_key_for_build_verification';
-const stripe = new Stripe(stripeKey, {
-  apiVersion: '2025-12-15.clover',
-});
-
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!;
 
 export async function POST(request: NextRequest) {
@@ -22,6 +16,11 @@ export async function POST(request: NextRequest) {
     if (!signature) {
       return NextResponse.json({ error: 'No signature' }, { status: 400 });
     }
+
+    // Initialize Stripe inside handler to avoid build-time errors
+    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+      apiVersion: '2025-12-15.clover',
+    });
 
     let event: Stripe.Event;
 
