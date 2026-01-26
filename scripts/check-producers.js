@@ -1,7 +1,6 @@
 const { createClient } = require('@supabase/supabase-js');
 const fs = require('fs');
 
-// Simple env parser
 function parseEnv(path) {
   const content = fs.readFileSync(path, 'utf8');
   const env = {};
@@ -18,28 +17,22 @@ const env = parseEnv('.env.local');
 const supabaseUrl = env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseKey = env.SUPABASE_SERVICE_ROLE_KEY;
 
-if (!supabaseUrl || !supabaseKey) {
-  console.error('Missing Supabase credentials in .env.local');
-  process.exit(1);
-}
-
 const supabase = createClient(supabaseUrl, supabaseKey);
 
-async function checkBeats() {
-  console.log('Fetching recent beats...');
+async function checkProducers() {
+  console.log('Fetching producers...');
   const { data, error } = await supabase
-    .from('beats')
-    .select('id, title, status, created_at')
-    .order('created_at', { ascending: false })
-    .limit(10);
+    .from('producers')
+    .select('*')
+    .limit(5);
 
   if (error) {
-    console.error('Error fetching beats:', error);
+    console.error('Error fetching producers:', error);
     return;
   }
 
-  console.log('Recent Beats:');
+  console.log('Producers:');
   console.table(data);
 }
 
-checkBeats();
+checkProducers();

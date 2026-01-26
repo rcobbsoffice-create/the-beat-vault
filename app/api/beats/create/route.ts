@@ -40,7 +40,7 @@ export async function POST(request: NextRequest) {
       audio_url,
       preview_url,
       artwork_url,
-      status: 'pending'
+      status: 'published'
     };
 
     console.log('Attempting to insert beat:', beatData);

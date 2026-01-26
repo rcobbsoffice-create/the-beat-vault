@@ -1,51 +1,13 @@
-'use client';
-
 import { use, useState, useEffect } from 'react';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
-import { Music, MapPin, Globe, Instagram, Twitter, Mail, Check, Star, Play, Share2 } from 'lucide-react';
+import { Music, MapPin, Globe, Instagram, Twitter, Mail, Check, Star, Play, Share2, Loader2, AlertCircle } from 'lucide-react';
 import { usePlayer } from '@/stores/player';
 import { useMerchStore } from '@/stores/merch';
 import toast from 'react-hot-toast';
-
-// Mock Data
-const MOCK_PRODUCER_DATA = {
-  name: 'Metro Boomin',
-  role: 'Producer',
-  location: 'Atlanta, GA',
-  bio: 'Multi-platinum producer known for dark, trap beats. Creating the sound of the future one track at a time.',
-  stats: {
-    beats: 124,
-    plays: '1.2M',
-    sales: '5.4K',
-    followers: '250K'
-  },
-  socials: {
-    website: 'https://metroboomin.com',
-    instagram: '#',
-    twitter: '#',
-    email: 'contact@metro.com'
-  },
-  featuredBeat: {
-    id: 'prod-feat-1',
-    title: 'SPACE CADET',
-    genre: 'Trap',
-    bpm: 144,
-    key: 'C Minor',
-    price: 29.99,
-    audio: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3'
-  },
-  beats: [
-    { id: '1', title: 'FUTURE HENDRIX', bpm: 130, key: 'D Minor', genre: 'Trap', price: 29.99, audio: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3' },
-    { id: '2', title: 'SAVAGE MODE', bpm: 85, key: 'G Minor', genre: 'Dark', price: 29.99, audio: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3' },
-    { id: '3', title: 'HEROES', bpm: 150, key: 'E Minor', genre: 'Hype', price: 29.99, audio: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3' },
-    { id: '4', title: 'VILLAINS', bpm: 142, key: 'A Minor', genre: 'Trap', price: 29.99, audio: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3' },
-    { id: '5', title: 'LOW LIFE', bpm: 120, key: 'F Minor', genre: 'R&B', price: 29.99, audio: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-6.mp3' },
-    { id: '6', title: 'CONGRATULATIONS', bpm: 110, key: 'B Major', genre: 'Pop', price: 29.99, audio: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-7.mp3' },
-  ]
-};
+import { supabase } from '@/lib/supabase/client';
 
 export default function ProducerProfilePage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = use(params);
@@ -53,32 +15,93 @@ export default function ProducerProfilePage({ params }: { params: Promise<{ slug
   const player = usePlayer();
   const [mounted, setMounted] = useState(false);
   const [waveformHeights, setWaveformHeights] = useState<number[]>([]);
+  
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [producer, setProducer] = useState<any>(null);
+  const [beats, setBeats] = useState<any[]>([]);
+
+  const { setCurrentBeat, currentBeat, isPlaying, togglePlayPause } = player;
 
   useEffect(() => {
     setMounted(true);
     setWaveformHeights(Array.from({ length: 40 }, () => Math.random() * 100));
-  }, []);
-  const { setCurrentBeat, currentBeat, isPlaying, togglePlayPause } = player;
+
+    async function fetchProducerData() {
+      setLoading(true);
+      setError(null);
+      try {
+        // 1. Find profile by display_name (case-insensitive slug match)
+        // Note: In a production app, we should use a dedicated 'slug' field.
+        // For now, we'll try to match the display_name.
+        const displayName = slug.split('-').join(' ');
+        
+        const { data: profiles, error: profileError } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('role', 'producer')
+          .ilike('display_name', displayName)
+          .limit(1);
+
+        if (profileError) throw profileError;
+        
+        if (!profiles || profiles.length === 0) {
+          // Try a second attempt: direct match if ilike fails or slug is weird
+          const { data: secondAttempt } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('role', 'producer')
+            .eq('display_name', displayName)
+            .limit(1);
+            
+          if (!secondAttempt || secondAttempt.length === 0) {
+            setError('Producer not found');
+            return;
+          }
+          setProducer(secondAttempt[0]);
+        } else {
+          setProducer(profiles[0]);
+        }
+
+        const profileId = profiles?.[0]?.id || (producer?.id);
+        if (!profileId) return;
+
+        // 2. Fetch Beats for this producer
+        const { data: beatsData, error: beatsError } = await supabase
+          .from('beats')
+          .select('*')
+          .eq('producer_id', profileId)
+          .eq('status', 'published')
+          .order('created_at', { ascending: false });
+
+        if (beatsError) throw beatsError;
+        setBeats(beatsData || []);
+        
+      } catch (err: any) {
+        console.error('Error fetching producer profile:', err);
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchProducerData();
+  }, [slug]);
   
-  const producer = {
-    ...MOCK_PRODUCER_DATA,
-    name: slug.split('-').map(s => s.charAt(0).toUpperCase() + s.slice(1)).join(' ')
-  };
-
   const handlePlayBeat = (beat: any) => {
-    const beatData = {
-      id: beat.id,
-      title: beat.title,
-      genre: beat.genre,
-      bpm: beat.bpm.toString(),
-      audio_url: beat.audio || beat.audio_url,
-      cover_url: '',
-    } as any;
-
     if (currentBeat?.id === beat.id) {
       togglePlayPause();
     } else {
-      setCurrentBeat(beatData);
+      // Use internal stream endpoint if URL is private or needs bypass, 
+      // but if it's already a public R2 URL, use it directly.
+      const audioUrl = beat.audio_url || beat.preview_url || beat.audio;
+      
+      setCurrentBeat({
+        ...beat,
+        audio_url: audioUrl,
+        preview_url: audioUrl,
+        cover_url: beat.artwork_url || '',
+      });
     }
   };
 
@@ -87,6 +110,46 @@ export default function ProducerProfilePage({ params }: { params: Promise<{ slug
       style: { background: '#0A0A0A', color: '#D4AF37', border: '1px solid #1C1C1C' }
     });
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex flex-col bg-dark-950">
+        <Header />
+        <main className="flex-1 flex items-center justify-center">
+          <div className="text-center space-y-4">
+            <Loader2 className="w-12 h-12 text-primary animate-spin mx-auto" />
+            <p className="text-gray-400 font-medium animate-pulse">Loading Producer Profile...</p>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
+  if (error || !producer) {
+    return (
+      <div className="min-h-screen flex flex-col bg-dark-950">
+        <Header />
+        <main className="flex-1 flex items-center justify-center">
+          <div className="text-center space-y-6 max-w-md px-4">
+            <div className="w-20 h-20 bg-red-500/10 rounded-full flex items-center justify-center mx-auto">
+              <AlertCircle className="w-10 h-10 text-red-500" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold text-white mb-2">Producer Not Found</h1>
+              <p className="text-gray-400">The profile you are looking for doesn't exist or has been moved.</p>
+            </div>
+            <Button variant="outline" onClick={() => window.location.href = '/producers'}>
+              Browse All Producers
+            </Button>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
+  const featuredBeat = beats.length > 0 ? beats[0] : null;
 
   return (
     <div className="min-h-screen flex flex-col bg-dark-950">
@@ -106,9 +169,13 @@ export default function ProducerProfilePage({ params }: { params: Promise<{ slug
               <div className="flex flex-col md:flex-row items-end gap-8">
                 {/* Avatar */}
                 <div className="w-32 h-32 md:w-40 md:h-40 rounded-full border-4 border-dark-950 bg-dark-800 relative shadow-2xl shrink-0 -mb-4 overflow-hidden">
-                  <div className="absolute inset-0 bg-gradient-to-br from-primary via-secondary to-purple-600 animate-gradient-xy flex items-center justify-center">
-                    <Music className="w-16 h-16 text-white/50" />
-                  </div>
+                  {producer.avatar_url ? (
+                    <img src={producer.avatar_url} alt={producer.display_name} className="w-full h-full object-cover" />
+                  ) : (
+                    <div className="absolute inset-0 bg-gradient-to-br from-primary via-secondary to-purple-600 animate-gradient-xy flex items-center justify-center">
+                      <Music className="w-16 h-16 text-white/50" />
+                    </div>
+                  )}
                 </div>
 
                 {/* Info */}
@@ -116,14 +183,14 @@ export default function ProducerProfilePage({ params }: { params: Promise<{ slug
                   <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div>
                       <div className="flex items-center gap-3 mb-1">
-                        <h1 className="text-3xl md:text-5xl font-bold text-white">{producer.name}</h1>
+                        <h1 className="text-3xl md:text-5xl font-bold text-white">{producer.display_name}</h1>
                         <Badge variant="primary" className="bg-primary text-black border-none">Verified</Badge>
                       </div>
                       <p className="text-gray-400 flex items-center gap-2 text-sm md:text-base">
                         <MapPin className="w-4 h-4 text-primary" />
-                        {producer.location}
+                        {producer.location || 'Professional Producer'}
                         <span className="mx-1 text-dark-700">|</span>
-                        <span className="text-white font-medium">{producer.role}</span>
+                        <span className="text-white font-medium capitalize">{producer.role}</span>
                       </p>
                     </div>
 
@@ -150,27 +217,24 @@ export default function ProducerProfilePage({ params }: { params: Promise<{ slug
               <div className="flex gap-8 md:gap-12 text-sm">
                 <div className="flex flex-col">
                   <span className="text-gray-500 uppercase text-xs tracking-wider">Total Plays</span>
-                  <span className="text-white font-bold text-lg">{producer.stats.plays}</span>
+                  <span className="text-white font-bold text-lg">--</span>
                 </div>
                 <div className="flex flex-col">
                   <span className="text-gray-500 uppercase text-xs tracking-wider">Solds</span>
-                  <span className="text-white font-bold text-lg">{producer.stats.sales}</span>
+                  <span className="text-white font-bold text-lg">--</span>
                 </div>
                 <div className="flex flex-col">
                   <span className="text-gray-500 uppercase text-xs tracking-wider">Followers</span>
-                  <span className="text-white font-bold text-lg">{producer.stats.followers}</span>
+                  <span className="text-white font-bold text-lg">--</span>
                 </div>
                 <div className="flex flex-col">
                   <span className="text-gray-500 uppercase text-xs tracking-wider">Tracks</span>
-                  <span className="text-white font-bold text-lg">{producer.stats.beats}</span>
+                  <span className="text-white font-bold text-lg">{beats.length}</span>
                 </div>
               </div>
 
               <div className="flex items-center gap-4 text-gray-400">
-                <a href={producer.socials.website} className="hover:text-white transition-colors"><Globe className="w-5 h-5" /></a>
-                <a href={producer.socials.instagram} className="hover:text-white transition-colors"><Instagram className="w-5 h-5" /></a>
-                <a href={producer.socials.twitter} className="hover:text-white transition-colors"><Twitter className="w-5 h-5" /></a>
-                <a href={`mailto:${producer.socials.email}`} className="hover:text-white transition-colors"><Mail className="w-5 h-5" /></a>
+                 <Mail className="w-5 h-5 cursor-pointer hover:text-white transition-colors" />
               </div>
             </div>
           </div>
@@ -183,76 +247,79 @@ export default function ProducerProfilePage({ params }: { params: Promise<{ slug
             <div className="lg:col-span-2 space-y-12">
               
               {/* Featured Beat */}
-              <section>
-                <div className="flex items-center gap-2 mb-6">
-                  <Star className="w-5 h-5 text-primary fill-current" />
-                  <h2 className="text-xl font-bold text-white">Featured Track</h2>
-                </div>
-                
-                <div className="glass p-6 rounded-2xl border border-white/5 relative overflow-hidden group">
-                  <div className="absolute inset-0 bg-gradient-to-r from-primary/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+              {featuredBeat && (
+                <section>
+                  <div className="flex items-center gap-2 mb-6">
+                    <Star className="w-5 h-5 text-primary fill-current" />
+                    <h2 className="text-xl font-bold text-white">Featured Track</h2>
+                  </div>
                   
-                  <div className="flex gap-6 items-center">
-                    <div className="w-32 h-32 rounded-xl bg-dark-800 relative shrink-0 overflow-hidden shadow-2xl">
-                      <div className="absolute inset-0 bg-gradient-to-br from-dark-700 to-black flex items-center justify-center">
-                        <Music className="w-12 h-12 text-gray-600" />
-                      </div>
-                      {/* Play Button Overlay */}
-                      <button 
-                        onClick={() => handlePlayBeat(producer.featuredBeat)}
-                        className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity backdrop-blur-[2px] z-10"
-                      >
-                        <div className="w-12 h-12 rounded-full bg-primary text-black flex items-center justify-center shadow-lg transform scale-90 group-hover:scale-100 transition-transform">
-                          {currentBeat?.id === producer.featuredBeat.id && isPlaying ? (
-                            <div className="flex gap-1 items-end h-3">
-                               <div className="w-1 bg-black animate-pulse" />
-                               <div className="w-1 bg-black animate-pulse delay-75" />
-                               <div className="w-1 bg-black animate-pulse delay-150" />
-                            </div>
+                  <div className="glass p-6 rounded-2xl border border-white/5 relative overflow-hidden group">
+                    <div className="absolute inset-0 bg-gradient-to-r from-primary/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+                    
+                    <div className="flex flex-col md:flex-row gap-6 items-center">
+                      <div className="w-32 h-32 rounded-xl bg-dark-800 relative shrink-0 overflow-hidden shadow-2xl">
+                        <div className="absolute inset-0 bg-gradient-to-br from-dark-700 to-black flex items-center justify-center">
+                          {featuredBeat.artwork_url ? (
+                            <img src={featuredBeat.artwork_url} alt={featuredBeat.title} className="w-full h-full object-cover" />
                           ) : (
-                            <Play className="w-5 h-5 fill-current ml-1" />
+                            <Music className="w-12 h-12 text-gray-600" />
                           )}
                         </div>
-                      </button>
-                    </div>
-
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-start justify-between mb-2">
-                        <div>
-                          <h3 className="text-2xl font-bold text-white truncate">{producer.featuredBeat.title}</h3>
-                          <p className="text-primary font-medium">{producer.featuredBeat.genre} • {producer.featuredBeat.bpm} BPM</p>
-                        </div>
-                        <div className="text-right">
-                          <span className="text-2xl font-bold text-white">${producer.featuredBeat.price}</span>
-                        </div>
-                      </div>
-                      
-                      {/* Fake Waveform */}
-                      <div className="h-12 w-full flex items-end gap-1 opacity-60 mb-4">
-                        {waveformHeights.map((height, i) => (
-                          <div 
-                            key={i} 
-                            style={{ height: `${height}%` }} 
-                            className={`flex-1 rounded-full ${i % 3 === 0 ? 'bg-primary' : 'bg-white/20'}`} 
-                          />
-                        ))}
-                      </div>
-
-                      <div className="flex gap-3">
-                        <Button 
-                          className="flex-1 bg-primary text-black hover:bg-primary-dark font-bold"
-                          onClick={() => handleAddToCart(producer.featuredBeat)}
+                        {/* Play Button Overlay */}
+                        <button 
+                          onClick={() => handlePlayBeat(featuredBeat)}
+                          className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity backdrop-blur-[2px] z-10"
                         >
-                          Add to Cart ${producer.featuredBeat.price}
-                        </Button>
-                        <Button variant="outline" className="border-white/10 hover:bg-white/5">
-                          Download Demo
-                        </Button>
+                          <div className="w-12 h-12 rounded-full bg-primary text-black flex items-center justify-center shadow-lg transform scale-90 group-hover:scale-100 transition-transform">
+                            {currentBeat?.id === featuredBeat.id && isPlaying ? (
+                              <div className="flex gap-1 items-end h-3">
+                                 <div className="w-1 bg-black animate-pulse" />
+                                 <div className="w-1 bg-black animate-pulse delay-75" />
+                                 <div className="w-1 bg-black animate-pulse delay-150" />
+                              </div>
+                            ) : (
+                              <Play className="w-5 h-5 fill-current ml-1" />
+                            )}
+                          </div>
+                        </button>
+                      </div>
+
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-start justify-between mb-2">
+                          <div>
+                            <h3 className="text-2xl font-bold text-white truncate">{featuredBeat.title}</h3>
+                            <p className="text-primary font-medium">{featuredBeat.genre} • {featuredBeat.bpm} BPM</p>
+                          </div>
+                        </div>
+                        
+                        {/* Fake Waveform */}
+                        <div className="h-12 w-full flex items-end gap-1 opacity-60 mb-4">
+                          {waveformHeights.map((height, i) => (
+                            <div 
+                              key={i} 
+                              style={{ height: `${height}%` }} 
+                              className={`flex-1 rounded-full ${i % 3 === 0 ? 'bg-primary' : 'bg-white/20'}`} 
+                            />
+                          ))}
+                        </div>
+
+                        <div className="flex gap-3">
+                          <Button 
+                            className="flex-1 bg-primary text-black hover:bg-primary-dark font-bold"
+                            onClick={() => handleAddToCart(featuredBeat)}
+                          >
+                            Add to Cart
+                          </Button>
+                          <Button variant="outline" className="border-white/10 hover:bg-white/5">
+                            Details
+                          </Button>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              </section>
+                </section>
+              )}
 
               {/* All Beats List */}
               <section>
@@ -260,18 +327,26 @@ export default function ProducerProfilePage({ params }: { params: Promise<{ slug
                   <h2 className="text-xl font-bold text-white">Latest Releases</h2>
                   <div className="flex gap-2">
                     <Button size="sm" variant="ghost" className="text-white bg-white/5">Newest</Button>
-                    <Button size="sm" variant="ghost" className="text-gray-400 hover:text-white">Popular</Button>
                   </div>
                 </div>
 
                 <div className="space-y-4">
-                  {producer.beats.map((beat, i) => (
+                  {beats.length === 0 ? (
+                    <div className="text-center py-12 bg-dark-900/20 rounded-2xl border border-dashed border-white/5">
+                      <Music className="w-12 h-12 text-gray-700 mx-auto mb-4" />
+                      <p className="text-gray-500">No tracks published yet.</p>
+                    </div>
+                  ) : beats.map((beat, i) => (
                     <div key={beat.id} className="group flex items-center gap-4 p-3 rounded-xl bg-dark-900/40 border border-white/5 hover:bg-white/5 hover:border-white/10 transition-all">
                       <span className="text-gray-500 w-6 text-center font-mono text-sm">{i + 1}</span>
                       
                       <div className="w-12 h-12 rounded-lg bg-dark-800 shrink-0 relative overflow-hidden">
                          <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-gray-800 to-black">
-                           <Music className="w-5 h-5 text-gray-600" />
+                           {beat.artwork_url ? (
+                             <img src={beat.artwork_url} alt={beat.title} className="w-full h-full object-cover" />
+                           ) : (
+                             <Music className="w-5 h-5 text-gray-600" />
+                           )}
                          </div>
                          <button 
                             onClick={() => handlePlayBeat(beat)}
@@ -299,24 +374,17 @@ export default function ProducerProfilePage({ params }: { params: Promise<{ slug
                       </div>
 
                       <div className="flex items-center gap-4">
-                        <span className="text-white font-bold">${beat.price}</span>
                         <Button 
                           size="sm" 
                           variant="outline" 
                           className="border-white/10 hover:border-primary hover:text-primary rounded-full px-4"
                           onClick={() => handleAddToCart(beat)}
                         >
-                          Add
+                          Buy
                         </Button>
                       </div>
                     </div>
                   ))}
-                </div>
-                
-                <div className="mt-8 text-center">
-                  <Button variant="outline" className="w-full py-6 border-dashed border-dark-700 text-gray-400 hover:text-white hover:border-white/20">
-                    View All Tracks
-                  </Button>
                 </div>
               </section>
             </div>
@@ -326,7 +394,7 @@ export default function ProducerProfilePage({ params }: { params: Promise<{ slug
               <div className="bg-dark-900 border border-white/5 rounded-2xl p-6">
                 <h3 className="font-bold text-white mb-4">About</h3>
                 <p className="text-gray-400 text-sm leading-relaxed mb-6">
-                  {producer.bio}
+                  {producer.bio || 'Professional music producer creating high-quality tracks for artists worldwide.'}
                 </p>
                 
                 <h4 className="font-bold text-white text-sm mb-3">Service Includes</h4>
@@ -343,22 +411,8 @@ export default function ProducerProfilePage({ params }: { params: Promise<{ slug
                 </ul>
 
                 <Button fullWidth className="bg-white/5 text-white hover:bg-white/10">
-                  Read Full Bio
+                   Contact
                 </Button>
-              </div>
-
-              {/* Credits / Clients */}
-              <div>
-                <h3 className="font-bold text-white mb-4 px-2">Work Credits</h3>
-                <div className="glass rounded-2xl p-1 border border-white/5">
-                  <div className="grid grid-cols-3 gap-1">
-                    {[1,2,3,4,5,6].map((i) => (
-                      <div key={i} className="aspect-square bg-dark-800 rounded-lg flex items-center justify-center hover:bg-dark-700 transition-colors cursor-pointer">
-                        <span className="text-xs text-gray-600 font-bold">ALBUM {i}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
               </div>
             </div>
 

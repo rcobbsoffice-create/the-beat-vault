@@ -1,7 +1,6 @@
 const { createClient } = require('@supabase/supabase-js');
 const fs = require('fs');
 
-// Simple env parser
 function parseEnv(path) {
   const content = fs.readFileSync(path, 'utf8');
   const env = {};
@@ -18,28 +17,28 @@ const env = parseEnv('.env.local');
 const supabaseUrl = env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseKey = env.SUPABASE_SERVICE_ROLE_KEY;
 
-if (!supabaseUrl || !supabaseKey) {
-  console.error('Missing Supabase credentials in .env.local');
-  process.exit(1);
-}
-
 const supabase = createClient(supabaseUrl, supabaseKey);
 
-async function checkBeats() {
-  console.log('Fetching recent beats...');
+async function listTables() {
+  console.log('Listing tables...');
   const { data, error } = await supabase
-    .from('beats')
-    .select('id, title, status, created_at')
-    .order('created_at', { ascending: false })
-    .limit(10);
-
+    .rpc('get_tables'); // If rpc exists
+  
   if (error) {
-    console.error('Error fetching beats:', error);
-    return;
+    // Fallback to direct query if rpc doesn't exist (might fail due to permissions)
+    const { data: tables, error: tablesError } = await supabase
+      .from('beats') // try to select from a known table to see if it works
+      .select('*')
+      .limit(1);
+    
+    if (tablesError) {
+       console.error('Error:', tablesError);
+    } else {
+       console.log('beats table exists');
+    }
+  } else {
+    console.table(data);
   }
-
-  console.log('Recent Beats:');
-  console.table(data);
 }
 
-checkBeats();
+listTables();
