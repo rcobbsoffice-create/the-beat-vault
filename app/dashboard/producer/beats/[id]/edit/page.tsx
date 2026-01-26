@@ -44,7 +44,7 @@ export default function EditBeatPage({ params }: { params: Promise<{ id: string 
   const [selectedMoods, setSelectedMoods] = useState<string[]>([]);
   const [bpm, setBpm] = useState('');
   const [key, setKey] = useState('');
-  const [coverUrl, setCoverUrl] = useState('');
+  const [artworkUrl, setArtworkUrl] = useState('');
 
   // AI Assistant state
   const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -82,7 +82,7 @@ export default function EditBeatPage({ params }: { params: Promise<{ id: string 
       if (beat.publisher) setPublisher(beat.publisher);
       if (beat.isrc) setIsrc(beat.isrc);
       if (beat.upc) setUpc(beat.upc);
-      if (beat.cover_url) setCoverUrl(beat.cover_url);
+      if (beat.artwork_url) setArtworkUrl(beat.artwork_url);
     }
   }, [id, getBeat]);
 
@@ -114,7 +114,7 @@ export default function EditBeatPage({ params }: { params: Promise<{ id: string 
       publisher,
       isrc,
       upc,
-      cover_url: coverUrl,
+      artwork_url: artworkUrl,
     });
 
     setLoading(false);
@@ -151,7 +151,7 @@ export default function EditBeatPage({ params }: { params: Promise<{ id: string 
     // Simulating generative art AI
     await new Promise(resolve => setTimeout(resolve, 3500));
     const mockArtwork = 'https://picsum.photos/seed/' + id + '/800/800';
-    setCoverUrl(mockArtwork);
+    setArtworkUrl(mockArtwork);
     setHasAIArtwork(true);
     setIsGeneratingArtwork(false);
     toast.success('Professional artwork generated and applied!', {
@@ -195,8 +195,8 @@ export default function EditBeatPage({ params }: { params: Promise<{ id: string 
         <div className="md:col-span-1 space-y-6">
            <Card className={`p-6 border-white/5 bg-dark-900/50 transition-all duration-700 ${hasAIArtwork ? 'ring-2 ring-primary/40 shadow-2xl shadow-primary/10' : ''}`}>
              <div className="aspect-square rounded-xl bg-dark-800 border border-dark-700 flex items-center justify-center relative overflow-hidden group mb-6">
-                {coverUrl ? (
-                   <img src={coverUrl} alt="Cover" className="w-full h-full object-cover" />
+                {artworkUrl ? (
+                   <img src={artworkUrl} alt="Cover" className="w-full h-full object-cover" />
                 ) : hasAIArtwork ? (
                    <div className="absolute inset-0 bg-gradient-to-br from-indigo-900 via-purple-900 to-black animate-gradient-slow flex items-center justify-center">
                       <div className="relative">

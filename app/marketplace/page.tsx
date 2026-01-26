@@ -42,7 +42,7 @@ const demoBeats: Beat[] = [
     metadata: null,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
-    producer: { id: 'p1', email: '', role: 'producer', display_name: 'Metro Vibes', bio: null, avatar_url: null, stripe_connect_account_id: null, stripe_onboarding_complete: false, created_at: '', updated_at: '' },
+    producer: { id: 'p1', email: '', role: 'producer', display_name: 'Metro Vibes', bio: null, avatar_url: null, status: 'active', stripe_connect_account_id: null, stripe_onboarding_complete: false, created_at: '', updated_at: '' },
     licenses: [
       { id: 'l1', beat_id: '1', type: 'basic', price: 2999, terms: null, files_included: ['mp3'], is_active: true, created_at: '', updated_at: '' },
       { id: 'l2', beat_id: '1', type: 'premium', price: 4999, terms: null, files_included: ['mp3', 'wav'], is_active: true, created_at: '', updated_at: '' },
@@ -72,7 +72,7 @@ const demoBeats: Beat[] = [
     metadata: null,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
-    producer: { id: 'p2', email: '', role: 'producer', display_name: 'Dark Sound', bio: null, avatar_url: null, stripe_connect_account_id: null, stripe_onboarding_complete: false, created_at: '', updated_at: '' },
+    producer: { id: 'p2', email: '', role: 'producer', display_name: 'Dark Sound', bio: null, avatar_url: null, status: 'active', stripe_connect_account_id: null, stripe_onboarding_complete: false, created_at: '', updated_at: '' },
     licenses: [
       { id: 'l3', beat_id: '2', type: 'basic', price: 3499, terms: null, files_included: ['mp3'], is_active: true, created_at: '', updated_at: '' },
     ],
@@ -101,7 +101,7 @@ const demoBeats: Beat[] = [
     metadata: null,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
-    producer: { id: 'p3', email: '', role: 'producer', display_name: 'Smooth Keys', bio: null, avatar_url: null, stripe_connect_account_id: null, stripe_onboarding_complete: false, created_at: '', updated_at: '' },
+    producer: { id: 'p3', email: '', role: 'producer', display_name: 'Smooth Keys', bio: null, avatar_url: null, status: 'active', stripe_connect_account_id: null, stripe_onboarding_complete: false, created_at: '', updated_at: '' },
     licenses: [
       { id: 'l4', beat_id: '3', type: 'basic', price: 2499, terms: null, files_included: ['mp3'], is_active: true, created_at: '', updated_at: '' },
       { id: 'l5', beat_id: '3', type: 'exclusive', price: 19999, terms: null, files_included: ['mp3', 'wav', 'stems'], is_active: true, created_at: '', updated_at: '' },
@@ -131,7 +131,7 @@ const demoBeats: Beat[] = [
     metadata: null,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
-    producer: { id: 'p1', email: '', role: 'producer', display_name: 'Metro Vibes', bio: null, avatar_url: null, stripe_connect_account_id: null, stripe_onboarding_complete: false, created_at: '', updated_at: '' },
+    producer: { id: 'p1', email: '', role: 'producer', display_name: 'Metro Vibes', bio: null, avatar_url: null, status: 'active', stripe_connect_account_id: null, stripe_onboarding_complete: false, created_at: '', updated_at: '' },
     licenses: [
       { id: 'l6', beat_id: '4', type: 'basic', price: 2999, terms: null, files_included: ['mp3'], is_active: true, created_at: '', updated_at: '' },
     ],

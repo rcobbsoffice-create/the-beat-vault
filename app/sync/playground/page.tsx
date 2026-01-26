@@ -21,9 +21,21 @@ import {
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
+interface SyncTrack {
+  id: string;
+  title: string;
+  producer: string;
+  genre: string;
+  bpm: number;
+  key: string;
+  isrc: string;
+  isSyncReady: boolean;
+  moods: string[];
+}
+
 export default function SyncPlayground() {
   const [loading, setLoading] = useState(true);
-  const [tracks, setTracks] = useState([]);
+  const [tracks, setTracks] = useState<SyncTrack[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {

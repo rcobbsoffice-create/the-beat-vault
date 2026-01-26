@@ -12,9 +12,9 @@ interface AuthContextType {
   session: Session | null;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
-  signUp: (email: string, password: string, displayName: string, role: 'producer' | 'customer') => Promise<{ error: any }>;
+  signUp: (email: string, password: string, displayName: string, role: 'producer' | 'customer' | 'artist') => Promise<{ error: any }>;
   signOut: () => Promise<void>;
-  isRole: (role: 'producer' | 'customer' | 'admin') => boolean;
+  isRole: (role: 'producer' | 'customer' | 'admin' | 'artist') => boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -94,7 +94,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     email: string, 
     password: string, 
     displayName: string, 
-    role: 'producer' | 'customer'
+    role: 'producer' | 'customer' | 'artist'
   ) => {
     const { error } = await supabase.auth.signUp({
       email,

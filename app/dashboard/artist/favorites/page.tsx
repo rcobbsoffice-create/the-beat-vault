@@ -26,7 +26,7 @@ const demoFavorites: Beat[] = [
     metadata: null,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
-    producer: { id: 'p1', email: '', role: 'producer', display_name: 'Metro Vibes', bio: null, avatar_url: null, stripe_connect_account_id: null, stripe_onboarding_complete: false, created_at: '', updated_at: '' },
+    producer: { id: 'p1', email: '', role: 'producer', display_name: 'Metro Vibes', bio: null, avatar_url: null, status: 'active', stripe_connect_account_id: null, stripe_onboarding_complete: false, created_at: '', updated_at: '' },
     licenses: [{ id: 'l1', beat_id: '1', type: 'basic', price: 2999, terms: null, files_included: ['mp3'], is_active: true, created_at: '', updated_at: '' }],
   },
 ];
