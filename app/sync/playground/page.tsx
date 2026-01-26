@@ -82,7 +82,7 @@ export default function SyncPlayground() {
   };
 
   return (
-    <div className="min-h-screen bg-[#050505] text-white p-8">
+    <div className="min-h-screen bg-dark-900 text-white p-8">
       {/* Premium Header */}
       <div className="max-w-7xl mx-auto mb-12 flex items-center justify-between">
         <div>
@@ -180,7 +180,7 @@ export default function SyncPlayground() {
 
                   <div className="flex items-center gap-6">
                     {/* Art/Play */}
-                    <div className="w-20 h-20 rounded-xl bg-gradient-to-br from-emerald-500/20 to-blue-500/20 flex items-center justify-center relative group-hover:scale-105 transition-all outline outline-white/5">
+                    <div className="w-20 h-20 rounded-xl bg-linear-to-br from-emerald-500/20 to-blue-500/20 flex items-center justify-center relative group-hover:scale-105 transition-all outline outline-white/5">
                       <Play className="w-8 h-8 text-emerald-500 fill-emerald-500" />
                     </div>
 
@@ -221,7 +221,7 @@ export default function SyncPlayground() {
            )}
 
            {/* API Usage Note */}
-           <div className="mt-12 p-8 bg-gradient-to-r from-emerald-500/5 to-transparent border border-emerald-500/10 rounded-3xl">
+           <div className="mt-12 p-8 bg-linear-to-r from-emerald-500/5 to-transparent border border-emerald-500/10 rounded-3xl">
               <div className="flex items-start gap-4">
                 <div className="p-3 bg-emerald-500/20 rounded-2xl text-emerald-500">
                    <Clock className="w-6 h-6" />

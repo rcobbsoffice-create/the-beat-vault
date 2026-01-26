@@ -198,7 +198,7 @@ export default function EditBeatPage({ params }: { params: Promise<{ id: string 
                 {artworkUrl ? (
                    <img src={artworkUrl} alt="Cover" className="w-full h-full object-cover" />
                 ) : hasAIArtwork ? (
-                   <div className="absolute inset-0 bg-gradient-to-br from-indigo-900 via-purple-900 to-black animate-gradient-slow flex items-center justify-center">
+                   <div className="absolute inset-0 bg-linear-to-br from-indigo-900 via-purple-900 to-black animate-gradient-slow flex items-center justify-center">
                       <div className="relative">
                          <Sparkles className="w-16 h-16 text-primary animate-pulse" />
                          <div className="absolute -inset-4 bg-primary/20 blur-2xl rounded-full animate-pulse" />
@@ -277,7 +277,7 @@ export default function EditBeatPage({ params }: { params: Promise<{ id: string 
            </Card>
 
            {/* AI Assistant Sidebar Section */}
-           <Card className="p-6 border-primary/20 bg-gradient-to-br from-primary/5 via-dark-900/50 to-secondary/5 relative overflow-hidden group">
+           <Card className="p-6 border-primary/20 bg-linear-to-br from-primary/5 via-dark-900/50 to-secondary/5 relative overflow-hidden group">
               <div className="absolute top-0 right-0 p-2 opacity-20 group-hover:opacity-100 transition-opacity">
                  <Sparkles className="w-4 h-4 text-primary" />
               </div>
@@ -352,7 +352,7 @@ export default function EditBeatPage({ params }: { params: Promise<{ id: string 
               </div>
 
               <div className="relative">
-                <label className="block text-sm font-medium text-foreground mb-2 flex items-center gap-2">
+                <label className="text-sm font-medium text-foreground mb-2 flex items-center gap-2">
                   Description
                   {suggestedFields.includes('description') && <Sparkles className="w-3 h-3 text-primary animate-pulse" />}
                 </label>
@@ -406,7 +406,7 @@ export default function EditBeatPage({ params }: { params: Promise<{ id: string 
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-foreground mb-2 flex items-center gap-2">
+                <label className="text-sm font-medium text-foreground mb-2 flex items-center gap-2">
                   Genre
                   {suggestedFields.includes('genre') && <Sparkles className="w-3 h-3 text-primary animate-pulse" />}
                 </label>
@@ -430,7 +430,7 @@ export default function EditBeatPage({ params }: { params: Promise<{ id: string 
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-foreground mb-2 flex items-center gap-2">
+                <label className="text-sm font-medium text-foreground mb-2 flex items-center gap-2">
                   Mood Tags (Select up to 3)
                   {suggestedFields.includes('moods') && <Sparkles className="w-3 h-3 text-secondary animate-pulse" />}
                 </label>
