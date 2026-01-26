@@ -30,7 +30,7 @@ export default function SellPage() {
             </h1>
             
             <p className="text-xl sm:text-2xl text-gray-400 max-w-3xl mx-auto mb-12 leading-relaxed">
-              TrackFlow offers the industry&apos;s most advanced rights-locked distribution and royalty engine. 
+              The Beat Vault offers the industry&apos;s most advanced rights-locked distribution and royalty engine. 
               Keep <span className="text-white font-bold">85%</span> of your sales and streaming royalties, always.
             </p>
             
@@ -72,7 +72,7 @@ export default function SellPage() {
                 </div>
                 <h3 className="text-2xl font-bold text-white mb-4">Pro Analytics</h3>
                 <p className="text-gray-400 leading-relaxed">
-                  Track plays, downloads, and sales in real-time with your advanced TrackFlow Dashboard.
+                  Track plays, downloads, and sales in real-time with your advanced The Beat Vault Dashboard.
                 </p>
               </div>
             </div>

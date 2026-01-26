@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createServiceClient } from '@/lib/supabase';
+import { createServiceClient } from '@/lib/supabase/server';
 import { createConnectAccount, createAccountLink } from '@/lib/stripe';
 
 // Create Stripe Connect account for producer

@@ -572,7 +572,7 @@ export default function ProducerStorefrontPage() {
                  </div>
                  <div className="flex-1 mx-4 h-6 bg-black/40 rounded-full flex items-center px-4">
                     <div className="w-2.5 h-2.5 rounded-full bg-primary/20 mr-2" />
-                    <p className="text-[10px] text-gray-600 font-mono truncate">trackflow.com/producers/{settings.displayName.toLowerCase().replace(/\s+/g, '-')}</p>
+                    <p className="text-[10px] text-gray-600 font-mono truncate">thebeatvault.com/producers/{settings.displayName.toLowerCase().replace(/\s+/g, '-')}</p>
                  </div>
               </div>
               

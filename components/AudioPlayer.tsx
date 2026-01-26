@@ -45,11 +45,6 @@ export function AudioPlayer() {
   useEffect(() => {
     if (!waveformRef.current || !currentBeat) return;
 
-    // Destroy previous instance
-    if (wavesurferRef.current) {
-      wavesurferRef.current.destroy();
-    }
-
     const wavesurfer = WaveSurfer.create({
       container: waveformRef.current,
       waveColor: 'rgba(255, 255, 255, 0.2)',
@@ -85,7 +80,17 @@ export function AudioPlayer() {
     wavesurferRef.current = wavesurfer;
 
     return () => {
-      wavesurfer.destroy();
+      try {
+        wavesurfer.destroy();
+      } catch (err) {
+        // Ignore AbortError during cleanup
+        if (err instanceof Error && err.name !== 'AbortError') {
+           console.error('WaveSurfer cleanup error:', err);
+        }
+      }
+      if (wavesurferRef.current === wavesurfer) {
+        wavesurferRef.current = null;
+      }
     };
   }, [currentBeat?.id]);
 

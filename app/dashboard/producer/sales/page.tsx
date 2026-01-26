@@ -33,7 +33,7 @@ export default function ProducerSalesPage() {
     { name: 'Metro Vibes', role: 'Main Producer', percentage: 70, amount: '20.99', status: 'settled' as const },
     { name: 'Lyricist A', role: 'Songwriter', percentage: 15, amount: '4.50', status: 'pending' as const },
     { name: 'Drum Designer X', role: 'Sound Design', percentage: 10, amount: '3.00', status: 'pending' as const },
-    { name: 'TrackFlow', role: 'Platform Fee', percentage: 5, amount: '1.50', status: 'settled' as const },
+    { name: 'The Beat Vault', role: 'Platform Fee', percentage: 5, amount: '1.50', status: 'settled' as const },
   ];
 
   return (

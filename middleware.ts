@@ -34,20 +34,31 @@ export async function middleware(request: NextRequest) {
           });
         },
         remove(name: string, options: CookieOptions) {
-          request.cookies.delete(name);
+          request.cookies.set({
+            name,
+            value: '',
+            ...options,
+          });
           response = NextResponse.next({
             request: {
               headers: request.headers,
             },
           });
-          response.cookies.delete(name);
+          response.cookies.set({
+            name,
+            value: '',
+            ...options,
+          });
         },
       },
     }
   );
 
-  // Refresh session if expired
-  const { data: { session } } = await supabase.auth.getSession();
+  // IMPORTANT: Avoid calling supabase.auth.getSession() in middleware
+  // as it can lead to session corruption. Using getUser() is safer.
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
   const isAuthPage = request.nextUrl.pathname.startsWith('/login') || 
                      request.nextUrl.pathname.startsWith('/signup');
@@ -55,21 +66,21 @@ export async function middleware(request: NextRequest) {
   const isDashboard = request.nextUrl.pathname.startsWith('/dashboard');
 
   // Redirect to login if accessing dashboard without session
-  if (isDashboard && !session) {
+  if (isDashboard && !user) {
     return NextResponse.redirect(new URL('/login', request.url));
   }
 
   // Redirect to dashboard if accessing auth pages with active session
-  if (isAuthPage && session) {
+  if (isAuthPage && user) {
     return NextResponse.redirect(new URL('/dashboard', request.url));
   }
 
   // Role-based access control for dashboard routes
-  if (session && isDashboard) {
+  if (user && isDashboard) {
     const { data: profile } = await supabase
       .from('profiles')
       .select('role')
-      .eq('id', session.user.id)
+      .eq('id', user.id)
       .single();
 
     const isProducerRoute = request.nextUrl.pathname.startsWith('/dashboard/producer');

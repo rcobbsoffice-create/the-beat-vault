@@ -23,7 +23,8 @@ import {
 import toast from 'react-hot-toast';
 import { SampleAuditor } from '@/components/SampleAuditor';
 import { ShieldCheck } from 'lucide-react';
-
+import { supabase } from '@/lib/supabase/client';
+import { useCatalogStore } from '@/stores/catalog';
 
 const steps = ['Files', 'Details', 'Licenses', 'Review'];
 
@@ -32,6 +33,7 @@ const moods = ['Dark', 'Energetic', 'Chill', 'Aggressive', 'Melodic', 'Emotional
 const keys = ['C Major', 'C Minor', 'D Major', 'D Minor', 'E Major', 'E Minor', 'F Major', 'F Minor', 'G Major', 'G Minor', 'A Major', 'A Minor', 'B Major', 'B Minor'];
 
 export default function UploadPage() {
+  const { fetchBeats } = useCatalogStore();
   const [currentStep, setCurrentStep] = useState(0);
   const [loading, setLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
@@ -81,18 +83,51 @@ export default function UploadPage() {
 
   const generateAiMetadata = async (file: File) => {
     setAiGenerating(true);
-    // Simulate AI analysis delay
-    setTimeout(() => {
-      // Mock AI suggestions based on filename
-      const cleanName = file.name.replace(/\.[^/.]+$/, "").replace(/[-_]/g, " ");
-      setTitle(cleanName.charAt(0).toUpperCase() + cleanName.slice(1));
-      setBpm(Math.floor(Math.random() * (160 - 80) + 80).toString());
-      setKey(keys[Math.floor(Math.random() * keys.length)]);
-      setGenre(genres[Math.floor(Math.random() * genres.length)]);
-      setDescription(`Professionally produced ${genres[Math.floor(Math.random() * genres.length)]} beat with ready-to-use stems. Perfect for recording artists looking for a unique sound.`);
-      setLabel('TrackFlow Independent');
-      setPublisher('TrackFlow Publishing (ASCAP)');
-      setAiGenerating(false);
+    try {
+      // Convert file to base64
+      // We limit to ~6MB to respect typical serverless constraints, 
+      // but Gemini Flash can handle audio. For speed, we'll slice the first 5MB if it's huge.
+      // Slicing audio is risky for encoding integrity (wav headers etc), so let's try full file first 
+      // but catch payload too large errors.
+      
+      const buffer = await file.arrayBuffer();
+      // Safety check for payload size (Vercel has 4.5MB limit on hobby, generic Next is larger).
+      // We'll fallback to filename only if too big.
+      const isTooLarge = buffer.byteLength > 4 * 1024 * 1024;
+      
+      let body: any = { filename: file.name };
+      
+      if (!isTooLarge) {
+        // Convert to base64
+        const base64String = Buffer.from(buffer).toString('base64');
+        const mimeType = file.type || 'audio/mpeg';
+        body.fileBase64 = `data:${mimeType};base64,${base64String}`;
+        body.contentType = mimeType;
+      } else {
+        toast('File too large for full AI listening. Using filename analysis.', { icon: '⚠️' });
+      }
+
+      const response = await fetch('/api/ai/analyze', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || `Analysis failed: ${response.statusText}`);
+      }
+      const data = await response.json();
+
+      setTitle(data.title);
+      setBpm(data.bpm.toString());
+      setKey(data.key);
+      setGenre(data.genre);
+      setDescription(data.description);
+      setSelectedMoods(data.moods);
+      setLabel(data.suggested_label);
+      setPublisher(data.suggested_publisher);
+
       toast.success('AI Metadata Generated!', {
         icon: '✨',
         style: {
@@ -101,7 +136,15 @@ export default function UploadPage() {
           border: '1px solid #D4AF37',
         }
       });
-    }, 1500);
+    } catch (error) {
+      console.error('AI Analysis failed:', error);
+      toast.error('AI analysis failed. Using fallback defaults.');
+      // Generic fallback
+      const cleanName = file.name.replace(/\.[^/.]+$/, "").replace(/[-_]/g, " ");
+      setTitle(cleanName.charAt(0).toUpperCase() + cleanName.slice(1));
+    } finally {
+      setAiGenerating(false);
+    }
   };
 
   const handleMoodToggle = (mood: string) => {
@@ -114,10 +157,127 @@ export default function UploadPage() {
 
   const handleSubmit = async () => {
     setLoading(true);
-    // Simulate upload
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    setLoading(false);
-    setIsSuccess(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error('Not authenticated');
+
+      const token = session.access_token;
+      const beatId = crypto.randomUUID();
+      
+      // 1. Upload Artwork if exists
+      let artwork_url = null;
+      if (artworkFile) {
+        const artRes = await fetch('/api/upload/presigned-url', {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${token}` },
+          body: JSON.stringify({ filename: artworkFile.name, contentType: artworkFile.type, type: 'artwork' }),
+        });
+        
+        if (!artRes.ok) {
+          const errorData = await artRes.json();
+          throw new Error(`Failed to get presigned URL for artwork: ${errorData.error || artRes.statusText}`);
+        }
+
+        const { uploadUrl, key } = await artRes.json();
+        
+        try {
+          await fetch(uploadUrl, { 
+            method: 'PUT', 
+            body: artworkFile, 
+            headers: { 'Content-Type': artworkFile.type } 
+          });
+        } catch (err: any) {
+          if (err.name === 'TypeError') {
+            throw new Error('Artwork upload failed (CORS Error). Please follow the guide in docs/R2_CORS_FIX.md.');
+          }
+          throw err;
+        }
+        
+        artwork_url = `${process.env.NEXT_PUBLIC_R2_PUBLIC_URL}/${key}`;
+      }
+
+      // 2. Upload Main Audio
+      const audioFile = audioFiles[0];
+      const audioRes = await fetch('/api/upload/presigned-url', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({ filename: audioFile.name, contentType: audioFile.type, type: 'original' }),
+      });
+
+      if (!audioRes.ok) {
+        const errorData = await audioRes.json();
+        throw new Error(`Failed to get presigned URL: ${errorData.error || audioRes.statusText}`);
+      }
+
+      const { uploadUrl: audioUploadUrl, key: audioKey } = await audioRes.json();
+      
+      console.log('Attempting upload to R2:', { url: audioUploadUrl, key: audioKey });
+
+      try {
+        const uploadResponse = await fetch(audioUploadUrl, { 
+          method: 'PUT', 
+          body: audioFile, 
+          headers: { 
+            'Content-Type': audioFile.type,
+          } 
+        });
+
+        if (!uploadResponse.ok) {
+          throw new Error(`Upload to R2 failed with status: ${uploadResponse.status} ${uploadResponse.statusText}`);
+        }
+      } catch (err: any) {
+        console.error('R2 Fetch Error Details:', {
+          message: err.message,
+          name: err.name,
+          stack: err.stack,
+          url: audioUploadUrl
+        });
+        
+        if (err.name === 'TypeError') {
+          console.error('R2 CORS Error detected. Redirecting user to fix instructions.');
+          throw new Error('CRITICAL: R2 CORS Policy Missing. Your browser is blocking the upload. Please follow the "Fixing Cloudflare R2 CORS" guide in docs/R2_CORS_FIX.md to allow http://localhost:3000.');
+        }
+        throw err;
+      }
+      const audio_url = `${process.env.NEXT_PUBLIC_R2_PUBLIC_URL}/${audioKey}`;
+
+      // 3. Create record in Supabase
+      const createRes = await fetch('/api/beats/create', {
+        method: 'POST',
+        headers: { 
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json' 
+        },
+        body: JSON.stringify({
+          beatId,
+          title,
+          description,
+          genre,
+          bpm,
+          key,
+          mood_tags: selectedMoods,
+          audio_url,
+          preview_url: audio_url, // For demo purposes using same URL
+          artwork_url,
+          licenses
+        }),
+      });
+
+      if (!createRes.ok) {
+        const errorData = await createRes.json();
+        console.error('Beat creation failed:', errorData);
+        throw new Error(`Failed to create beat record: ${errorData.error || createRes.statusText}`);
+      }
+      
+      toast.success('Beat Published Successfully!');
+      setIsSuccess(true);
+      fetchBeats(); // Refresh catalog in background
+    } catch (error: any) {
+      console.error('Upload error:', error);
+      toast.error(error.message || 'Upload failed. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const canProceed = () => {
@@ -508,7 +668,7 @@ export default function UploadPage() {
                         <Badge variant="success" className="bg-success text-white border-success">Sync Ready</Badge>
                       </div>
                       <p className="text-sm text-gray-400 mt-1">
-                        Make this track available for film, TV, and advertising licensing via TrackFlow API.
+                        Make this track available for film, TV, and advertising licensing via The Beat Vault API.
                       </p>
                     </div>
                   </div>

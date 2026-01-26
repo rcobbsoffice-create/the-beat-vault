@@ -47,14 +47,16 @@ const MOCK_PRODUCER_DATA = {
   ]
 };
 
-export default function ProducerProfilePage({ params }: { params: any }) {
+export default function ProducerProfilePage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = use(params);
   const { addToCart } = useMerchStore();
   const player = usePlayer();
   const [mounted, setMounted] = useState(false);
+  const [waveformHeights, setWaveformHeights] = useState<number[]>([]);
 
   useEffect(() => {
     setMounted(true);
+    setWaveformHeights(Array.from({ length: 40 }, () => Math.random() * 100));
   }, []);
   const { setCurrentBeat, currentBeat, isPlaying, togglePlayPause } = player;
   
@@ -227,10 +229,10 @@ export default function ProducerProfilePage({ params }: { params: any }) {
                       
                       {/* Fake Waveform */}
                       <div className="h-12 w-full flex items-end gap-1 opacity-60 mb-4">
-                        {Array.from({ length: 40 }).map((_, i) => (
+                        {waveformHeights.map((height, i) => (
                           <div 
                             key={i} 
-                            style={{ height: mounted ? `${Math.random() * 100}%` : '50%' }} 
+                            style={{ height: `${height}%` }} 
                             className={`flex-1 rounded-full ${i % 3 === 0 ? 'bg-primary' : 'bg-white/20'}`} 
                           />
                         ))}

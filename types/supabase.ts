@@ -1,6 +1,7 @@
 // Database type definitions
-export type UserRole = 'producer' | 'customer' | 'admin';
-export type BeatStatus = 'draft' | 'published' | 'archived';
+export type UserRole = 'producer' | 'customer' | 'admin' | 'artist';
+export type UserStatus = 'active' | 'verified' | 'suspended';
+export type BeatStatus = 'draft' | 'pending' | 'published' | 'rejected' | 'archived';
 export type LicenseType = 'basic' | 'premium' | 'exclusive';
 export type PurchaseStatus = 'pending' | 'completed' | 'refunded';
 export type AnalyticsEventType = 'view' | 'play' | 'purchase' | 'share' | 'download';
@@ -12,7 +13,11 @@ export interface Profile {
   display_name: string | null;
   bio: string | null;
   avatar_url: string | null;
+  status: UserStatus;
+  stripe_connect_account_id: string | null;
+  stripe_onboarding_complete: boolean;
   created_at: string;
+  updated_at: string;
 }
 
 export interface Producer {
@@ -41,12 +46,12 @@ export interface Beat {
   waveform_data: WaveformData | null;
   status: BeatStatus;
   play_count: number;
-  is_sync_ready: boolean;
-  isrc: string | null;
-  upc: string | null;
-  label: string | null;
-  publisher: string | null;
-  metadata: Record<string, any> | null;
+  is_sync_ready?: boolean;
+  isrc?: string | null;
+  upc?: string | null;
+  label?: string | null;
+  publisher?: string | null;
+  metadata?: Record<string, any> | null;
   created_at: string;
   updated_at: string;
   // Joined data

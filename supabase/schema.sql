@@ -1,91 +1,27 @@
 -- Core Profiles & Auth
 CREATE TABLE profiles (
   id UUID REFERENCES auth.users ON DELETE CASCADE PRIMARY KEY,
-  role TEXT DEFAULT 'customer' CHECK (role IN ('admin', 'producer', 'customer')),
+  email TEXT NOT NULL,
+  role TEXT DEFAULT 'artist' CHECK (role IN ('admin', 'producer', 'artist')),
   display_name TEXT,
   avatar_url TEXT,
+  status TEXT DEFAULT 'active' CHECK (status IN ('active', 'verified', 'suspended')),
   created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
--- Producer Profiles
-CREATE TABLE producers (
-  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  profile_id UUID REFERENCES profiles(id) ON DELETE CASCADE NOT NULL,
-  store_slug TEXT UNIQUE NOT NULL,
-  branding JSONB DEFAULT '{}'::jsonb,
-  stripe_account_id TEXT,
-  status TEXT DEFAULT 'pending' CHECK (status IN ('pending', 'active', 'disabled')),
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
-);
-
--- Storefront Customization
-CREATE TABLE stores (
-  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  producer_id UUID REFERENCES producers(id) ON DELETE CASCADE NOT NULL,
-  url TEXT,
-  theme JSONB DEFAULT '{}'::jsonb,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
-);
-
--- Merchandise Catalog
-CREATE TABLE merch_products (
-  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  producer_id UUID REFERENCES producers(id) ON DELETE CASCADE NOT NULL,
-  title TEXT NOT NULL,
-  description TEXT,
-  supplier TEXT CHECK (supplier IN ('printful', 'printify', 'manual')),
-  supplier_product_id TEXT,
-  variant_ids JSONB DEFAULT '[]'::jsonb,
-  base_cost NUMERIC(10,2),
-  retail_price NUMERIC(10,2),
-  platform_fee_percent NUMERIC(5,2) DEFAULT 10.00,
-  status TEXT DEFAULT 'draft' CHECK (status IN ('published', 'draft', 'archived')),
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
-);
-
--- Intermediate Ideas / AI Pipeline
-CREATE TABLE merch_ideas (
-  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  producer_id UUID REFERENCES producers(id) ON DELETE CASCADE NOT NULL,
-  idea_type TEXT,
-  content JSONB DEFAULT '{}'::jsonb,
-  status TEXT DEFAULT 'pending' CHECK (status IN ('pending', 'processing', 'completed', 'failed')),
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
-);
-
--- Order Tracking
-CREATE TABLE orders (
-  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  producer_id UUID REFERENCES producers(id) NOT NULL,
-  customer_email TEXT NOT NULL,
-  shipping_address JSONB NOT NULL,
-  payment_intent_id TEXT,
-  payment_status TEXT DEFAULT 'pending' CHECK (payment_status IN ('pending', 'paid', 'failed')),
-  fulfillment_status TEXT DEFAULT 'pending' CHECK (fulfillment_status IN ('pending', 'processing', 'shipped', 'delivered', 'cancelled')),
-  tracking_number TEXT,
-  total_amount NUMERIC(10,2),
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
-);
-
--- AUTH TRIGGER
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS trigger AS $$
 BEGIN
-  INSERT INTO public.profiles (id, display_name, role)
+  INSERT INTO public.profiles (id, email, display_name, role)
   VALUES (
     new.id,
-    new.raw_user_meta_data->>'display_name',
-    COALESCE(new.raw_user_meta_data->>'role', 'customer')
+    new.email,
+    COALESCE(new.raw_user_meta_data->>'display_name', split_part(new.email, '@', 1)),
+    CASE 
+      WHEN new.raw_user_meta_data->>'role' IN ('artist', 'producer', 'admin') THEN new.raw_user_meta_data->>'role'
+      ELSE 'artist'
+    END
   );
-
-  -- If producer, create entry
-  IF (new.raw_user_meta_data->>'role' = 'producer') THEN
-    INSERT INTO public.producers (profile_id, store_slug)
-    VALUES (
-      new.id,
-      LOWER(REPLACE(new.raw_user_meta_data->>'display_name', ' ', '-'))
-    );
-  END IF;
 
   RETURN new;
 END;

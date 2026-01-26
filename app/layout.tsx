@@ -11,9 +11,9 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "TrackFlow - Unified Music Creation, Distribution & Sync",
-  description: "A unified platform combining beat licensing, music distribution, royalty splitting, and sync licensing into a single rights-aware system.",
-  keywords: ["beats", "music distribution", "royalty splits", "sync licensing", "producers", "rights management"],
+  title: "The Beat Vault - Elite Beat Marketplace & Rights Licensing",
+  description: "The premier marketplace for rights-locked music assets. Secure distribution, automated split contracts, and instant sync licensing.",
+  keywords: ["beats", "music marketplace", "royalty splits", "sync licensing", "producers", "sonic legacy"],
 };
 
 export default function RootLayout({
@@ -23,7 +23,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="dark" suppressHydrationWarning>
-      <body className={`${inter.variable} antialiased`}>
+      <body className={`${inter.variable} antialiased`} suppressHydrationWarning>
         <AuthProvider>
           {children}
           <AudioPlayer />

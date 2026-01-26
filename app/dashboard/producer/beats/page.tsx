@@ -16,35 +16,42 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
 import { usePlayer } from '@/stores/player';
 import { useCatalogStore } from '@/stores/catalog';
 import toast from 'react-hot-toast';
 import type { Beat } from '@/types/supabase';
-
-// Demo beats are now moved to the catalog store
+import { Loader2 } from 'lucide-react';
+import { supabase } from '@/lib/supabase/client';
 
 export default function ProducerBeatsPage() {
   const router = useRouter();
   const { setCurrentBeat, togglePlayPause, currentBeat, isPlaying } = usePlayer();
-  const { beats } = useCatalogStore();
+  const { beats, fetchBeats, isLoading, error } = useCatalogStore();
+
+  useEffect(() => {
+    fetchBeats();
+  }, [fetchBeats]);
+
+  if (isLoading && beats.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
+        <Loader2 className="w-8 h-8 text-primary animate-spin" />
+        <p className="text-gray-400">Loading your catalog...</p>
+      </div>
+    );
+  }
 
   const handlePlayBeat = (beat: any) => {
-    // Transform demo beat to match player expected type briefly or 
-    // just pass enough for the player to handle it.
-    const beatData = {
-      id: beat.id,
-      title: beat.title,
-      genre: beat.genre,
-      bpm: beat.bpm.toString(),
-      // Mocking URLs for demo
-      audio_url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3',
-      cover_url: '',
-    } as any;
-
     if (currentBeat?.id === beat.id) {
       togglePlayPause();
     } else {
-      setCurrentBeat(beatData);
+      // Use stream endpoint to bypass 403 Forbidden on private buckets
+      setCurrentBeat({
+        ...beat,
+        preview_url: `/api/beats/${beat.id}/stream`,
+        artwork_url: `/api/beats/${beat.id}/artwork`
+      });
     }
   };
 
@@ -52,8 +59,46 @@ export default function ProducerBeatsPage() {
     router.push(`/dashboard/producer/beats/${beat.id}/edit`);
   };
 
-  const handleMore = (beat: any) => {
-    toast('More options coming soon!', { icon: '✨' });
+  const handleDelete = async (beat: any) => {
+    if (!confirm('Are you sure you want to delete this track? This action cannot be undone.')) return;
+
+    const toastId = toast.loading('Deleting track...');
+    try {
+      console.log('Fetching session for delete...');
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      
+      if (sessionError) {
+        console.error('Session error:', sessionError);
+        throw new Error(`Auth session error: ${sessionError.message}`);
+      }
+      
+      const token = session?.access_token;
+      console.log('Token retrieved:', token ? 'Yes (starts with ' + token.substring(0, 10) + '...)' : 'No');
+
+      if (!token) {
+        throw new Error('No active session found. Please log in again.');
+      }
+
+      console.log('Sending delete request for beat:', beat.id);
+      const res = await fetch(`/api/beats/${beat.id}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      console.log('Delete response status:', res.status);
+      const data = await res.json();
+      console.log('Delete response data:', data);
+
+      if (!res.ok) throw new Error(data.error || 'Failed to delete track');
+
+      toast.success('Track deleted', { id: toastId });
+      fetchBeats(); // Refresh catalog
+    } catch (err: any) {
+      console.error('Delete error details:', err);
+      toast.error(`Delete failed: ${err.message}`, { id: toastId });
+    }
   };
 
   return (
@@ -79,8 +124,8 @@ export default function ProducerBeatsPage() {
             <div className="flex flex-col md:flex-row items-center gap-6">
               {/* Cover Art Preview */}
               <div className="w-20 h-20 rounded-xl bg-dark-800 shrink-0 relative overflow-hidden flex items-center justify-center">
-                {beat.cover_url ? (
-                  <img src={beat.cover_url} alt={beat.title} className="w-full h-full object-cover" />
+                {beat.artwork_url ? (
+                  <img src={`/api/beats/${beat.id}/artwork`} alt={beat.title} className="w-full h-full object-cover" />
                 ) : (
                   <Music className="w-6 h-6 text-gray-600" />
                 )}
@@ -151,10 +196,10 @@ export default function ProducerBeatsPage() {
                 <Button 
                   variant="ghost" 
                   size="sm" 
-                  className="px-2 text-gray-500 hover:text-white"
-                  onClick={() => handleMore(beat)}
+                  className="px-2 text-gray-500 hover:text-red-500 hover:bg-red-500/10"
+                  onClick={() => handleDelete(beat)}
                 >
-                  <MoreVertical className="w-5 h-5" />
+                  <Trash2 className="w-5 h-5" />
                 </Button>
               </div>
             </div>

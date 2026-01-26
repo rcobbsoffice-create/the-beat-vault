@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createServiceClient } from '@/lib/supabase';
+import { createServiceClient } from '@/lib/supabase/server';
 
 /**
  * Dynamic Cue Sheet Generator API
@@ -57,8 +57,8 @@ export async function GET(request: NextRequest) {
           share: '50%'
         }
       ],
-      publisher: beat.publisher || 'TrackFlow Publishing',
-      label: beat.label || 'TrackFlow Independent',
+      publisher: beat.publisher || 'The Beat Vault Publishing',
+      label: beat.label || 'The Beat Vault Independent',
       licenseId: p.id,
       dateGenerated: new Date().toISOString()
     };

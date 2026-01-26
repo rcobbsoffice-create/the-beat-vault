@@ -326,7 +326,7 @@ export default function EditBeatPage({ params }: { params: Promise<{ id: string 
                  </Button>
 
                  <p className="text-[9px] text-gray-500 italic leading-tight">
-                    Powered by TrackFlow Intelligence. Analyzes harmonic content and sonic energy.
+                    Powered by The Beat Vault Intelligence. Analyzes harmonic content and sonic energy.
                  </p>
               </div>
               {isAnalyzing && (

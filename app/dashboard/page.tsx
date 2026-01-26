@@ -15,14 +15,47 @@ import {
   Upload,
   Store,
   BarChart3,
+  Loader2,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { supabase } from '@/lib/supabase';
 
 export default function DashboardPage() {
   const { profile, loading } = useAuth();
 
-  const handleStripeConnect = () => {
-    toast('Redirecting to Stripe onboarding...', { icon: '💳' });
+  const [isConnecting, setIsConnecting] = useState(false);
+
+  const handleStripeConnect = async () => {
+    try {
+      setIsConnecting(true);
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        toast.error('Please sign in to connect Stripe');
+        return;
+      }
+
+      const response = await fetch('/api/stripe/connect', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+        },
+      });
+
+      const data = await response.json();
+
+      if (data.url) {
+        toast.success('Redirecting to Stripe...', { icon: '💳' });
+        window.location.href = data.url;
+      } else {
+        throw new Error(data.error || 'Failed to create Connect account');
+      }
+    } catch (error: any) {
+      console.error('Stripe Connect error:', error);
+      toast.error(error.message || 'Verification failed. Please try again.');
+    } finally {
+      setIsConnecting(false);
+    }
   };
 
   if (loading) {
@@ -71,14 +104,15 @@ export default function DashboardPage() {
   return (
     <div className="space-y-8">
       {/* Welcome Header */}
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold text-white mb-2">
-              Welcome back, {profile?.display_name || 'User'}!
+          <div className="mb-10 relative">
+            <div className="absolute -top-10 -left-10 w-64 h-64 bg-primary/5 blur-[100px] pointer-events-none" />
+            <h1 className="text-4xl font-black text-white mb-2 tracking-tight">
+              Welcome back, <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent italic">{profile?.display_name || 'Maestro'}</span>!
             </h1>
-            <p className="text-gray-400">
+            <p className="text-gray-400 font-medium">
               {profile?.role === 'producer' 
-                ? 'Manage your beats and track your sales'
-                : 'Access your licensed beats and favorites'
+                ? 'Your sonic empire is growing. Track your legacy below.'
+                : 'Your library of elite sounds is ready for your next masterpiece.'
               }
             </p>
           </div>
@@ -134,8 +168,12 @@ export default function DashboardPage() {
                     Connect your Stripe account to receive payments for your beat sales.
                   </p>
                 </div>
-                <Button variant="primary" onClick={handleStripeConnect}>
-                  Connect Stripe
+                <Button 
+                  variant="primary" 
+                  onClick={handleStripeConnect}
+                  isLoading={isConnecting}
+                >
+                  {isConnecting ? 'Initializing...' : 'Connect Stripe'}
                 </Button>
               </div>
             </Card>

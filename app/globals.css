@@ -1,21 +1,21 @@
 @import "tailwindcss";
 
 @theme {
-  /* Brand Colors - Gold & Bronze */
-  --color-primary: #d4af37;
-  --color-primary-dark: #b5952f;
-  --color-secondary: #c0c0c0;
-  --color-secondary-dark: #a0a0a0;
+  /* Brand Colors - Neon Green & Electric Blue */
+  --color-primary: #10b981; /* Emerald Green */
+  --color-primary-dark: #059669;
+  --color-secondary: #3b82f6; /* Blue */
+  --color-secondary-dark: #2563eb;
 
   /* Dark Shades - Onyx & Matte */
   --color-dark-950: #000000;
-  --color-dark-900: #0a0a0a;
-  --color-dark-800: #121212;
-  --color-dark-700: #1c1c1c;
-  --color-dark-600: #2a2a2a;
+  --color-dark-900: #050505;
+  --color-dark-800: #0a0a0a;
+  --color-dark-700: #111111;
+  --color-dark-600: #1a1a1a;
 
   /* State Colors */
-  --color-accent: #ffd700;
+  --color-accent: #3b82f6;
   --color-success: #10b981;
   --color-warning: #f59e0b;
   --color-error: #ef4444;
@@ -59,11 +59,23 @@
     }
   }
   --animate-bounce-short: bounce-short 0.6s ease-in-out infinite;
+  --animate-gradient-x: gradient-x 15s ease infinite;
+  --animate-float: float 6s ease-in-out infinite;
+
+  @keyframes gradient-x {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-20px); }
+  }
 }
 
 /* Custom Gradients as Utilities */
 @utility gradient-text {
-  background: linear-gradient(135deg, #d4af37 0%, #f3e5ab 50%, #b5952f 100%);
+  background: linear-gradient(135deg, #10b981 0%, #3b82f6 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;

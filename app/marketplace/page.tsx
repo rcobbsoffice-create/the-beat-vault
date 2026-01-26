@@ -8,15 +8,9 @@ import { BeatCard } from '@/components/BeatCard';
 import { AudioPlayer } from '@/components/AudioPlayer';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
-import { 
-  Search, 
-  SlidersHorizontal, 
-  Grid, 
-  List,
-  ChevronDown,
-  X
-} from 'lucide-react';
+import { Search, SlidersHorizontal, Grid, List, ChevronDown, X } from 'lucide-react';
 import type { Beat, BeatFilters, BeatSortOption } from '@/types/supabase';
+import { supabase } from '@/lib/supabase';
 
 const genres = ['Hip Hop', 'Trap', 'R&B', 'Pop', 'Lo-Fi', 'Drill', 'Afrobeat', 'Dance'];
 const moods = ['Dark', 'Energetic', 'Chill', 'Aggressive', 'Melodic', 'Emotional', 'Happy'];
@@ -43,8 +37,8 @@ const demoBeats: Beat[] = [
     is_sync_ready: true,
     isrc: 'US-TF1-26-00001',
     upc: '190000000001',
-    label: 'TrackFlow Independent',
-    publisher: 'TrackFlow Publishing',
+    label: 'The Beat Vault Independent',
+    publisher: 'The Beat Vault Publishing',
     metadata: null,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
@@ -132,8 +126,8 @@ const demoBeats: Beat[] = [
     is_sync_ready: true,
     isrc: 'US-TF1-26-00004',
     upc: '190000000004',
-    label: 'TrackFlow Independent',
-    publisher: 'TrackFlow Publishing',
+    label: 'The Beat Vault Independent',
+    publisher: 'The Beat Vault Publishing',
     metadata: null,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
@@ -146,8 +140,8 @@ const demoBeats: Beat[] = [
 
 function MarketplaceContent() {
   const searchParams = useSearchParams();
-  const [beats, setBeats] = useState<Beat[]>(demoBeats);
-  const [loading, setLoading] = useState(false);
+  const [beats, setBeats] = useState<Beat[]>([]);
+  const [loading, setLoading] = useState(true);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [showFilters, setShowFilters] = useState(false);
   const [sortBy, setSortBy] = useState<BeatSortOption>('newest');
@@ -162,6 +156,31 @@ function MarketplaceContent() {
   });
 
   const [activeFilters, setActiveFilters] = useState<string[]>([]);
+
+  useEffect(() => {
+    async function fetchBeats() {
+      setLoading(true);
+      try {
+        const { data, error } = await supabase
+          .from('beats')
+          .select(`
+            *,
+            producer:profiles(*),
+            licenses(*)
+          `)
+          .eq('status', 'published')
+          .order('created_at', { ascending: false });
+
+        if (error) throw error;
+        setBeats((data as any) || []);
+      } catch (error) {
+        console.error('Error fetching beats:', error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchBeats();
+  }, []);
 
   useEffect(() => {
     const newActiveFilters: string[] = [];

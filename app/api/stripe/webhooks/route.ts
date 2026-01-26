@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { headers } from 'next/headers';
 import Stripe from 'stripe';
-import { createServiceClient } from '@/lib/supabase';
+import { createServiceClient } from '@/lib/supabase/server';
 import { generateDownloadUrl, getBeatFilePaths } from '@/lib/r2';
 import { generateLicenseMarkdown } from '@/lib/licenses';
 

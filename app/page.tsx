@@ -60,14 +60,14 @@ export default function HomePage() {
             </div>
 
             {/* Title */}
-            <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold mb-6">
-              <span className="text-white">Find Your </span>
-              <span className="gradient-text">Perfect Beat</span>
+            <h1 className="text-5xl sm:text-6xl lg:text-7xl font-black mb-6 tracking-tight leading-tight">
+              <span className="text-white">Secure Your </span>
+              <span className="bg-gradient-to-r from-primary via-secondary to-primary bg-[length:200%_auto] animate-gradient-x bg-clip-text text-transparent italic">Sonic Legacy</span>
             </h1>
 
-            <p className="text-xl text-gray-400 max-w-2xl mx-auto mb-10">
-              The unified rights-locked platform for music creation, distribution, and sync licensing. 
-              Monetize your music instantly with automated royalty splits.
+            <p className="text-xl text-gray-400 max-w-2xl mx-auto mb-10 leading-relaxed">
+              The premier rights-locked platform for elite music creation. 
+              Monetize your sonic assets with automated split contracts and instant licensing.
             </p>
 
             {/* CTA Buttons */}
@@ -112,7 +112,7 @@ export default function HomePage() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             <div className="text-center mb-16">
               <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">
-                Why Choose TrackFlow
+                Why Choose The Beat Vault
               </h2>
               <p className="text-gray-400 max-w-2xl mx-auto">
                 The complete platform for buying and selling beats with everything you need to succeed.
@@ -193,7 +193,7 @@ export default function HomePage() {
             </h2>
             
             <p className="text-xl text-gray-400 mb-10 max-w-2xl mx-auto">
-              Join thousands of artists and producers already using TrackFlow to power their music careers.
+              Join thousands of artists and producers already using The Beat Vault to power their sonic careers.
             </p>
             
             <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
