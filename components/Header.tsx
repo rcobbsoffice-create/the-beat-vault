@@ -26,7 +26,7 @@ export function Header() {
           {/* Logo */}
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2">
-            <div className="relative w-32 h-10 flex items-center justify-center">
+            <div className="relative w-40 h-12 flex items-center justify-center">
               <img src="/trackflow-logo.png" alt="TrackFlow" className="w-full h-full object-contain" />
             </div>
           </Link>
