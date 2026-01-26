@@ -77,10 +77,5 @@ export async function POST(request: NextRequest) {
   }
 }
 
-export const config = {
-  api: {
-    bodyParser: {
-      sizeLimit: '10mb',
-    },
-  },
-};
+// Note: In Next.js App Router, body size limit defaults to 4MB (Vercel).
+// For larger uploads, consider signed URLs or client-side uploads.
