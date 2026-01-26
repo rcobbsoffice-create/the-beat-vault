@@ -5,7 +5,9 @@ import { createServiceClient } from '@/lib/supabase/server';
 import { generateDownloadUrl, getBeatFilePaths } from '@/lib/r2';
 import { generateLicenseMarkdown } from '@/lib/licenses';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+// Use fallback key during build time if env var is missing
+const stripeKey = process.env.STRIPE_SECRET_KEY || 'sk_test_dummy_key_for_build_verification';
+const stripe = new Stripe(stripeKey, {
   apiVersion: '2025-12-15.clover',
 });
 
