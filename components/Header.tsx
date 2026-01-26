@@ -24,13 +24,11 @@ export function Header() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
+          {/* Logo */}
           <Link href="/" className="flex items-center gap-2">
-            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
-              <Music className="w-6 h-6 text-white" />
+            <div className="relative w-32 h-10 flex items-center justify-center">
+              <img src="/trackflow-logo.png" alt="TrackFlow" className="w-full h-full object-contain" />
             </div>
-            <span className="text-xl font-bold gradient-text hidden sm:block">
-              The Beat Vault
-            </span>
           </Link>
 
           {/* Desktop Navigation */}
@@ -85,7 +83,7 @@ export function Header() {
                   </Button>
                 </Link>
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
+                  <div className="w-8 h-8 rounded-full bg-linear-to-br from-primary to-secondary flex items-center justify-center">
                     <span className="text-sm font-medium text-white">
                       {profile?.display_name?.charAt(0).toUpperCase() || 'U'}
                     </span>

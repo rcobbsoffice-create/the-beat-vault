@@ -30,7 +30,7 @@ export default function SellPage() {
             </h1>
             
             <p className="text-xl sm:text-2xl text-gray-400 max-w-3xl mx-auto mb-12 leading-relaxed">
-              The Beat Vault offers the industry&apos;s most advanced rights-locked distribution and royalty engine. 
+              TrackFlow offers the industry&apos;s most advanced rights-locked distribution and royalty engine. 
               Keep <span className="text-white font-bold">85%</span> of your sales and streaming royalties, always.
             </p>
             
@@ -47,7 +47,7 @@ export default function SellPage() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="grid md:grid-cols-3 gap-8">
               <div className="glass p-10 rounded-3xl border border-white/5 hover:border-primary/30 transition-colors duration-300 group">
-                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-dark-800 to-dark-900 border border-white/5 flex items-center justify-center mb-8 group-hover:scale-110 transition-transform">
+                <div className="w-16 h-16 rounded-2xl bg-linear-to-br from-dark-800 to-dark-900 border border-white/5 flex items-center justify-center mb-8 group-hover:scale-110 transition-transform">
                   <DollarSign className="w-8 h-8 text-success" />
                 </div>
                 <h3 className="text-2xl font-bold text-white mb-4">Instant Payouts</h3>
@@ -57,7 +57,7 @@ export default function SellPage() {
               </div>
               
               <div className="glass p-10 rounded-3xl border border-white/5 hover:border-primary/30 transition-colors duration-300 group">
-                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-dark-800 to-dark-900 border border-white/5 flex items-center justify-center mb-8 group-hover:scale-110 transition-transform">
+                <div className="w-16 h-16 rounded-2xl bg-linear-to-br from-dark-800 to-dark-900 border border-white/5 flex items-center justify-center mb-8 group-hover:scale-110 transition-transform">
                   <Globe className="w-8 h-8 text-primary" />
                 </div>
                 <h3 className="text-2xl font-bold text-white mb-4">Global Reach</h3>
@@ -67,12 +67,12 @@ export default function SellPage() {
               </div>
               
               <div className="glass p-10 rounded-3xl border border-white/5 hover:border-primary/30 transition-colors duration-300 group">
-                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-dark-800 to-dark-900 border border-white/5 flex items-center justify-center mb-8 group-hover:scale-110 transition-transform">
+                <div className="w-16 h-16 rounded-2xl bg-linear-to-br from-dark-800 to-dark-900 border border-white/5 flex items-center justify-center mb-8 group-hover:scale-110 transition-transform">
                   <BarChart3 className="w-8 h-8 text-secondary" />
                 </div>
                 <h3 className="text-2xl font-bold text-white mb-4">Pro Analytics</h3>
                 <p className="text-gray-400 leading-relaxed">
-                  Track plays, downloads, and sales in real-time with your advanced The Beat Vault Dashboard.
+                  Track plays, downloads, and sales in real-time with your advanced TrackFlow Dashboard.
                 </p>
               </div>
             </div>

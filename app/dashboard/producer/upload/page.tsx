@@ -463,7 +463,7 @@ export default function UploadPage() {
                   onClick={() => setUseAiMastering(!useAiMastering)}
                 >
                   {useAiMastering && (
-                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-[100%] animate-slide-in pointer-events-none" />
+                    <div className="absolute w-[200%] h-full top-0 -translate-x-full transition-transform duration-1500 bg-linear-to-r from-transparent via-white/5 to-transparent animate-slide-in pointer-events-none" />
                   )}
                   <div className="mt-1">
                     <div className={`w-5 h-5 rounded border flex items-center justify-center transition-colors ${
@@ -668,7 +668,7 @@ export default function UploadPage() {
                         <Badge variant="success" className="bg-success text-white border-success">Sync Ready</Badge>
                       </div>
                       <p className="text-sm text-gray-400 mt-1">
-                        Make this track available for film, TV, and advertising licensing via The Beat Vault API.
+                        Make this track available for film, TV, and advertising licensing via TrackFlow API.
                       </p>
                     </div>
                   </div>
@@ -874,7 +874,7 @@ export default function UploadPage() {
                   <div key={idx} className="grid grid-cols-2 gap-6 bg-dark-900 p-4 rounded-xl border border-dark-700">
                     {/* Preview */}
                     <div className="space-y-4">
-                      <div className="aspect-square rounded-xl bg-gradient-to-br from-primary/30 to-secondary/30 flex items-center justify-center relative overflow-hidden">
+                      <div className="aspect-square rounded-xl bg-linear-to-br from-primary/30 to-secondary/30 flex items-center justify-center relative overflow-hidden">
                         {artworkFile ? (
                           <img
                             src={URL.createObjectURL(artworkFile)}

@@ -21,7 +21,7 @@ export default function DistributionDashboard() {
     {
       id: '1',
       title: 'Neon Nights',
-      artist: 'The Beat Vault Artist',
+      artist: 'TrackFlow Artist',
       status: 'live',
       releaseDate: '2026-01-15',
       isrc: 'US-TF1-26-00001',
@@ -31,7 +31,7 @@ export default function DistributionDashboard() {
     {
       id: '2',
       title: 'Midnight Shadows',
-      artist: 'The Beat Vault Artist',
+      artist: 'TrackFlow Artist',
       status: 'processing',
       releaseDate: '2026-02-01',
       isrc: 'US-TF1-26-00002',

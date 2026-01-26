@@ -1,5 +1,5 @@
 /**
- * The Beat Vault AI Sync Scoring Engine
+ * TrackFlow AI Sync Scoring Engine
  * Analyzes track metadata and structure to determine sync licensing potential.
  */
 

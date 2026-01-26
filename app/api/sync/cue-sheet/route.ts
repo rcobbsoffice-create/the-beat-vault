@@ -57,8 +57,8 @@ export async function GET(request: NextRequest) {
           share: '50%'
         }
       ],
-      publisher: beat.publisher || 'The Beat Vault Publishing',
-      label: beat.label || 'The Beat Vault Independent',
+      publisher: beat.publisher || 'TrackFlow Publishing',
+      label: beat.label || 'TrackFlow Independent',
       licenseId: p.id,
       dateGenerated: new Date().toISOString()
     };

@@ -8,7 +8,8 @@ import {
   Shield, 
   TrendingUp,
   Play,
-  ArrowRight
+  ArrowRight,
+  Sparkles
 } from 'lucide-react';
 
 const features = [
@@ -108,11 +109,11 @@ export default function HomePage() {
 
         {/* Features Section */}
         <section className="py-24 bg-dark-900 relative">
-          <div className="absolute inset-0 bg-gradient-to-b from-dark-950 to-transparent pointer-events-none" />
+            <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-linear-to-br from-emerald-500/10 to-transparent blur-[120px] rounded-full mix-blend-screen animate-blob" />
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             <div className="text-center mb-16">
               <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">
-                Why Choose The Beat Vault
+                Why Choose TrackFlow
               </h2>
               <p className="text-gray-400 max-w-2xl mx-auto">
                 The complete platform for buying and selling beats with everything you need to succeed.
@@ -125,8 +126,8 @@ export default function HomePage() {
                   key={index}
                   className="group p-8 bg-dark-800/50 backdrop-blur-sm border border-dark-700 rounded-2xl transition-all duration-300 hover:border-primary/50 hover:bg-dark-800 hover:-translate-y-1 hover:shadow-2xl hover:shadow-primary/10"
                 >
-                  <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-primary/20 to-secondary/20 border border-white/5 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
-                    <feature.icon className="w-7 h-7 text-primary" />
+                  <div className="w-14 h-14 rounded-2xl bg-linear-to-br from-primary/20 to-secondary/20 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300 shadow-lg">
+                    <feature.icon className="w-7 h-7 text-white" />
                   </div>
                   <h3 className="text-xl font-semibold text-white mb-3">{feature.title}</h3>
                   <p className="text-gray-400 leading-relaxed">{feature.description}</p>
@@ -178,22 +179,23 @@ export default function HomePage() {
 
         {/* CTA Section */}
         <section className="py-32 pb-48 relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-r from-dark-900 to-dark-950" />
+          <div className="absolute inset-0 bg-linear-to-b from-black via-dark-900 to-black z-0" />
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-primary/10 via-transparent to-transparent opacity-50" />
           <div className="absolute inset-0 border-y border-white/5" />
           
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
-            <div className="inline-flex p-3 rounded-2xl bg-gradient-to-br from-primary/20 to-secondary/20 border border-white/5 mb-8 animate-pulse">
-              <Music className="w-12 h-12 text-primary" />
-            </div>
+            <span className="inline-block text-transparent bg-clip-text bg-linear-to-r from-emerald-400 to-cyan-400 font-extrabold animate-pulse bg-size-[200%_auto] mb-8">
+              <Sparkles className="w-12 h-12 inline-block mr-2" />
+              TrackFlow
+            </span>
             
             <h2 className="text-4xl sm:text-5xl font-bold mb-6">
               <span className="text-white">Ready to Start </span>
-              <span className="gradient-text">Your Journey?</span>
+              <span className="inline-block text-transparent bg-clip-text bg-linear-to-r from-emerald-400 to-cyan-400">Your Journey?</span>
             </h2>
             
             <p className="text-xl text-gray-400 mb-10 max-w-2xl mx-auto">
-              Join thousands of artists and producers already using The Beat Vault to power their sonic careers.
+              Join thousands of artists and producers already using TrackFlow to power their sonic careers.
             </p>
             
             <div className="flex flex-col sm:flex-row items-center justify-center gap-6">

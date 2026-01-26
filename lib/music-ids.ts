@@ -1,5 +1,5 @@
 /**
- * The Beat Vault Music ID Utilities
+ * TrackFlow Music ID Utilities
  * Handles ISRC and UPC generation/validation
  */
 
@@ -30,7 +30,7 @@ export function validateISRC(isrc: string): boolean {
  * Format: 12-digit numeric
  */
 export function generateUPC(): string {
-  // The Beat Vault prefix could be 190 (common for digital music)
+  // TrackFlow prefix could be 190 (common for digital music)
   const prefix = '190';
   const rest = Math.floor(Math.random() * 1000000000).toString().padStart(9, '0');
   return `${prefix}${rest}`;

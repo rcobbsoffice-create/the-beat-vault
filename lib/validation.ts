@@ -1,5 +1,5 @@
 /**
- * The Beat Vault Metadata Validation Engine
+ * TrackFlow Metadata Validation Engine
  * Ensures industry-standard data quality for music distribution
  */
 

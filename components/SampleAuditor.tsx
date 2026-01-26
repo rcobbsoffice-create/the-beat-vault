@@ -66,7 +66,7 @@ export function SampleAuditor({ onComplete }: SampleAuditorProps) {
             className="w-5 h-5 mt-1 accent-primary rounded border-dark-600 bg-dark-800"
           />
           <label htmlFor="audit-check" className="text-xs text-gray-400 leading-relaxed cursor-pointer select-none">
-            I hereby certify that all samples used in this production are either original, royalty-free, or have been fully cleared for commercial distribution and synchronization. I understand that The Beat Vault is a <strong className="text-white">Rights-Aware</strong> platform and misuse can lead to account suspension.
+            I hereby certify that all samples used in this production are either original, royalty-free, or have been fully cleared for commercial distribution and synchronization. I understand that TrackFlow is a <strong className="text-white">Rights-Aware</strong> platform and misuse can lead to account suspension.
           </label>
         </div>
 
@@ -84,7 +84,7 @@ export function SampleAuditor({ onComplete }: SampleAuditorProps) {
       </div>
 
       <p className="text-[10px] text-gray-600 text-center italic">
-        The Beat Vault uses automated fingerprinting to verify declarations against public databases.
+        TrackFlow uses automated fingerprinting to verify declarations against public databases.
       </p>
     </div>
   );

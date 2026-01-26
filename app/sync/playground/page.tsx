@@ -45,7 +45,7 @@ export default function SyncPlayground() {
         {
           id: '1',
           title: 'Neon Odyssey',
-          producer: 'The Beat Vault Pro',
+          producer: 'TrackFlow Pro',
           genre: 'Electronic',
           bpm: 124,
           key: 'C Minor',
@@ -229,7 +229,7 @@ export default function SyncPlayground() {
                 <div>
                   <h4 className="text-lg font-bold text-white mb-2">Build for Programmatic Sync</h4>
                   <p className="text-gray-400 text-sm leading-relaxed max-w-2xl">
-                    Every track in this catalog is pre-cleared for automated licensing via our The Beat Vault Sync API. 
+                    Every track in this catalog is pre-cleared for automated licensing via our TrackFlow Sync API. 
                     Integrate our marketplace directly into your creative platform, video editor, or content management system.
                   </p>
                   <Button variant="outline" className="mt-4 border-emerald-500/30 text-emerald-500 hover:bg-emerald-500 hover:text-black font-bold gap-2">

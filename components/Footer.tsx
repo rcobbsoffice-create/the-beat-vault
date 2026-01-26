@@ -9,10 +9,9 @@ export function Footer() {
           {/* Brand */}
           <div className="space-y-4">
             <Link href="/" className="flex items-center gap-2">
-              <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
-                <Music className="w-6 h-6 text-white" />
+              <div className="relative w-32 h-10 flex items-center justify-center">
+                <img src="/trackflow-logo.png" alt="TrackFlow" className="w-full h-full object-contain" />
               </div>
-              <span className="text-xl font-bold gradient-text">The Beat Vault</span>
             </Link>
             <p className="text-gray-400 text-sm">
               The premier marketplace for rights-locked music assets.
@@ -116,7 +115,7 @@ export function Footer() {
         {/* Bottom */}
         <div className="mt-12 pt-8 border-t border-dark-800 flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-gray-500 text-sm">
-            © {new Date().getFullYear()} The Beat Vault. All rights reserved.
+            © {new Date().getFullYear()} TrackFlow. All rights reserved.
           </p>
           <div className="flex items-center gap-6">
             <span className="text-gray-500 text-sm">

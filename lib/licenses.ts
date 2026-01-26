@@ -38,7 +38,7 @@ export function generateLicenseMarkdown(data: LicenseData): string {
 # MUSIC LICENSE AGREEMENT (Rights-Locked)
 
 **Date:** ${format(date, 'PPPP')}
-**License Number:** BV-${Math.random().toString(36).substring(7).toUpperCase()}
+**License Number:** TF-${Math.random().toString(36).substring(7).toUpperCase()}
 
 ## 1. PARTIES
 This agreement is between **${producerName}** (the "Producer") and **${artistName}** (the "Artist").
@@ -57,11 +57,11 @@ The Producer hereby grants the Artist a ${licenseType === 'exclusive' ? 'exclusi
 
 ${licenseType === 'sync' ? `
 ### 3.1 SYNC ADDENDUM
-This license includes a The Beat Vault Programmatic Sync Authorization, allowing the Track to be used in Film, TV, and Advertising placements via the The Beat Vault API infrastructure.
+This license includes a TrackFlow Programmatic Sync Authorization, allowing the Track to be used in Film, TV, and Advertising placements via the TrackFlow API infrastructure.
 ` : ''}
 
 ## 4. ROYALTY SPLITS
-Unless otherwise specified, following standard The Beat Vault rights-locked protocols:
+Unless otherwise specified, following standard TrackFlow rights-locked protocols:
 - **Mechanicals:** 50/50 split between Producer and Artist.
 - **Sync Fees:** 50/50 split (if applicable).
 - **Public Performance:** Standard PRO registration required.
@@ -70,6 +70,6 @@ Unless otherwise specified, following standard The Beat Vault rights-locked prot
 Universal (all platforms and regions).
 
 ---
-*Generated via The Beat Vault - Unified Music Infrastructure.*
+*Generated via TrackFlow - Unified Music Infrastructure.*
   `.trim();
 }

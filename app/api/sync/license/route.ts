@@ -37,7 +37,7 @@ export async function POST(request: NextRequest) {
     // 3. Generate Programmatic Sync License
     const licenseMarkdown = generateLicenseMarkdown({
       beatTitle: beatData.title,
-      producerName: beatData.producer?.display_name || 'The Beat Vault Producer',
+      producerName: beatData.producer?.display_name || 'TrackFlow Producer',
       artistName: artistName || 'Consuming Partner Artist',
       licenseType: 'sync',
       price: 49900, // Default sync price in cents
