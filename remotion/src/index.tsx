@@ -16,7 +16,7 @@ const RemotionRoot: React.FC = () => {
           pulseData: Array.from({ length: 900 }, () => Math.random() * 0.5),
           albumArtUrl: 'https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?w=1000&auto=format&fit=crop',
           title: 'Sample Beat',
-          producerName: 'TrackFlow AI',
+          producerName: 'AudioGenes AI',
         }}
       />
       <Composition
@@ -30,7 +30,7 @@ const RemotionRoot: React.FC = () => {
           pulseData: Array.from({ length: 240 }, () => Math.random() * 0.5),
           albumArtUrl: 'https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?w=1000&auto=format&fit=crop',
           title: 'Sample Beat',
-          producerName: 'TrackFlow AI',
+          producerName: 'AudioGenes AI',
         }}
       />
     </>

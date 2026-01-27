@@ -1,10 +1,10 @@
-import { registerComposition } from 'remotion';
+import { Composition } from 'remotion';
 import { MotionArtwork } from './Composition';
 
 export const RemotionRoot: React.FC = () => {
   return (
     <>
-      <registerComposition
+      <Composition
         id="MotionArtwork"
         component={MotionArtwork}
         durationInFrames={900}
@@ -15,10 +15,10 @@ export const RemotionRoot: React.FC = () => {
           pulseData: Array.from({ length: 900 }, () => Math.random() * 0.5),
           albumArtUrl: 'https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?w=1000&auto=format&fit=crop',
           title: 'Sample Beat',
-          producerName: 'TrackFlow AI',
+          producerName: 'AudioGenes AI',
         }}
       />
-      <registerComposition
+      <Composition
         id="SpotifyCanvas"
         component={MotionArtwork}
         durationInFrames={240}
@@ -29,7 +29,7 @@ export const RemotionRoot: React.FC = () => {
           pulseData: Array.from({ length: 240 }, () => Math.random() * 0.5),
           albumArtUrl: 'https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?w=1000&auto=format&fit=crop',
           title: 'Sample Beat',
-          producerName: 'TrackFlow AI',
+          producerName: 'AudioGenes AI',
         }}
       />
     </>

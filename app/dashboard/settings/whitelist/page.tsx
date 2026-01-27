@@ -49,9 +49,9 @@ export default function WhitelistDashboard() {
   return (
     <div className="max-w-4xl mx-auto space-y-8 py-8">
       {/* Header */}
-      <div className="flex items-center gap-4 bg-emerald-500/10 border border-emerald-500/20 p-6 rounded-3xl">
-        <div className="w-16 h-16 rounded-2xl bg-emerald-500/20 flex items-center justify-center border border-emerald-500/30">
-          <ShieldCheck className="w-8 h-8 text-emerald-500" />
+      <div className="flex items-center gap-4 bg-primary/10 border border-primary/20 p-6 rounded-3xl">
+        <div className="w-16 h-16 rounded-2xl bg-primary/20 flex items-center justify-center border border-primary/30">
+          <ShieldCheck className="w-8 h-8 text-primary" />
         </div>
         <div>
           <h1 className="text-2xl font-bold text-white">Content ID Shield</h1>
@@ -62,12 +62,12 @@ export default function WhitelistDashboard() {
       {/* Add New */}
       <Card className="p-6 bg-dark-900/40 border-white/5 backdrop-blur-xl">
         <h3 className="font-bold text-white mb-4 flex items-center gap-2">
-          <Plus className="w-4 h-4 text-emerald-500" />
+          <Plus className="w-4 h-4 text-primary" />
           Add Protection
         </h3>
         <div className="flex flex-col md:flex-row gap-4">
           <select 
-            className="bg-dark-800 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
+            className="bg-dark-800 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-primary/50"
             value={newPlatform}
             onChange={(e) => setNewPlatform(e.target.value)}
           >
@@ -82,13 +82,13 @@ export default function WhitelistDashboard() {
             value={newHandle}
             onChange={(e) => setNewHandle(e.target.value)}
           />
-          <Button onClick={addHandle} className="bg-emerald-500 hover:bg-emerald-600 text-black font-bold px-8">
+          <Button onClick={addHandle} className="bg-primary hover:bg-primary-dark text-black font-bold px-8">
             Enable Shield
           </Button>
         </div>
         <p className="text-[10px] text-gray-500 mt-4 leading-relaxed flex items-start gap-2">
           <HelpCircle className="w-3 h-3 shrink-0" />
-          Whitelisting ensures that ArtistFlow AI recognizes your channel as a licensed user, 
+          Whitelisting ensures that AudioGenes AI recognizes your channel as a licensed user, 
           preventing digital fingerprinting engines from flagging your content. Clearance can take up to 24-48 hours.
         </p>
       </Card>
@@ -97,7 +97,7 @@ export default function WhitelistDashboard() {
       <div className="space-y-4">
         <h3 className="text-sm font-bold text-gray-500 uppercase tracking-widest px-2">Active Protections</h3>
         {handles.map(h => (
-          <Card key={h.id} className="p-4 bg-dark-900 border-white/5 hover:border-emerald-500/20 transition-all flex items-center justify-between group">
+          <Card key={h.id} className="p-4 bg-dark-900 border-white/5 hover:border-primary/20 transition-all flex items-center justify-between group">
             <div className="flex items-center gap-4">
               <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center">
                 {platformIcons[h.platform as keyof typeof platformIcons]}

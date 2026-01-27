@@ -1,5 +1,5 @@
 /**
- * ArtistFlow AI Sync Scoring Engine
+ * AudioGenes AI Sync Scoring Engine
  * Analyzes track metadata and structure to determine sync licensing potential.
  */
 

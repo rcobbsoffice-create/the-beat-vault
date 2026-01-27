@@ -45,7 +45,7 @@ export default function SyncPlayground() {
         {
           id: '1',
           title: 'Neon Odyssey',
-          producer: 'ArtistFlow Pro',
+          producer: 'AudioGenes Pro',
           genre: 'Electronic',
           bpm: 124,
           key: 'C Minor',
@@ -75,8 +75,8 @@ export default function SyncPlayground() {
       icon: '📡',
       style: {
         background: '#0A0A0A',
-        color: '#10B981',
-        border: '1px solid #10B981',
+        color: '#0066cc',
+        border: '1px solid #0066cc',
       }
     });
   };
@@ -87,7 +87,7 @@ export default function SyncPlayground() {
       <div className="max-w-7xl mx-auto mb-12 flex items-center justify-between">
         <div>
           <div className="flex items-center gap-2 mb-2">
-            <Badge variant="primary" className="bg-emerald-500/10 text-emerald-500 border-emerald-500/20">Sync Partner Portal</Badge>
+            <Badge variant="primary" className="bg-primary/10 text-primary border-primary/20">Sync Partner Portal</Badge>
             <Badge variant="outline" className="border-white/10 text-gray-500">v1.2.0 API</Badge>
           </div>
           <h1 className="text-4xl font-extrabold tracking-tight">Sync Playground</h1>
@@ -96,8 +96,8 @@ export default function SyncPlayground() {
         <div className="hidden md:flex items-center gap-4 bg-white/5 p-2 rounded-2xl border border-white/10">
           <div className="flex flex-col items-end px-4 border-r border-white/10">
             <span className="text-[10px] text-gray-500 uppercase tracking-widest font-bold">API Status</span>
-            <span className="text-emerald-500 text-sm font-bold flex items-center gap-1">
-              <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+            <span className="text-primary text-sm font-bold flex items-center gap-1">
+              <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
               Operational
             </span>
           </div>
@@ -115,7 +115,7 @@ export default function SyncPlayground() {
         <div className="lg:col-span-1 space-y-6">
           <Card className="p-6 bg-dark-900/40 border-white/5 backdrop-blur-xl sticky top-8">
             <h3 className="font-bold mb-4 flex items-center gap-2">
-              <Filter className="w-4 h-4 text-emerald-500" />
+              <Filter className="w-4 h-4 text-primary" />
               Rights Filter
             </h3>
             
@@ -125,7 +125,7 @@ export default function SyncPlayground() {
                 <div className="space-y-2">
                    {['Instant Sync', 'One-Stop', 'Global Only'].map(level => (
                      <label key={level} className="flex items-center gap-3 group cursor-pointer">
-                       <input type="checkbox" defaultChecked className="w-4 h-4 accent-emerald-500" />
+                       <input type="checkbox" defaultChecked className="w-4 h-4 accent-primary" />
                        <span className="text-sm text-gray-400 group-hover:text-white transition-colors">{level}</span>
                      </label>
                    ))}
@@ -142,7 +142,7 @@ export default function SyncPlayground() {
               </div>
 
               <div className="pt-4 border-t border-white/5">
-                <Button fullWidth className="bg-emerald-500 hover:bg-emerald-600 text-black font-bold">
+                <Button fullWidth className="bg-primary hover:bg-primary-dark text-white font-bold">
                    Update Search
                 </Button>
               </div>
@@ -158,7 +158,7 @@ export default function SyncPlayground() {
              <input 
                type="text" 
                placeholder="Search by keywords, mood, or instrument..."
-               className="w-full h-14 bg-white/5 border border-white/10 rounded-2xl pl-12 pr-4 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition-all text-lg"
+               className="w-full h-14 bg-white/5 border border-white/10 rounded-2xl pl-12 pr-4 text-white focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all text-lg"
                value={searchQuery}
                onChange={(e) => setSearchQuery(e.target.value)}
              />
@@ -166,28 +166,28 @@ export default function SyncPlayground() {
 
            {loading ? (
              <div className="flex flex-col items-center justify-center py-20 text-gray-500 gap-4">
-                <div className="w-10 h-10 border-4 border-emerald-500/20 border-t-emerald-500 rounded-full animate-spin" />
+                <div className="w-10 h-10 border-4 border-primary/20 border-t-primary rounded-full animate-spin" />
                 <p className="animate-pulse">Loading verified sync catalog...</p>
              </div>
            ) : (
              tracks.map(track => (
-               <Card key={track.id} className="p-4 bg-dark-900/60 border-white/5 hover:border-emerald-500/30 transition-all group overflow-hidden relative">
+               <Card key={track.id} className="p-4 bg-dark-900/60 border-white/5 hover:border-primary/30 transition-all group overflow-hidden relative">
                   <div className="absolute top-0 right-0 p-1">
-                    <div className="bg-emerald-500/10 text-emerald-500 text-[10px] font-bold px-2 py-0.5 rounded-bl-lg flex items-center gap-1 border-b border-l border-emerald-500/20">
+                    <div className="bg-primary/10 text-primary text-[10px] font-bold px-2 py-0.5 rounded-bl-lg flex items-center gap-1 border-b border-l border-primary/20">
                       <Zap className="w-2 h-2" /> Programmatic Ready
                     </div>
                   </div>
 
                   <div className="flex items-center gap-6">
                     {/* Art/Play */}
-                    <div className="w-20 h-20 rounded-xl bg-linear-to-br from-emerald-500/20 to-blue-500/20 flex items-center justify-center relative group-hover:scale-105 transition-all outline outline-white/5">
-                      <Play className="w-8 h-8 text-emerald-500 fill-emerald-500" />
+                    <div className="w-20 h-20 rounded-xl bg-linear-to-br from-primary/20 to-secondary/20 flex items-center justify-center relative group-hover:scale-105 transition-all outline outline-white/5">
+                      <Play className="w-8 h-8 text-primary fill-primary" />
                     </div>
 
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-3 mb-1">
                         <h3 className="text-xl font-bold text-white tracking-tight">{track.title}</h3>
-                        <ShieldCheck className="w-4 h-4 text-emerald-500" />
+                        <ShieldCheck className="w-4 h-4 text-primary" />
                       </div>
                       <p className="text-sm text-gray-400 font-medium">By {track.producer}</p>
                       
@@ -196,7 +196,7 @@ export default function SyncPlayground() {
                          <Badge variant="outline" className="text-[10px] text-gray-500 border-white/10">{track.bpm} BPM</Badge>
                          <Badge variant="outline" className="text-[10px] text-gray-500 border-white/10">{track.key}</Badge>
                          {track.moods.map(mood => (
-                           <Badge key={mood} className="bg-white/5 text-emerald-400 text-[10px] border-emerald-500/10 hover:bg-emerald-500/10 transition-colors uppercase font-bold">{mood}</Badge>
+                           <Badge key={mood} className="bg-white/5 text-primary text-[10px] border-primary/10 hover:bg-primary/10 transition-colors uppercase font-bold">{mood}</Badge>
                          ))}
                       </div>
                     </div>
@@ -208,7 +208,7 @@ export default function SyncPlayground() {
                            <Download className="w-4 h-4" />
                          </Button>
                          <Button 
-                           className="bg-emerald-500 hover:bg-emerald-600 text-black font-bold h-10 px-6 gap-2"
+                           className="bg-primary hover:bg-primary-dark text-white font-bold h-10 px-6 gap-2"
                            onClick={() => handleLicenseClick(track.title)}
                          >
                            License This Track
@@ -221,18 +221,18 @@ export default function SyncPlayground() {
            )}
 
            {/* API Usage Note */}
-           <div className="mt-12 p-8 bg-linear-to-r from-emerald-500/5 to-transparent border border-emerald-500/10 rounded-3xl">
+           <div className="mt-12 p-8 bg-linear-to-r from-primary/5 to-transparent border border-primary/10 rounded-3xl">
               <div className="flex items-start gap-4">
-                <div className="p-3 bg-emerald-500/20 rounded-2xl text-emerald-500">
+                <div className="p-3 bg-primary/20 rounded-2xl text-primary">
                    <Clock className="w-6 h-6" />
                 </div>
                 <div>
                   <h4 className="text-lg font-bold text-white mb-2">Build for Programmatic Sync</h4>
                   <p className="text-gray-400 text-sm leading-relaxed max-w-2xl">
-                    Every track in this catalog is pre-cleared for automated licensing via our ArtistFlow Sync API. 
+                    Every track in this catalog is pre-cleared for automated licensing via our AudioGenes Sync API. 
                     Integrate our marketplace directly into your creative platform, video editor, or content management system.
                   </p>
-                  <Button variant="outline" className="mt-4 border-emerald-500/30 text-emerald-500 hover:bg-emerald-500 hover:text-black font-bold gap-2">
+                  <Button variant="outline" className="mt-4 border-primary/30 text-primary hover:bg-primary hover:text-white font-bold gap-2">
                     Generate API Key <ExternalLink className="w-3 h-3" />
                   </Button>
                 </div>

@@ -11,9 +11,9 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "ArtistFlow - Elite Beat Marketplace & Rights Licensing",
+  title: "AudioGenes - Elite Beat Marketplace & Rights Licensing",
   description: "The premier marketplace for rights-locked music assets. Secure distribution, automated split contracts, and instant sync licensing.",
-  keywords: ["beats", "music marketplace", "royalty splits", "sync licensing", "producers", "sonic legacy", "ArtistFlow"],
+  keywords: ["beats", "music marketplace", "royalty splits", "sync licensing", "producers", "sonic legacy", "AudioGenes"],
 };
 
 export default function RootLayout({

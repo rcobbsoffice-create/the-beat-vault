@@ -5,7 +5,7 @@ My diagnostic tests show an **Access Denied** error from Cloudflare even before 
 1.  Log in to the [Cloudflare Dashboard](https://dash.cloudflare.com/).
 2.  Navigate to **R2** > **Manage R2 API Tokens**.
 3.  Click **Create API token**.
-4.  **Token name**: `ArtistFlow Uploads`.
+4.  **Token name**: `AudioGenes Uploads`.
 5.  **Permissions**: Select **Object Read & Write** (or "Admin Read & Write" for full control).
 6.  **Bucket scoping**: You can select "All buckets" or specifically the `beatvault` bucket.
 7.  Click **Create Token**.

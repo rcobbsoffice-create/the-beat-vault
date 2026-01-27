@@ -1,11 +1,11 @@
 @import "tailwindcss";
 
 @theme {
-  /* Brand Colors - Neon Green & Electric Blue */
-  --color-primary: #10b981; /* Emerald Green */
-  --color-primary-dark: #059669;
-  --color-secondary: #3b82f6; /* Blue */
-  --color-secondary-dark: #2563eb;
+  /* Brand Colors - AudioGenes Blue */
+  --color-primary: #0066cc; /* Logo Blue */
+  --color-primary-dark: #004d99;
+  --color-secondary: #2563eb; /* Secondary Blue */
+  --color-secondary-dark: #1d4ed8;
 
   /* Dark Shades - Onyx & Matte */
   --color-dark-950: #000000;
@@ -63,19 +63,29 @@
   --animate-float: float 6s ease-in-out infinite;
 
   @keyframes gradient-x {
-    0%, 100% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
+    0%,
+    100% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
   }
 
   @keyframes float {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-20px); }
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-20px);
+    }
   }
 }
 
 /* Custom Gradients as Utilities */
 @utility gradient-text {
-  background: linear-gradient(135deg, #10b981 0%, #3b82f6 100%);
+  background: linear-gradient(135deg, #0066cc 0%, #3b82f6 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;

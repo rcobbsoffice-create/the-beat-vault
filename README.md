@@ -1,4 +1,4 @@
-# ArtistFlow
+# AudioGenes
 
 A unified platform that combines beat licensing, music distribution, royalty splitting, and sync licensing into a single rights-aware system.
 

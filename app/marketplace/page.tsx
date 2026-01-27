@@ -37,8 +37,8 @@ const demoBeats: Beat[] = [
     is_sync_ready: true,
     isrc: 'US-TF1-26-00001',
     upc: '190000000001',
-    label: 'ArtistFlow Independent',
-    publisher: 'ArtistFlow Publishing',
+    label: 'AudioGenes Independent',
+    publisher: 'AudioGenes Publishing',
     metadata: null,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
@@ -126,8 +126,8 @@ const demoBeats: Beat[] = [
     is_sync_ready: true,
     isrc: 'US-TF1-26-00004',
     upc: '190000000004',
-    label: 'ArtistFlow Independent',
-    publisher: 'ArtistFlow Publishing',
+    label: 'AudioGenes Independent',
+    publisher: 'AudioGenes Publishing',
     metadata: null,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
@@ -363,7 +363,7 @@ function MarketplaceContent() {
                       type="checkbox" 
                       checked={filters.isSyncReady}
                       onChange={(e) => setFilters(f => ({ ...f, isSyncReady: e.target.checked }))}
-                      className="w-5 h-5 accent-emerald-500 rounded border-dark-600 bg-dark-800"
+                      className="w-5 h-5 accent-primary rounded border-dark-600 bg-dark-800"
                     />
                     <span className="text-sm text-gray-400 group-hover:text-white transition-colors">Sync Ready Only</span>
                   </label>

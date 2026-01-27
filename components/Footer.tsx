@@ -10,7 +10,7 @@ export function Footer() {
           <div className="space-y-4">
             <Link href="/" className="flex items-center gap-2">
               <div className="relative w-[250px] h-[250px] flex items-center justify-center">
-                <img src="/artistflow-logo.png" alt="ArtistFlow" className="w-full h-full object-contain" />
+                <img src="/audiogenes-logo.png" alt="AudioGenes" className="w-full h-full object-contain" />
               </div>
             </Link>
             <p className="text-gray-400 text-sm">
@@ -115,7 +115,7 @@ export function Footer() {
         {/* Bottom */}
         <div className="mt-12 pt-8 border-t border-dark-800 flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-gray-500 text-sm">
-            © {new Date().getFullYear()} ArtistFlow. All rights reserved.
+            © {new Date().getFullYear()} AudioGenes. All rights reserved.
           </p>
           <div className="flex items-center gap-6">
             <span className="text-gray-500 text-sm">

@@ -105,7 +105,7 @@ export default function ProducerAnalyticsPage() {
           </div>
         </div>
         <Button variant="outline" className="gap-2 bg-dark-900 border-white/10">
-          <Zap className="w-4 h-4 text-emerald-500" />
+          <Zap className="w-4 h-4 text-primary" />
           Run AI Forecast
         </Button>
       </div>
@@ -166,13 +166,13 @@ export default function ProducerAnalyticsPage() {
         <div className="space-y-8">
            <Card className="p-6 bg-dark-950 border-white/5">
               <h3 className="text-sm font-bold text-gray-500 uppercase tracking-widest mb-6 flex items-center gap-2">
-                 <Globe className="w-4 h-4 text-emerald-500" /> Hot Zones
+                 <Globe className="w-4 h-4 text-primary" /> Hot Zones
               </h3>
               <div className="space-y-6">
                  {locations.map((loc, i) => (
                    <div key={i} className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
-                         <div className="w-2 h-2 rounded-full bg-emerald-500" />
+                         <div className="w-2 h-2 rounded-full bg-primary" />
                          <span className="text-sm text-white font-medium">{loc.city}</span>
                       </div>
                       <div className="text-right">
@@ -184,18 +184,18 @@ export default function ProducerAnalyticsPage() {
                    </div>
                  ))}
               </div>
-              <Button fullWidth variant="ghost" className="mt-6 text-xs text-emerald-500 hover:bg-emerald-500/5">
+              <Button fullWidth variant="ghost" className="mt-6 text-xs text-primary hover:bg-primary/5">
                  View Global Heatmap
               </Button>
            </Card>
 
-           <Card className="p-6 bg-emerald-500/10 border-emerald-500/20 relative overflow-hidden group">
-              <Zap className="absolute top-4 right-4 w-12 h-12 text-emerald-500/10 group-hover:scale-110 transition-transform" />
-              <h3 className="text-sm font-bold text-emerald-500 uppercase tracking-widest mb-4">AI Trend Alert</h3>
+           <Card className="p-6 bg-primary/10 border-primary/20 relative overflow-hidden group">
+              <Zap className="absolute top-4 right-4 w-12 h-12 text-primary/10 group-hover:scale-110 transition-transform" />
+              <h3 className="text-sm font-bold text-primary uppercase tracking-widest mb-4">AI Trend Alert</h3>
               <p className="text-xs text-white leading-relaxed mb-4">
-                "Afrobeats" and "Lo-Fi" influence is rising in your target demographics. Your track <strong className="text-emerald-400">"Neon Glow"</strong> matches 89% of current search velocity.
+                "Afrobeats" and "Lo-Fi" influence is rising in your target demographics. Your track <strong className="text-primary">"Neon Glow"</strong> matches 89% of current search velocity.
               </p>
-              <Button size="sm" className="bg-emerald-500 text-black font-bold h-8 text-[10px]">Optimize Listing</Button>
+              <Button size="sm" className="bg-primary text-black font-bold h-8 text-[10px]">Optimize Listing</Button>
            </Card>
         </div>
       </div>

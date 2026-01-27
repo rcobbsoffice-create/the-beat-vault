@@ -55,6 +55,21 @@ async function run() {
         if (existing) {
           userId = existing.id;
           console.log(`Found existing Auth ID: ${userId}`);
+          
+          // Sync metadata, reset password, and confirm email for existing user
+          const { error: updateAuthError } = await supabase.auth.admin.updateUserById(
+            userId,
+            { 
+              user_metadata: { display_name: user.displayName, role: user.role },
+              password: user.password,
+              email_confirm: true
+            }
+          );
+          if (updateAuthError) {
+            console.error(`Error updating auth metadata for ${user.email}:`, updateAuthError);
+          } else {
+            console.log(`Synced auth metadata for: ${user.email}`);
+          }
         }
     } else {
       console.error(`Unexpected error creating ${user.email}:`, createError);

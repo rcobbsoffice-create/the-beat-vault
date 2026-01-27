@@ -36,7 +36,7 @@ VALUES (
     (
         'underground-gems-vol-12',
         'Underground Gems: Vol. 12',
-        'Our weekly roundup of the freshest beats and undiscovered talent from the TrackFlow community.',
+        'Our weekly roundup of the freshest beats and undiscovered talent from the AudioGenes community.',
         'This week we spotlight three rising stars who are pushing the boundaries of rhythm and melody...',
         'Weekly Roundup',
         'published',

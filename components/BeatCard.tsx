@@ -108,7 +108,7 @@ export function BeatCard({ beat, onFavorite, isFavorited = false }: BeatCardProp
             {beat.genre && <Badge variant="primary">{beat.genre}</Badge>}
             {beat.bpm && <Badge>{beat.bpm} BPM</Badge>}
             {beat.is_sync_ready && (
-              <Badge className="bg-emerald-500/10 text-emerald-500 border-emerald-500/20">
+              <Badge className="bg-primary/10 text-primary border-primary/20">
                 Sync Ready
               </Badge>
             )}

@@ -725,7 +725,7 @@ export default function UploadPage() {
                 <div className="pt-6 border-t border-dark-700 space-y-6">
                   <div className="flex items-center justify-between">
                     <h2 className="text-xl font-semibold text-white">Rights & Distribution</h2>
-                    <Badge variant="outline" className="bg-emerald-500/10 text-emerald-500 border-emerald-500/20 gap-1">
+                    <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20 gap-1">
                       <ShieldCheck className="w-3 h-3" /> Rights Aware
                     </Badge>
                   </div>
@@ -753,7 +753,7 @@ export default function UploadPage() {
                         <Badge variant="success" className="bg-success text-white border-success">Sync Ready</Badge>
                       </div>
                       <p className="text-sm text-gray-400 mt-1">
-                        Make this track available for film, TV, and advertising licensing via ArtistFlow API.
+                        Make this track available for film, TV, and advertising licensing via AudioGenes API.
                       </p>
                     </div>
                   </div>

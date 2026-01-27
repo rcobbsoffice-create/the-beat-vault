@@ -33,7 +33,7 @@ export default function ProducerSalesPage() {
     { name: 'Metro Vibes', role: 'Main Producer', percentage: 70, amount: '20.99', status: 'settled' as const },
     { name: 'Lyricist A', role: 'Songwriter', percentage: 15, amount: '4.50', status: 'pending' as const },
     { name: 'Drum Designer X', role: 'Sound Design', percentage: 10, amount: '3.00', status: 'pending' as const },
-    { name: 'ArtistFlow', role: 'Platform Fee', percentage: 5, amount: '1.50', status: 'settled' as const },
+    { name: 'AudioGenes', role: 'Platform Fee', percentage: 5, amount: '1.50', status: 'settled' as const },
   ];
 
   return (
@@ -104,7 +104,7 @@ export default function ProducerSalesPage() {
       {/* Split Transparency Section */}
       <section className="space-y-4">
         <div className="flex items-center gap-2">
-           <Zap className="w-5 h-5 text-emerald-500" />
+           <Zap className="w-5 h-5 text-primary" />
            <h2 className="text-xl font-bold text-white">Revenue Split Transparency</h2>
         </div>
         <Card className="p-8 bg-dark-900/30 border-white/5 backdrop-blur-sm">

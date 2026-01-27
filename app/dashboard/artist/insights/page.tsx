@@ -68,7 +68,7 @@ export default function ArtistInsightsPage() {
            {/* Trend Discovery */}
            <div className="pt-4">
               <h2 className="text-lg font-bold text-white flex items-center gap-2 px-2 mb-4">
-                <Search className="w-5 h-5 text-emerald-500" /> Market Shift Prediction
+                <Search className="w-5 h-5 text-primary" /> Market Shift Prediction
               </h2>
               <Card className="p-8 bg-black/40 border-white/5">
                  <div className="grid grid-cols-1 md:grid-cols-3 gap-8">

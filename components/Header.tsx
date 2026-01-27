@@ -11,13 +11,15 @@ import {
   X,
   LogOut,
   LayoutDashboard,
-  Heart
+  Heart,
+  ChevronDown
 } from 'lucide-react';
 import { useState } from 'react';
 
 export function Header() {
   const { user, profile, signOut, loading } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [newsOpen, setNewsOpen] = useState(false);
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 glass">
@@ -26,7 +28,7 @@ export function Header() {
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2">
             <div className="relative w-[120px] h-[40px] flex items-center justify-center">
-              <img src="/artistflow-logo.png" alt="ArtistFlow" className="w-full h-full object-contain" />
+              <img src="/audiogenes-logo.png" alt="AudioGenes" className="w-full h-full object-contain" />
             </div>
           </Link>
 
@@ -50,6 +52,39 @@ export function Header() {
             >
               Licensing
             </Link>
+
+            {/* News Dropdown */}
+            <div 
+              className="relative group"
+              onMouseEnter={() => setNewsOpen(true)}
+              onMouseLeave={() => setNewsOpen(false)}
+            >
+              <button 
+                className="flex items-center gap-1 text-gray-300 hover:text-white transition-colors py-2"
+              >
+                News
+                <ChevronDown className={`w-4 h-4 transition-transform ${newsOpen ? 'rotate-180' : ''}`} />
+              </button>
+              
+              {newsOpen && (
+                <div className="absolute top-full left-0 w-48 mt-1 glass border border-white/10 rounded-xl overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
+                  <div className="py-2">
+                    <Link 
+                      href="/editorial" 
+                      className="block px-4 py-2 text-sm text-gray-300 hover:text-white hover:bg-white/5 transition-colors"
+                    >
+                      Editorial
+                    </Link>
+                    <Link 
+                      href="/charts" 
+                      className="block px-4 py-2 text-sm text-gray-300 hover:text-white hover:bg-white/5 transition-colors"
+                    >
+                      Charts
+                    </Link>
+                  </div>
+                </div>
+              )}
+            </div>
           </nav>
 
           {/* Search Bar */}
@@ -148,6 +183,24 @@ export function Header() {
               >
                 Licensing
               </Link>
+              
+              <div className="pt-2">
+                <p className="px-4 py-1 text-[10px] font-black uppercase tracking-[0.2em] text-gray-500">News</p>
+                <div className="flex flex-col gap-1 pl-4 mt-2">
+                  <Link 
+                    href="/editorial" 
+                    className="px-4 py-2 text-gray-300 hover:text-white hover:bg-dark-800 rounded-lg text-sm"
+                  >
+                    Editorial
+                  </Link>
+                  <Link 
+                    href="/charts" 
+                    className="px-4 py-2 text-gray-300 hover:text-white hover:bg-dark-800 rounded-lg text-sm"
+                  >
+                    Charts
+                  </Link>
+                </div>
+              </div>
             </nav>
             {!user && (
               <div className="flex flex-col gap-2 pt-4 border-t border-dark-700">

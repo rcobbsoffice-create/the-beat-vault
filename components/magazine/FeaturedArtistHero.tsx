@@ -72,7 +72,7 @@ export function FeaturedArtistHero({ artist }: FeaturedArtistHeroProps) {
       {/* Magazine Detail - Vertical Text */}
       <div className="absolute right-8 top-1/2 -translate-y-1/2 hidden lg:block">
         <p className="rotate-90 text-[10px] font-bold uppercase tracking-[0.5em] text-white/30 whitespace-nowrap">
-          ArtistFlow Magazine • Issue #01 • Jan 2026
+          AudioGenes Magazine • Issue #01 • Jan 2026
         </p>
       </div>
     </section>

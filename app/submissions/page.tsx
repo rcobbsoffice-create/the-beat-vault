@@ -74,7 +74,7 @@ export default function SubmissionsPage() {
               SUBMIT FOR <span className="text-primary italic">FEATURE</span>
             </h1>
             <p className="text-xl text-gray-500 font-medium leading-relaxed">
-              Join the elite circle of verified ArtistFlow artists. Apply for profile verification, charts listing, and editorial features.
+              Join the elite circle of verified AudioGenes artists. Apply for profile verification, charts listing, and editorial features.
             </p>
           </div>
 

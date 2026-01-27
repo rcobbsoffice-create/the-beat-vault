@@ -38,7 +38,7 @@ async function renderMotion(beatId: string) {
     pulseData: pulseData.bass_energy,
     albumArtUrl: beat.artwork_url || 'https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?w=1000&auto=format&fit=crop',
     title: beat.title,
-    producerName: 'TrackFlow Artist',
+    producerName: 'AudioGenes Artist',
   };
 
   const composition = await selectComposition({
@@ -60,7 +60,7 @@ async function renderMotion(beatId: string) {
     composition,
     serveUrl: bundleLocation,
     codec: 'h264',
-    audioCodec: 'none', // TEMP: Disable audio to bypass the ffmpeg crash
+    audioCodec: undefined, // TEMP: Disable audio to bypass the ffmpeg crash
     outputLocation,
     inputProps,
     timeoutInMilliseconds: 300000, // 5 minutes for render

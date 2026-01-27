@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation';
 import { useAuth } from '@/components/providers/AuthProvider';
 import { 
   LayoutDashboard, 
+  Layout,
   Upload, 
   Music, 
   DollarSign, 
@@ -21,7 +22,10 @@ import {
   ChevronLeft,
   ChevronRight,
   Menu,
-  X
+  X,
+  Mail,
+  History,
+  Sparkles
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { useState, useEffect } from 'react';
@@ -68,17 +72,23 @@ export function DashboardSidebar() {
     artist: [
       { name: 'Overview', href: '/dashboard', icon: LayoutDashboard },
       { name: 'My Insights', href: '/dashboard/artist/insights', icon: BrainCircuit },
+      { name: 'Tell Your Story', href: '/dashboard/artist/questionnaire', icon: Sparkles, highlight: true },
+      { name: 'Music Distribution', href: '/dashboard/artist/distribution', icon: Music },
       { name: 'My Library', href: '/dashboard/artist/library', icon: ShoppingBag },
-      { name: 'Music Distribution', href: '/dashboard/artist/distribution', icon: Music, highlight: true },
       { name: 'Rights Shield', href: '/dashboard/settings/whitelist', icon: ShieldCheck },
-      { name: 'Favorites', href: '/dashboard/artist/favorites', icon: Heart },
       { name: 'Settings', href: '/dashboard/settings', icon: Settings },
     ],
     admin: [
-      { name: 'Overview', href: '/dashboard', icon: LayoutDashboard },
-      { name: 'User Management', href: '/dashboard/admin/users', icon: Users },
-      { name: 'Content Moderation', href: '/dashboard/admin/beats', icon: Shield },
-      { name: 'Platform Revenue', href: '/dashboard/admin/revenue', icon: DollarSign },
+      { name: 'Control Room', href: '/dashboard/admin', icon: LayoutDashboard },
+      { name: 'Editorial', href: '/dashboard/admin/editorial', icon: Layout },
+      { name: 'Story Queue', href: '/dashboard/admin/editorial/questionnaire', icon: History },
+      { name: 'Campaigns', href: '/dashboard/admin/newsletters', icon: Mail },
+      { name: 'Merch Hub', href: '/dashboard/admin/merch', icon: ShoppingBag },
+      { name: 'Analytics', href: '/dashboard/admin/analytics', icon: BarChart3 },
+      { name: 'Artists', href: '/dashboard/admin/artists', icon: ShieldCheck },
+      { name: 'Beats', href: '/dashboard/admin/beats', icon: Music },
+      { name: 'Users', href: '/dashboard/admin/users', icon: Users },
+      { name: 'Revenue', href: '/dashboard/admin/revenue', icon: DollarSign },
       { name: 'Settings', href: '/dashboard/settings', icon: Settings },
     ]
   };
@@ -116,7 +126,7 @@ export function DashboardSidebar() {
               isCollapsed ? 'w-10 h-10' : 'w-10 h-10'
             }`}>
               {profile?.avatar_url ? (
-                <img src={profile.avatar_url} alt={profile.display_name} className="w-full h-full object-cover" />
+                <img src={profile.avatar_url ?? undefined} alt={profile.display_name ?? 'User'} className="w-full h-full object-cover" />
               ) : (
                 <div className="w-full h-full bg-linear-to-br from-primary to-secondary flex items-center justify-center">
                   {profile?.display_name?.charAt(0).toUpperCase() || 'U'}

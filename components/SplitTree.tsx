@@ -29,29 +29,29 @@ export function SplitTree({ totalAmount, parties }: SplitTreeProps) {
     <div className="space-y-8 py-4">
       {/* Total Source */}
       <div className="flex flex-col items-center">
-        <div className="bg-emerald-500/10 border border-emerald-500/20 p-6 rounded-3xl text-center relative z-10">
-          <Badge className="mb-2 bg-emerald-500 text-black font-bold">Revenue Source</Badge>
+        <div className="bg-primary/10 border border-primary/20 p-6 rounded-3xl text-center relative z-10">
+          <Badge className="mb-2 bg-primary text-black font-bold">Revenue Source</Badge>
           <div className="text-3xl font-black text-white">${totalAmount}</div>
           <p className="text-xs text-gray-400 mt-1 uppercase tracking-widest font-bold">Gross Sale</p>
         </div>
         
         {/* Connector Line */}
-        <div className="w-px h-12 bg-gradient-to-b from-emerald-500/50 to-emerald-500/10" />
+        <div className="w-px h-12 bg-gradient-to-b from-primary/50 to-primary/10" />
       </div>
 
       {/* Distribution Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 relative">
         {/* Horizontal Connector Line (Desktop Only) */}
-        <div className="hidden lg:block absolute top-[-1px] left-[12.5%] right-[12.5%] h-px bg-emerald-500/10" />
+        <div className="hidden lg:block absolute top-[-1px] left-[12.5%] right-[12.5%] h-px bg-primary/10" />
 
         {parties.map((party, index) => (
           <div key={index} className="flex flex-col items-center group">
             {/* Vertical Connector Line */}
-            <div className="w-px h-8 bg-emerald-500/10 mb-[-1px]" />
+            <div className="w-px h-8 bg-primary/10 mb-[-1px]" />
             
-            <Card className="p-4 bg-dark-900 border-white/5 w-full hover:border-emerald-500/30 transition-all hover:scale-[1.02] duration-300 relative overflow-hidden">
+            <Card className="p-4 bg-dark-900 border-white/5 w-full hover:border-primary/30 transition-all hover:scale-[1.02] duration-300 relative overflow-hidden">
                {/* Background Accent */}
-               <div className="absolute top-0 right-0 w-16 h-16 bg-emerald-500/5 rounded-bl-full -mr-8 -mt-8 opacity-0 group-hover:opacity-100 transition-opacity" />
+               <div className="absolute top-0 right-0 w-16 h-16 bg-primary/5 rounded-bl-full -mr-8 -mt-8 opacity-0 group-hover:opacity-100 transition-opacity" />
                
                <div className="flex items-center gap-3 mb-3">
                  <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-primary border border-white/5">
@@ -69,7 +69,7 @@ export function SplitTree({ totalAmount, parties }: SplitTreeProps) {
                     <span className="text-lg font-black text-white">{party.percentage}%</span>
                  </div>
                  <div className="text-right">
-                    <span className="text-emerald-500 text-sm font-bold block">${party.amount || '0.00'}</span>
+                    <span className="text-primary text-sm font-bold block">${party.amount || '0.00'}</span>
                     <Badge variant={party.status === 'settled' ? 'success' : 'default'} className="mt-1 text-[9px] h-4">
                       {party.status}
                     </Badge>
@@ -83,13 +83,13 @@ export function SplitTree({ totalAmount, parties }: SplitTreeProps) {
       {/* Workflow Legend */}
       <div className="flex justify-center gap-8 pt-8 border-t border-white/5">
          <div className="flex items-center gap-2 text-[10px] text-gray-500 font-bold uppercase tracking-widest">
-            <ShieldCheck className="w-3 h-3 text-emerald-500" /> Rights Protected
+            <ShieldCheck className="w-3 h-3 text-primary" /> Rights Protected
          </div>
          <div className="flex items-center gap-2 text-[10px] text-gray-500 font-bold uppercase tracking-widest">
-            <Zap className="w-3 h-3 text-emerald-500" /> Automated Split
+            <Zap className="w-3 h-3 text-primary" /> Automated Split
          </div>
          <div className="flex items-center gap-2 text-[10px] text-gray-500 font-bold uppercase tracking-widest">
-            <TrendingUp className="w-3 h-3 text-emerald-500" /> Real-time Settlement
+            <TrendingUp className="w-3 h-3 text-primary" /> Real-time Settlement
          </div>
       </div>
     </div>

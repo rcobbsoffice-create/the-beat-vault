@@ -148,7 +148,7 @@ export default function NewReleasePage() {
 
               <Input 
                 label="Label / Publisher" 
-                placeholder="e.g. ArtistFlow Independent" 
+                placeholder="e.g. AudioGenes Independent" 
                 value={label}
                 onChange={(e) => setLabel(e.target.value)}
               />
@@ -236,7 +236,7 @@ export default function NewReleasePage() {
              </div>
              <h2 className="text-2xl font-bold text-white">Metadata Sanitization</h2>
              <p className="text-gray-400 max-w-sm mx-auto">
-               ArtistFlow AI is verifying your metadata against DDEX and DSP standards for guaranteed delivery.
+               AudioGenes AI is verifying your metadata against DDEX and DSP standards for guaranteed delivery.
              </p>
 
              <div className="mt-8 space-y-3 max-w-md mx-auto">

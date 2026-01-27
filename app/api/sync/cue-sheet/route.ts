@@ -57,8 +57,8 @@ export async function GET(request: NextRequest) {
           share: '50%'
         }
       ],
-      publisher: beat.publisher || 'ArtistFlow Publishing',
-      label: beat.label || 'ArtistFlow Independent',
+      publisher: beat.publisher || 'AudioGenes Publishing',
+      label: beat.label || 'AudioGenes Independent',
       licenseId: p.id,
       dateGenerated: new Date().toISOString()
     };
