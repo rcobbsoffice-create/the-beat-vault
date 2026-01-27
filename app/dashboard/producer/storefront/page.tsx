@@ -145,8 +145,9 @@ export default function ProducerStorefrontPage() {
 
              if (storeError) throw storeError;
              
-             // Re-run to load fresh data
-             loadStorefrontData();
+             // Directly update state after successful creation
+             setProducerData(newProducer);
+             setIsInitialLoading(false);
           } catch (initErr) {
              console.error('[Storefront] Auto-initialization failed:', initErr);
              useMockDataFallback();
@@ -193,14 +194,23 @@ export default function ProducerStorefrontPage() {
   };
 
   const handleSave = async () => {
-    if (!producerData?.id) return;
+    if (!profile?.id) return;
     
     setIsSaving(true);
     try {
+      // 1. Get or verify producer ID
+      let pId = producerData?.id;
+      if (!pId) {
+        const { data: p } = await supabase.from('producers').select('id').eq('profile_id', profile.id).maybeSingle();
+        pId = p?.id;
+      }
+
+      if (!pId) throw new Error('Storefront profile not initialized. Please refresh.');
+
       const { error: storeError } = await supabase
         .from('stores')
         .upsert({
-          producer_id: producerData.id,
+          producer_id: pId,
           theme: {
             id: settings.theme,
             accentColor: settings.accentColor,
@@ -214,18 +224,19 @@ export default function ProducerStorefrontPage() {
       const { error: producerError } = await supabase
         .from('producers')
         .update({
-          branding: { ...producerData.branding, tagline: settings.tagline }
+          branding: { ...(producerData?.branding || {}), tagline: settings.tagline }
         })
-        .eq('id', producerData.id);
+        .eq('id', pId);
 
       if (producerError) throw producerError;
 
-      toast.success('Storefront settings saved to Supabase!', {
+      toast.success('Storefront settings saved!', {
+        id: 'storefront-save',
         style: { background: '#0A0A0A', color: '#D4AF37', border: '1px solid #1C1C1C' }
       });
-    } catch (err) {
-      toast.error('Failed to save settings');
-      console.error(err);
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to save settings');
+      console.error('[Storefront] Save Error:', err);
     } finally {
       setIsSaving(false);
     }
@@ -518,7 +529,7 @@ export default function ProducerStorefrontPage() {
                                 Disconnect
                              </button>
                           </div>
-                          <div className="h-[1px] bg-white/5" />
+                          <div className="h-px bg-white/5" />
                           <div className="flex justify-between items-center">
                              <span className="text-[10px] text-gray-500 uppercase font-black tracking-widest">Active Products</span>
                              <span className="text-xs font-bold text-white">{merchItems.length} items</span>
@@ -562,7 +573,7 @@ export default function ProducerStorefrontPage() {
 
         {/* Live Preview Emulator */}
         <div className="lg:col-span-2 sticky top-[100px] h-fit">
-           <div className="bg-dark-950 rounded-[2rem] border-[12px] border-dark-900 aspect-[16/10] relative overflow-hidden shadow-2xl scale-[0.98] origin-top">
+           <div className="bg-dark-950 rounded-4xl border-12 border-dark-900 aspect-16/10 relative overflow-hidden shadow-2xl scale-[0.98] origin-top">
               {/* Fake Browser Toolbar */}
               <div className="h-10 bg-dark-900 flex items-center px-6 gap-2 border-b border-black/40">
                  <div className="flex gap-1.5">
@@ -584,7 +595,7 @@ export default function ProducerStorefrontPage() {
 
                  {/* Mock Header */}
                  <div className="h-32 w-full rounded-3xl bg-dark-900/50 border border-white/5 mb-8 flex items-end p-8 relative overflow-hidden">
-                    <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/60 to-transparent" />
+                    <div className="absolute inset-x-0 bottom-0 h-1/2 bg-linear-to-t from-black/60 to-transparent" />
                     <div className="flex items-center gap-6 relative z-10">
                        <div 
                         className="w-20 h-20 rounded-full flex items-center justify-center text-black font-black text-2xl shadow-xl"
@@ -693,7 +704,7 @@ export default function ProducerStorefrontPage() {
               </div>
 
               {/* Interaction Overlay */}
-              <div className="absolute inset-0 bg-black/5 pointer-events-none border-[1px] border-white/5 rounded-3xl" />
+              <div className="absolute inset-0 bg-black/5 pointer-events-none border border-white/5 rounded-3xl" />
               
               {!settings.whiteLabel && (
                  <div className="absolute bottom-4 right-4 flex items-center gap-2 opacity-40 hover:opacity-100 transition-opacity">

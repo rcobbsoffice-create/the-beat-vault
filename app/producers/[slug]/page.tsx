@@ -412,7 +412,11 @@ export default function ProducerProfilePage({ params }: { params: Promise<{ slug
                   </li>
                 </ul>
 
-                <Button fullWidth className="bg-white/5 text-white hover:bg-white/10">
+                <Button 
+                  fullWidth 
+                  className="bg-white/5 text-white hover:bg-white/10"
+                  onClick={() => window.location.href = `mailto:${producer.email}`}
+                >
                    Contact
                 </Button>
               </div>

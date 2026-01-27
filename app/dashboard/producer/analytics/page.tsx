@@ -11,24 +11,78 @@ import {
   ArrowUpRight,
   Globe,
   Clock,
-  Zap
+  Zap,
+  Loader2
 } from 'lucide-react';
 import { EngagementHeatmap } from '@/components/Analytics/EngagementHeatmap';
+import { useAuth } from '@/components/providers/AuthProvider';
+import { useState, useEffect } from 'react';
+import { supabase } from '@/lib/supabase';
 
 export default function ProducerAnalyticsPage() {
+  const { profile } = useAuth();
+  const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState({
+    plays: 0,
+    wishlist: 0,
+    cart: 0,
+    purchase: 0,
+    avgSession: '0:00'
+  });
+
+  useEffect(() => {
+    async function fetchAnalytics() {
+      if (!profile?.id) return;
+      
+      try {
+        const { data: beats } = await supabase.from('beats').select('id').eq('producer_id', profile.id);
+        const beatIds = beats?.map(b => b.id) || [];
+
+        // Fetch counts for conversion funnel
+        const { data: events } = await supabase
+          .from('analytics_events' as any)
+          .select('event_type')
+          .in('beat_id', beatIds);
+
+        const counts = {
+          play: events?.filter(e => e.event_type === 'play').length || 0,
+          wishlist: events?.filter(e => e.event_type === 'wishlist').length || 0,
+          cart: events?.filter(e => e.event_type === 'cart_add').length || 0,
+          purchase: events?.filter(e => e.event_type === 'purchase').length || 0,
+        };
+
+        setStats({
+          plays: counts.play,
+          wishlist: counts.wishlist,
+          cart: counts.cart,
+          purchase: counts.purchase,
+          avgSession: counts.play > 0 ? '2:45' : '0:00' // Mock session for now but reactive
+        });
+      } catch (err) {
+        console.error('Analytics Fetch Error:', err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchAnalytics();
+  }, [profile]);
+
   const heatmapData = [
-    { position: 0, intensity: 0.2 },
-    { position: 0.1, intensity: 0.4 },
-    { position: 0.2, intensity: 0.3, isDropoff: true },
-    { position: 0.3, intensity: 0.6 },
+    { position: 0, intensity: 0.1 },
+    { position: 0.2, intensity: 0.4 },
     { position: 0.4, intensity: 0.8, isPeak: true },
-    { position: 0.5, intensity: 0.7 },
     { position: 0.6, intensity: 0.5 },
-    { position: 0.7, intensity: 0.9, isPeak: true },
-    { position: 0.8, intensity: 0.6 },
-    { position: 0.9, intensity: 0.3 },
-    { position: 1, intensity: 0.1 },
+    { position: 0.8, intensity: 0.9, isPeak: true },
+    { position: 1, intensity: 0.2 },
   ];
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <Loader2 className="w-8 h-8 text-primary animate-spin" />
+      </div>
+    );
+  }
 
   const locations = [
     { city: 'Atlanta, USA', share: 24, trend: '+12%' },
@@ -72,10 +126,10 @@ export default function ProducerAnalyticsPage() {
                 </h3>
                 <div className="space-y-4">
                    {[
-                    { label: 'Plays', count: '12,402', rate: '100%' },
-                    { label: 'Wishlist', count: '842', rate: '6.8%' },
-                    { label: 'Cart', count: '215', rate: '1.7%' },
-                    { label: 'Purchase', count: '98', rate: '0.8%' },
+                    { label: 'Plays', count: stats.plays.toLocaleString(), rate: '100%' },
+                    { label: 'Wishlist', count: stats.wishlist.toLocaleString(), rate: stats.plays > 0 ? `${((stats.wishlist / stats.plays) * 100).toFixed(1)}%` : '0%' },
+                    { label: 'Cart', count: stats.cart.toLocaleString(), rate: stats.plays > 0 ? `${((stats.cart / stats.plays) * 100).toFixed(1)}%` : '0%' },
+                    { label: 'Purchase', count: stats.purchase.toLocaleString(), rate: stats.plays > 0 ? `${((stats.purchase / stats.plays) * 100).toFixed(1)}%` : '0%' },
                    ].map((item, i) => (
                      <div key={i} className="group">
                         <div className="flex justify-between items-end mb-1.5">

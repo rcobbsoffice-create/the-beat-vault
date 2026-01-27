@@ -58,13 +58,65 @@ export default function DashboardPage() {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-dark-950 flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
-  }
+  const [stats, setStats] = useState<any[]>([]);
+  const [isStatsLoading, setIsStatsLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchStats() {
+      if (!profile?.id || profile.role !== 'producer') {
+        setIsStatsLoading(false);
+        return;
+      }
+
+      try {
+        // 1. Total Beats
+        const { count: beatsCount } = await supabase
+          .from('beats')
+          .select('*', { count: 'exact', head: true })
+          .eq('producer_id', profile.id);
+
+        // 2. Total Sales (Join with beats to get producer's purchases)
+        // Note: For complex joins with PostgREST, we might need a view or nested select
+        const { data: producerBeats } = await supabase
+          .from('beats')
+          .select('id')
+          .eq('producer_id', profile.id);
+        
+        const beatIds = producerBeats?.map(b => b.id) || [];
+        
+        const { data: salesData } = await supabase
+          .from('purchases' as any)
+          .select('amount_paid')
+          .in('beat_id', beatIds);
+        
+        const totalSalesCents = salesData?.reduce((sum, item) => sum + item.amount_paid, 0) || 0;
+        const totalSalesFormatted = new Intl.NumberFormat('en-US', {
+          style: 'currency',
+          currency: 'USD',
+        }).format(totalSalesCents / 100);
+
+        // 3. Total Plays (from analytics_events)
+        const { count: playsCount } = await supabase
+          .from('analytics_events' as any)
+          .select('*', { count: 'exact', head: true })
+          .eq('event_type', 'play')
+          .in('beat_id', beatIds);
+
+        setStats([
+          { label: 'Total Beats', value: beatsCount?.toString() || '0', icon: Music },
+          { label: 'Total Sales', value: totalSalesFormatted, icon: DollarSign },
+          { label: 'Total Plays', value: playsCount?.toString() || '0', icon: Play },
+          { label: 'Followers', value: '0', icon: Users }, // Placeholder for now
+        ]);
+      } catch (err) {
+        console.error('Error fetching dashboard stats:', err);
+      } finally {
+        setIsStatsLoading(false);
+      }
+    }
+
+    fetchStats();
+  }, [profile]);
 
   // Redirect based on role
   const dashboardLinks = {
@@ -89,33 +141,29 @@ export default function DashboardPage() {
 
   const links = dashboardLinks[profile?.role as keyof typeof dashboardLinks] || dashboardLinks.artist;
 
-  // Demo stats
-  const stats = profile?.role === 'producer' ? [
-    { label: 'Total Beats', value: '24', icon: Music, change: '+3 this week' },
-    { label: 'Total Sales', value: '$4,280', icon: DollarSign, change: '+$620 this month' },
-    { label: 'Total Plays', value: '12.4K', icon: Play, change: '+1.2K this week' },
-    { label: 'Followers', value: '892', icon: Users, change: '+45 this month' },
-  ] : [
-    { label: 'Licensed Beats', value: '8', icon: Music },
-    { label: 'Total Spent', value: '$380', icon: DollarSign },
-    { label: 'Favorites', value: '24', icon: TrendingUp },
-  ];
+  if (loading || isStatsLoading) {
+    return (
+      <div className="min-h-screen bg-dark-950 flex items-center justify-center">
+        <Loader2 className="w-8 h-8 text-primary animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8">
       {/* Welcome Header */}
-          <div className="mb-10 relative">
-            <div className="absolute -top-10 -left-10 w-64 h-64 bg-primary/5 blur-[100px] pointer-events-none" />
-            <h1 className="text-4xl font-black text-white mb-2 tracking-tight">
-              Welcome back, <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent italic">{profile?.display_name || 'Maestro'}</span>!
-            </h1>
-            <p className="text-gray-400 font-medium">
-              {profile?.role === 'producer' 
-                ? 'Your sonic empire is growing. Track your legacy below.'
-                : 'Your library of elite sounds is ready for your next masterpiece.'
-              }
-            </p>
-          </div>
+      <div className="mb-10 relative">
+        <div className="absolute -top-10 -left-10 w-64 h-64 bg-primary/5 blur-[100px] pointer-events-none" />
+        <h1 className="text-4xl font-black text-white mb-2 tracking-tight">
+          Welcome back, <span className="bg-linear-to-r from-primary to-accent bg-clip-text text-transparent italic">{profile?.display_name || 'Maestro'}</span>!
+        </h1>
+        <p className="text-gray-400 font-medium">
+          {profile?.role === 'producer' 
+            ? 'Your sonic empire is growing. Track your legacy below.'
+            : 'Your library of elite sounds is ready for your next masterpiece.'
+          }
+        </p>
+      </div>
 
           {/* Stats */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
@@ -144,7 +192,7 @@ export default function DashboardPage() {
               <Link key={index} href={link.href}>
                 <Card hoverable className="p-6 h-full">
                   <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
+                    <div className="w-12 h-12 rounded-xl bg-linear-to-br from-primary to-secondary flex items-center justify-center">
                       <link.icon className="w-6 h-6 text-white" />
                     </div>
                     <div className="flex-1">

@@ -135,7 +135,7 @@ export function AudioPlayer() {
         <div className="flex items-center gap-4">
           {/* Beat Info */}
           <div className="flex items-center gap-3 min-w-0 w-64">
-            <div className="w-12 h-12 rounded-lg overflow-hidden flex-shrink-0 relative">
+            <div className="w-12 h-12 rounded-lg overflow-hidden shrink-0 relative">
               {currentBeat.artwork_url ? (
                 <Image 
                   src={currentBeat.artwork_url} 
@@ -144,7 +144,7 @@ export function AudioPlayer() {
                   className="object-cover"
                 />
               ) : (
-                <div className="w-full h-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-xl">
+                <div className="w-full h-full bg-linear-to-br from-primary to-secondary flex items-center justify-center text-xl">
                   🎵
                 </div>
               )}
@@ -175,7 +175,13 @@ export function AudioPlayer() {
                 <SkipBack className="w-5 h-5" />
               </button>
               <button
-                onClick={() => isPlaying ? pause() : play()}
+                onClick={() => {
+                  if (wavesurferRef.current) {
+                    const ctx = (wavesurferRef.current as any).backend?.getAudioContext?.();
+                    if (ctx?.state === 'suspended') ctx.resume();
+                  }
+                  isPlaying ? pause() : play();
+                }}
                 className="w-10 h-10 rounded-full bg-white flex items-center justify-center transition-transform hover:scale-105"
               >
                 {isPlaying ? (

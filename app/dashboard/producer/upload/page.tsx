@@ -42,6 +42,7 @@ export default function UploadPage() {
   // Form state
   const [audioFiles, setAudioFiles] = useState<File[]>([]);
   const [artworkFile, setArtworkFile] = useState<File | null>(null);
+  const [projectFile, setProjectFile] = useState<File | null>(null); // New state for ZIP/Stems
   
   // Single beat metadata (for single upload)
   const [title, setTitle] = useState('');
@@ -70,7 +71,9 @@ export default function UploadPage() {
   const handleAudioDrop = (e: React.DragEvent) => {
     e.preventDefault();
     const files = Array.from(e.dataTransfer.files).filter(
-      file => file.type.includes('audio') || file.name.endsWith('.wav') || file.name.endsWith('.mp3')
+      file => file.type.includes('audio') || 
+              file.name.toLowerCase().endsWith('.wav') || 
+              file.name.toLowerCase().endsWith('.mp3')
     );
     if (files.length > 0) {
       setAudioFiles(prev => [...prev, ...files]);
@@ -241,6 +244,38 @@ export default function UploadPage() {
       }
       const audio_url = `${process.env.NEXT_PUBLIC_R2_PUBLIC_URL}/${audioKey}`;
 
+      // 2.5. Upload Project ZIP if exists (Issue 2)
+      let stems_url = null;
+      if (projectFile) {
+        const zipRes = await fetch('/api/upload/presigned-url', {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${token}` },
+          body: JSON.stringify({ filename: projectFile.name, contentType: projectFile.type || 'application/zip', type: 'stems' }),
+        });
+        
+        if (!zipRes.ok) {
+          const errorData = await zipRes.json();
+          throw new Error(`Failed to get presigned URL for project file: ${errorData.error || zipRes.statusText}`);
+        }
+
+        const { uploadUrl, key: zipKey } = await zipRes.json();
+        
+        try {
+          await fetch(uploadUrl, { 
+            method: 'PUT', 
+            body: projectFile, 
+            headers: { 'Content-Type': projectFile.type || 'application/zip' } 
+          });
+        } catch (err: any) {
+          if (err.name === 'TypeError') {
+            throw new Error('Project file upload failed (CORS Error).');
+          }
+          throw err;
+        }
+        
+        stems_url = `${process.env.NEXT_PUBLIC_R2_PUBLIC_URL}/${zipKey}`;
+      }
+
       // 3. Create record in Supabase
       const createRes = await fetch('/api/beats/create', {
         method: 'POST',
@@ -257,16 +292,34 @@ export default function UploadPage() {
           key,
           mood_tags: selectedMoods,
           audio_url,
-          preview_url: audio_url, // For demo purposes using same URL
+          preview_url: audio_url,
           artwork_url,
+          stems_url,
           licenses
         }),
       });
 
       if (!createRes.ok) {
-        const errorData = await createRes.json();
+        const errorData = await createRes.ok ? await createRes.json() : { error: createRes.statusText };
         console.error('Beat creation failed:', errorData);
         throw new Error(`Failed to create beat record: ${errorData.error || createRes.statusText}`);
+      }
+
+      const { beatId: confirmedBeatId } = await createRes.json();
+
+      // 4. Trigger Audio Analysis (Motion Engine)
+      try {
+        fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/analyze-audio`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+            'apikey': process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
+          },
+          body: JSON.stringify({ beat_id: confirmedBeatId }),
+        }).catch(err => console.error('Silent failure in audio analysis trigger:', err));
+      } catch (e) {
+        console.error('Failed to trigger audio analysis:', e);
       }
       
       toast.success('Beat Published Successfully!');
@@ -409,7 +462,7 @@ export default function UploadPage() {
                           + Add more files
                           <input
                             type="file"
-                            accept="audio/*"
+                            accept=".mp3,.wav,audio/*"
                             multiple
                             className="hidden"
                             onChange={(e) => {
@@ -437,7 +490,7 @@ export default function UploadPage() {
                         </span>
                         <input
                           type="file"
-                          accept="audio/*"
+                          accept=".mp3,.wav,audio/*"
                           multiple
                           className="hidden"
                           onChange={(e) => {
@@ -513,6 +566,38 @@ export default function UploadPage() {
                       />
                     </label>
                     <p className="text-xs text-gray-400 mt-2">500x500 recommended</p>
+                  </div>
+                </div>
+
+                {/* ZIP/Stems Upload (Issue 2) */}
+                <h2 className="text-xl font-semibold text-white pt-4">Project Files / Stems (Optional)</h2>
+                <div className="p-6 border-2 border-dashed border-dark-600 rounded-xl hover:border-primary transition-colors bg-dark-900/50">
+                  <div className="flex items-center gap-6">
+                    <div className="w-16 h-16 rounded-xl bg-dark-800 flex items-center justify-center shrink-0 border border-white/5">
+                      <Layers className={`w-8 h-8 ${projectFile ? 'text-primary' : 'text-gray-500'}`} />
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-white font-bold mb-1">{projectFile ? projectFile.name : 'Upload ZIP or Stems'}</p>
+                      <p className="text-xs text-gray-400 mb-3">Include trackouts, MIDI, or FLP for Exclusive licenses.</p>
+                      <label className="cursor-pointer inline-flex items-center gap-2 px-3 py-1.5 bg-dark-800 hover:bg-dark-700 text-white text-xs font-bold rounded-lg border border-white/10 transition-colors">
+                        <Upload className="w-3 h-3" />
+                        {projectFile ? 'Change File' : 'Browse Files'}
+                        <input
+                          type="file"
+                          accept=".zip,.rar,.7z"
+                          className="hidden"
+                          onChange={(e) => e.target.files?.[0] && setProjectFile(e.target.files[0])}
+                        />
+                      </label>
+                      {projectFile && (
+                        <button 
+                          onClick={() => setProjectFile(null)}
+                          className="ml-4 text-xs text-red-500 hover:underline"
+                        >
+                          Remove
+                        </button>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>

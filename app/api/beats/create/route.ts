@@ -16,6 +16,7 @@ export async function POST(request: NextRequest) {
       audio_url,
       preview_url,
       artwork_url,
+      stems_url,
       licenses 
     } = body;
 
@@ -40,6 +41,7 @@ export async function POST(request: NextRequest) {
       audio_url,
       preview_url,
       artwork_url,
+      stems_url,
       status: 'published'
     };
 
