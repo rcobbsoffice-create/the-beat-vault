@@ -1,214 +1,164 @@
-import Link from 'next/link';
+'use client';
+
+import { useState, useEffect } from 'react';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
-import { Button } from '@/components/ui/Button';
-import { 
-  Music, 
-  Zap, 
-  Shield, 
-  TrendingUp,
-  Play,
-  ArrowRight,
-  Sparkles
-} from 'lucide-react';
+import { FeaturedArtistHero } from '@/components/magazine/FeaturedArtistHero';
+import { TrendingArticles } from '@/components/magazine/TrendingArticles';
+import { NewReleasesCarousel } from '@/components/magazine/NewReleasesCarousel';
+import { ChartsOverview } from '@/components/magazine/ChartsOverview';
+import { magazineService } from '@/lib/supabase/magazine';
 
-const features = [
-  {
-    icon: Zap,
-    title: 'Instant Downloads',
-    description: 'Get your beats immediately after purchase. No waiting, no hassle.',
-  },
-  {
-    icon: Shield,
-    title: 'Licensed & Legal',
-    description: 'All beats come with proper licensing. Focus on creating, not worrying.',
-  },
-  {
-    icon: TrendingUp,
-    title: 'Top Producers',
-    description: 'Access beats from verified, professional producers worldwide.',
-  },
-];
+// Fallback Mock Data
+const MOCK_FEATURED_ARTIST = {
+  id: 'metro-boomin',
+  name: 'Metro Boomin',
+  image: 'https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=2070&auto=format&fit=crop', // Verified working cool dark studio photo
+  genre: 'Trap / Hip Hop',
+  quote: 'If Young Metro don\'t trust you, I\'m gon\' shoot you.'
+};
 
-const genres = [
-  { name: 'Hip Hop', count: 2400, gradient: 'from-purple-600 to-blue-600' },
-  { name: 'Trap', count: 1800, gradient: 'from-red-600 to-orange-500' },
-  { name: 'R&B', count: 1200, gradient: 'from-pink-600 to-purple-600' },
-  { name: 'Pop', count: 900, gradient: 'from-cyan-500 to-blue-500' },
-  { name: 'Lo-Fi', count: 750, gradient: 'from-green-600 to-teal-500' },
-  { name: 'Drill', count: 600, gradient: 'from-gray-700 to-gray-900' },
+const MOCK_RELEASES = [
+  {
+    id: 'r1',
+    title: 'Sonic Boom',
+    artist: 'Voltz',
+    coverImage: 'https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?q=80&w=2070&auto=format&fit=crop',
+    type: 'Single' as const
+  },
+  {
+    id: 'r2',
+    title: 'After Hours',
+    artist: 'Lumina',
+    coverImage: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?q=80&w=2070&auto=format&fit=crop',
+    type: 'Album' as const
+  },
+  {
+    id: 'r3',
+    title: 'Midnight Drive',
+    artist: 'Retro Kid',
+    coverImage: 'https://images.unsplash.com/photo-1557683311-eac922347aa1?q=80&w=2070&auto=format&fit=crop', // Verified working
+    type: 'EP' as const
+  }
 ];
 
 export default function HomePage() {
+  const [articles, setArticles] = useState<any[]>([]);
+  const [editorsPicks, setEditorsPicks] = useState<any[]>([]);
+  const [charts, setCharts] = useState<any[]>([]);
+  const [featuredArtist, setFeaturedArtist] = useState(MOCK_FEATURED_ARTIST);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const [fetchedArticles, fetchedPicks, fetchedCharts] = await Promise.all([
+          magazineService.getArticles(4),
+          magazineService.getArticles(3, false, "Editor's Picks"),
+          magazineService.getCharts('top_100', 6)
+        ]);
+        
+        if (fetchedArticles && fetchedArticles.length > 0) {
+          setArticles(fetchedArticles.map(a => ({
+            ...a,
+            author: a.profiles?.display_name || 'Staff',
+            image: a.image_url,
+            date: new Date(a.published_at).toLocaleDateString()
+          })));
+        }
+
+        if (fetchedPicks && fetchedPicks.length > 0) {
+          setEditorsPicks(fetchedPicks.map(a => ({
+            ...a,
+            author: a.profiles?.display_name || 'Staff',
+            image: a.image_url,
+            date: new Date(a.published_at).toLocaleDateString()
+          })));
+        }
+
+        if (fetchedCharts && fetchedCharts.length > 0) {
+          setCharts(fetchedCharts.map(c => ({
+            rank: c.rank,
+            lastRank: c.last_rank,
+            title: c.title,
+            artist: c.artist_name,
+            image: c.image_url
+          })));
+        }
+      } catch (error: any) {
+        console.error('Error fetching magazine data full error:', JSON.stringify(error, null, 2));
+        console.error('Error details:', {
+          message: error.message,
+          code: error.code,
+          details: error.details,
+          hint: error.hint,
+        });
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchData();
+  }, []);
+
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-black">
       <Header />
       
       <main className="flex-1">
-        {/* Hero Section */}
-        <section className="relative min-h-[90vh] flex items-center justify-center overflow-hidden pt-16">
-          {/* Background */}
-          <div className="absolute inset-0 bg-dark-950">
-            <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-secondary/10" />
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-primary/5 rounded-full blur-3xl" />
+        {/* Magazine Cover Hero */}
+        <FeaturedArtistHero artist={featuredArtist} />
+
+        {/* Trending Stories Board */}
+        {loading ? (
+          <div className="py-24 bg-white text-black text-center font-bold uppercase tracking-widest animate-pulse">
+            Loading Stories...
           </div>
-
-          <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            {/* Badge */}
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-dark-800 border border-dark-600 mb-8">
-              <span className="w-2 h-2 rounded-full bg-success animate-pulse" />
-              <span className="text-sm text-gray-300">1000+ New Beats Added This Week</span>
-            </div>
-
-            {/* Title */}
-            <h1 className="text-5xl sm:text-6xl lg:text-7xl font-black mb-6 tracking-tight leading-tight">
-              <span className="text-white">Secure Your </span>
-              <span className="bg-gradient-to-r from-primary via-secondary to-primary bg-[length:200%_auto] animate-gradient-x bg-clip-text text-transparent italic">Sonic Legacy</span>
-            </h1>
-
-            <p className="text-xl text-gray-400 max-w-2xl mx-auto mb-10 leading-relaxed">
-              The premier rights-locked platform for elite music creation. 
-              Monetize your sonic assets with automated split contracts and instant licensing.
-            </p>
-
-            {/* CTA Buttons */}
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <Link href="/marketplace">
-                <Button size="lg" className="gap-2">
-                  <Play className="w-5 h-5" fill="currentColor" />
-                  Browse Beats
-                </Button>
-              </Link>
-              <Link href="/signup?role=producer">
-                <Button variant="outline" size="lg" className="gap-2">
-                  Start Selling
-                  <ArrowRight className="w-5 h-5" />
-                </Button>
-              </Link>
-            </div>
-
-            {/* Stats */}
-            <div className="flex items-center justify-center gap-12 mt-16 animate-fade-in" style={{ animationDelay: '0.2s' }}>
-              <div className="text-center">
-                <p className="text-3xl font-bold text-white">10K+</p>
-                <p className="text-gray-400">Beats</p>
-              </div>
-              <div className="w-px h-12 bg-dark-700" />
-              <div className="text-center">
-                <p className="text-3xl font-bold text-white">500+</p>
-                <p className="text-gray-400">Producers</p>
-              </div>
-              <div className="w-px h-12 bg-dark-700" />
-              <div className="text-center">
-                <p className="text-3xl font-bold text-white">50K+</p>
-                <p className="text-gray-400">Artists</p>
-              </div>
-            </div>
+        ) : articles.length > 0 ? (
+          <TrendingArticles articles={articles} />
+        ) : (
+          <div className="py-24 bg-white text-black text-center font-medium uppercase tracking-widest opacity-50">
+            No stories featured this week.
           </div>
-        </section>
+        )}
 
-        {/* Features Section */}
-        <section className="py-24 bg-dark-900 relative">
-            <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-linear-to-br from-emerald-500/10 to-transparent blur-[120px] rounded-full mix-blend-screen animate-blob" />
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-            <div className="text-center mb-16">
-              <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">
-                Why Choose TrackFlow
-              </h2>
-              <p className="text-gray-400 max-w-2xl mx-auto">
-                The complete platform for buying and selling beats with everything you need to succeed.
-              </p>
-            </div>
+        {/* New Releases Carousel */}
+        <NewReleasesCarousel releases={MOCK_RELEASES} />
 
-            <div className="grid md:grid-cols-3 gap-8">
-              {features.map((feature, index) => (
-                <div
-                  key={index}
-                  className="group p-8 bg-dark-800/50 backdrop-blur-sm border border-dark-700 rounded-2xl transition-all duration-300 hover:border-primary/50 hover:bg-dark-800 hover:-translate-y-1 hover:shadow-2xl hover:shadow-primary/10"
-                >
-                  <div className="w-14 h-14 rounded-2xl bg-linear-to-br from-primary/20 to-secondary/20 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300 shadow-lg">
-                    <feature.icon className="w-7 h-7 text-white" />
-                  </div>
-                  <h3 className="text-xl font-semibold text-white mb-3">{feature.title}</h3>
-                  <p className="text-gray-400 leading-relaxed">{feature.description}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
+        {/* Charts Section */}
+        {charts.length > 0 && <ChartsOverview entries={charts} />}
 
-        {/* Genres Section */}
-        <section className="py-24 bg-dark-950 relative overflow-hidden">
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[500px] bg-primary/5 rounded-full blur-[100px] pointer-events-none" />
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-            <div className="flex items-center justify-between mb-12">
-              <div>
-                <h2 className="text-3xl sm:text-4xl font-bold text-white mb-2">
-                  Explore by Genre
-                </h2>
-                <p className="text-gray-400">
-                  Find beats that match your style
-                </p>
-              </div>
-              <Link href="/marketplace">
-                <Button variant="ghost" className="gap-2 hover:text-primary">
-                  View All
-                  <ArrowRight className="w-4 h-4" />
-                </Button>
-              </Link>
-            </div>
-
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
-              {genres.map((genre, index) => (
-                <Link
-                  key={index}
-                  href={`/marketplace?genre=${genre.name.toLowerCase()}`}
-                  className="group relative aspect-square rounded-2xl overflow-hidden border border-dark-700/50 hover:border-primary/50 transition-colors"
-                >
-                  <div className={`absolute inset-0 bg-gradient-to-br ${genre.gradient} opacity-80 group-hover:opacity-100 transition-opacity duration-500`} />
-                  <div className="absolute inset-0 bg-dark-950/20 group-hover:bg-transparent transition-colors duration-300" />
-                  <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-4 transform group-hover:scale-105 transition-transform duration-300">
-                    <p className="text-lg font-bold text-white drop-shadow-lg">{genre.name}</p>
-                    <p className="text-xs font-medium text-white/90 bg-black/20 px-2 py-0.5 rounded-full mt-1 backdrop-blur-sm">{genre.count}</p>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* CTA Section */}
-        <section className="py-32 pb-48 relative overflow-hidden">
-          <div className="absolute inset-0 bg-linear-to-b from-black via-dark-900 to-black z-0" />
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-primary/10 via-transparent to-transparent opacity-50" />
-          <div className="absolute inset-0 border-y border-white/5" />
-          
-          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
-            <span className="inline-block text-transparent bg-clip-text bg-linear-to-r from-emerald-400 to-cyan-400 font-extrabold animate-pulse bg-size-[200%_auto] mb-8">
-              <Sparkles className="w-12 h-12 inline-block mr-2" />
-              TrackFlow
-            </span>
-            
-            <h2 className="text-4xl sm:text-5xl font-bold mb-6">
-              <span className="text-white">Ready to Start </span>
-              <span className="inline-block text-transparent bg-clip-text bg-linear-to-r from-emerald-400 to-cyan-400">Your Journey?</span>
+        {/* Editor's Picks / Featured On Grid */}
+        <section className="py-24 bg-white text-black">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 className="text-4xl font-black uppercase tracking-tighter mb-12 border-b-2 border-black pb-4">
+              Editor's Picks
             </h2>
-            
-            <p className="text-xl text-gray-400 mb-10 max-w-2xl mx-auto">
-              Join thousands of artists and producers already using TrackFlow to power their sonic careers.
-            </p>
-            
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
-              <Link href="/signup">
-                <Button size="lg" className="h-14 px-8 text-lg shadow-xl shadow-primary/20 hover:shadow-primary/40 transition-all hover:-translate-y-1">
-                  Create Free Account
-                </Button>
-              </Link>
-              <Link href="/marketplace">
-                <Button variant="outline" size="lg" className="h-14 px-8 text-lg border-dark-600 hover:bg-dark-800">
-                  Browse Beats
-                </Button>
-              </Link>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
+              {editorsPicks.length > 0 ? editorsPicks.map((pick) => (
+                <div key={pick.id} className="group cursor-pointer">
+                  <div className="relative aspect-square bg-gray-100 mb-6 overflow-hidden">
+                    <img 
+                      src={pick.image} 
+                      className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700"
+                      alt={pick.title}
+                    />
+                  </div>
+                  <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-primary mb-2">{pick.category}</p>
+                  <h3 className="text-2xl font-black uppercase mb-4 group-hover:underline decoration-2">{pick.title}</h3>
+                  <button className="text-sm font-bold border-b border-black pb-1 hover:text-primary hover:border-primary transition-colors">
+                    READ STORY
+                  </button>
+                </div>
+              )) : (
+                [1, 2, 3].map((i) => (
+                  <div key={i} className="group animate-pulse">
+                    <div className="relative aspect-square bg-gray-100 mb-6" />
+                    <div className="h-4 bg-gray-100 w-1/4 mb-4" />
+                    <div className="h-8 bg-gray-100 w-3/4 mb-4" />
+                  </div>
+                ))
+              )}
             </div>
           </div>
         </section>

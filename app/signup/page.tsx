@@ -46,7 +46,7 @@ function SignupContent() {
         <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
           <Music className="w-6 h-6 text-white" />
         </div>
-        <span className="text-xl font-bold gradient-text">TrackFlow</span>
+        <span className="text-xl font-bold gradient-text">ArtistFlow</span>
       </div>
 
       <h1 className="text-2xl font-bold text-white text-center mb-2">

@@ -668,7 +668,7 @@ export default function UploadPage() {
                         <Badge variant="success" className="bg-success text-white border-success">Sync Ready</Badge>
                       </div>
                       <p className="text-sm text-gray-400 mt-1">
-                        Make this track available for film, TV, and advertising licensing via TrackFlow API.
+                        Make this track available for film, TV, and advertising licensing via ArtistFlow API.
                       </p>
                     </div>
                   </div>

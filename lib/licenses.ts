@@ -57,11 +57,11 @@ The Producer hereby grants the Artist a ${licenseType === 'exclusive' ? 'exclusi
 
 ${licenseType === 'sync' ? `
 ### 3.1 SYNC ADDENDUM
-This license includes a TrackFlow Programmatic Sync Authorization, allowing the Track to be used in Film, TV, and Advertising placements via the TrackFlow API infrastructure.
+This license includes a ArtistFlow Programmatic Sync Authorization, allowing the Track to be used in Film, TV, and Advertising placements via the ArtistFlow API infrastructure.
 ` : ''}
 
 ## 4. ROYALTY SPLITS
-Unless otherwise specified, following standard TrackFlow rights-locked protocols:
+Unless otherwise specified, following standard ArtistFlow rights-locked protocols:
 - **Mechanicals:** 50/50 split between Producer and Artist.
 - **Sync Fees:** 50/50 split (if applicable).
 - **Public Performance:** Standard PRO registration required.
@@ -70,6 +70,6 @@ Unless otherwise specified, following standard TrackFlow rights-locked protocols
 Universal (all platforms and regions).
 
 ---
-*Generated via TrackFlow - Unified Music Infrastructure.*
+*Generated via ArtistFlow - Unified Music Infrastructure.*
   `.trim();
 }

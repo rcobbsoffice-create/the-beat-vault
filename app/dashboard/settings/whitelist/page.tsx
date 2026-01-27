@@ -88,7 +88,7 @@ export default function WhitelistDashboard() {
         </div>
         <p className="text-[10px] text-gray-500 mt-4 leading-relaxed flex items-start gap-2">
           <HelpCircle className="w-3 h-3 shrink-0" />
-          Whitelisting ensures that TrackFlow AI recognizes your channel as a licensed user, 
+          Whitelisting ensures that ArtistFlow AI recognizes your channel as a licensed user, 
           preventing digital fingerprinting engines from flagging your content. Clearance can take up to 24-48 hours.
         </p>
       </Card>

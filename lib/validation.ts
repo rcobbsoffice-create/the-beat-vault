@@ -1,5 +1,5 @@
 /**
- * TrackFlow Metadata Validation Engine
+ * ArtistFlow Metadata Validation Engine
  * Ensures industry-standard data quality for music distribution
  */
 

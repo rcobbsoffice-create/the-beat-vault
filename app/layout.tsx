@@ -11,9 +11,9 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "TrackFlow - Elite Beat Marketplace & Rights Licensing",
+  title: "ArtistFlow - Elite Beat Marketplace & Rights Licensing",
   description: "The premier marketplace for rights-locked music assets. Secure distribution, automated split contracts, and instant sync licensing.",
-  keywords: ["beats", "music marketplace", "royalty splits", "sync licensing", "producers", "sonic legacy", "TrackFlow"],
+  keywords: ["beats", "music marketplace", "royalty splits", "sync licensing", "producers", "sonic legacy", "ArtistFlow"],
 };
 
 export default function RootLayout({

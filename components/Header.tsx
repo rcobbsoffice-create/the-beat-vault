@@ -22,12 +22,11 @@ export function Header() {
   return (
     <header className="fixed top-0 left-0 right-0 z-50 glass">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-[300px]">
-          {/* Logo */}
+        <div className="flex items-center justify-between h-20">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2">
-            <div className="relative w-[250px] h-[250px] flex items-center justify-center">
-              <img src="/trackflow-logo.png" alt="TrackFlow" className="w-full h-full object-contain" />
+            <div className="relative w-[120px] h-[40px] flex items-center justify-center">
+              <img src="/artistflow-logo.png" alt="ArtistFlow" className="w-full h-full object-contain" />
             </div>
           </Link>
 

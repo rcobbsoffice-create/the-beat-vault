@@ -1,5 +1,5 @@
 /**
- * TrackFlow AI Sync Scoring Engine
+ * ArtistFlow AI Sync Scoring Engine
  * Analyzes track metadata and structure to determine sync licensing potential.
  */
 

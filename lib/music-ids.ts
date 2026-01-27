@@ -1,5 +1,5 @@
 /**
- * TrackFlow Music ID Utilities
+ * ArtistFlow Music ID Utilities
  * Handles ISRC and UPC generation/validation
  */
 
@@ -30,7 +30,7 @@ export function validateISRC(isrc: string): boolean {
  * Format: 12-digit numeric
  */
 export function generateUPC(): string {
-  // TrackFlow prefix could be 190 (common for digital music)
+  // ArtistFlow prefix could be 190 (common for digital music)
   const prefix = '190';
   const rest = Math.floor(Math.random() * 1000000000).toString().padStart(9, '0');
   return `${prefix}${rest}`;
