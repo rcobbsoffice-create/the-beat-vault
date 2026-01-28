@@ -142,13 +142,20 @@ export function Header() {
             )}
           </div>
 
-          {/* Mobile Menu Button */}
-          <button
-            className="md:hidden p-2 text-gray-300 hover:text-white"
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          >
-            {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-          </button>
+          {/* Mobile Actions */}
+          <div className="flex md:hidden items-center gap-2">
+            {!user && !loading && (
+              <Link href="/login">
+                <Button variant="ghost" size="sm" className="px-3">Log In</Button>
+              </Link>
+            )}
+            <button
+              className="p-2 text-gray-300 hover:text-white"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            >
+              {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            </button>
+          </div>
         </div>
       </div>
 
