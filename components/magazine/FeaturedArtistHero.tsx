@@ -15,9 +15,12 @@ interface FeaturedArtistHeroProps {
   };
 }
 
+import { SonicPulse } from './SonicPulse';
+
 export function FeaturedArtistHero({ artist }: FeaturedArtistHeroProps) {
   return (
     <section className="relative h-[85vh] min-h-[600px] w-full overflow-hidden bg-black">
+      <SonicPulse />
       {/* Background Image with Gradient Overlay */}
       <div 
         className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat transition-opacity duration-1000"
