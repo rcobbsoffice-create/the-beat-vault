@@ -5,9 +5,25 @@ import { useEffect, useState, useRef } from 'react';
 
 export function SonicPulse() {
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+  const [mounted, setMounted] = useState(false);
+  const [particles, setParticles] = useState<any[]>([]);
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    setMounted(true);
+    
+    // Generate stable random particles on client side only
+    const newParticles = [...Array(12)].map((_, i) => ({
+      id: i,
+      x: Math.random() * 100,
+      y: Math.random() * 100,
+      scale: Math.random() * 1.5 + 0.5,
+      duration: 8 + Math.random() * 10,
+      delay: Math.random() * 5,
+      driftX: Math.random() > 0.5 ? 5 : -5
+    }));
+    setParticles(newParticles);
+
     const handleMouseMove = (e: MouseEvent) => {
       if (!containerRef.current) return;
       const { left, top, width, height } = containerRef.current.getBoundingClientRect();
@@ -27,8 +43,10 @@ export function SonicPulse() {
   const moveX = useTransform(springX, [-0.5, 0.5], [-30, 30]);
   const moveY = useTransform(springY, [-0.5, 0.5], [-30, 30]);
 
+  if (!mounted) return null;
+
   return (
-    <div ref={containerRef} className="absolute inset-0 z-[1] overflow-hidden pointer-events-none">
+    <div ref={containerRef} className="absolute inset-0 z-1 overflow-hidden pointer-events-none">
       {/* Animated Waveforms */}
       <div className="absolute inset-0 opacity-40">
         <svg
@@ -85,25 +103,25 @@ export function SonicPulse() {
       </div>
 
       {/* Genetic Particles */}
-      {[...Array(12)].map((_, i) => (
+      {particles.map((p, i) => (
         <motion.div
-          key={i}
+          key={p.id}
           className="absolute w-2 h-2 rounded-full bg-primary/40 blur-sm flex items-center justify-center"
           initial={{
-            x: Math.random() * 100 + "%",
-            y: Math.random() * 100 + "%",
-            scale: Math.random() * 1.5 + 0.5,
+            x: p.x + "%",
+            y: p.y + "%",
+            scale: p.scale,
           }}
           animate={{
             y: ["0%", "-20%", "0%"],
-            x: ["0%", (Math.random() > 0.5 ? 5 : -5) + "%", "0%"],
+            x: ["0%", p.driftX + "%", "0%"],
             opacity: [0.2, 0.6, 0.2],
           }}
           transition={{
-            duration: 8 + Math.random() * 10,
+            duration: p.duration,
             repeat: Infinity,
             ease: "easeInOut",
-            delay: Math.random() * 5,
+            delay: p.delay,
           }}
           style={{
             x: useTransform(springX, [-0.5, 0.5], [-(10 + i * 5), 10 + i * 5]),
