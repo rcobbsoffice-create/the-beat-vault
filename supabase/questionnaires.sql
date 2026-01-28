@@ -11,21 +11,27 @@ CREATE TABLE IF NOT EXISTS artist_questionnaires (
 -- RLS
 ALTER TABLE artist_questionnaires ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Users can manage own questionnaires" ON artist_questionnaires FOR ALL USING (
-    auth.uid () = artist_id
-);
+DROP POLICY IF EXISTS "Users can manage own questionnaires" ON artist_questionnaires;
 
-CREATE POLICY "Admins and Editors view all questionnaires" ON artist_questionnaires FOR SELECT USING (
-    EXISTS (
-        SELECT 1
-        FROM profiles
-        WHERE
-            profiles.id = auth.uid ()
-            AND profiles.role IN ('admin', 'editor')
-    )
-);
+CREATE POLICY "Users can manage own questionnaires" ON artist_questionnaires FOR ALL USING (auth.uid () = artist_id);
 
-CREATE POLICY "Admins and Editors update questionnaires" ON artist_questionnaires FOR UPDATE USING (
+DROP POLICY IF EXISTS "Admins and Editors view all questionnaires" ON artist_questionnaires;
+
+CREATE POLICY "Admins and Editors view all questionnaires" ON artist_questionnaires FOR
+SELECT USING (
+        EXISTS (
+            SELECT 1
+            FROM profiles
+            WHERE
+                profiles.id = auth.uid ()
+                AND profiles.role IN ('admin', 'editor')
+        )
+    );
+
+DROP POLICY IF EXISTS "Admins and Editors update questionnaires" ON artist_questionnaires;
+
+CREATE POLICY "Admins and Editors update questionnaires" ON artist_questionnaires FOR
+UPDATE USING (
     EXISTS (
         SELECT 1
         FROM profiles

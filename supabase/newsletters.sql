@@ -12,6 +12,8 @@ CREATE TABLE IF NOT EXISTS newsletters (
 -- RLS
 ALTER TABLE newsletters ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Admins manage newsletters" ON newsletters;
+
 CREATE POLICY "Admins manage newsletters" ON newsletters FOR ALL USING (
     EXISTS (
         SELECT 1

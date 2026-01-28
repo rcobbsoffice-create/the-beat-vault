@@ -14,6 +14,8 @@ CREATE TABLE IF NOT EXISTS distribution_data (
 -- RLS
 ALTER TABLE distribution_data ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Admins view all distribution data" ON distribution_data;
+
 CREATE POLICY "Admins view all distribution data" ON distribution_data FOR
 SELECT USING (
         EXISTS (
@@ -24,6 +26,8 @@ SELECT USING (
                 AND profiles.role = 'admin'
         )
     );
+
+DROP POLICY IF EXISTS "Artists view own distribution data" ON distribution_data;
 
 CREATE POLICY "Artists view own distribution data" ON distribution_data FOR
 SELECT USING (
