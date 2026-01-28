@@ -80,7 +80,7 @@ ${responses.musical_journey}
 When asked about their process, ${artistName} shared a profound insight into the studio: "${responses.creative_process}". This dedication to craft is what sets them apart in today's landscape.
 
 ## Influences and Visions
-Drawing from ${responses.major_influences}, the sound is a curated blend of history and future. "My ultimate message is ${responses.message_to_fans}," ${artistName} tells TrackFlow.
+Drawing from ${responses.major_influences}, the sound is a curated blend of history and future. "My ultimate message is ${responses.message_to_fans}," ${artistName} tells AudioGenes.
 
 ## What's Next
 Look out for ${responses.upcoming_projects} as ${artistName} continues to redefine the boundaries of ${submission.artist?.genre || 'electronic'} music.

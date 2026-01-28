@@ -180,7 +180,7 @@ export default function ArtistQuestionnairePage() {
       </Card>
 
       <p className="text-center mt-8 text-[10px] font-bold text-gray-600 uppercase tracking-widest">
-        Integrated Editorial System v2.1 • TrackFlow Exclusive
+        Integrated Editorial System v2.1 • AudioGenes Exclusive
       </p>
     </div>
   );

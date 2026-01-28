@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { format } from 'date-fns';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
@@ -62,7 +63,7 @@ export default function AdminNewslettersPage() {
       return;
     }
     setAiLoading(true);
-    const toastId = toast.loading('TrackFlow AI is drafting your campaign...');
+    const toastId = toast.loading('AudioGenes AI is drafting your campaign...');
     
     try {
       // Simulate AI generation
@@ -71,7 +72,7 @@ export default function AdminNewslettersPage() {
       const mockedContent = `
 # New Opportunities: ${form.subject}
 
-Hello TrackFlow Fam,
+Hello AudioGenes Fam,
 
 We're excited to announce some major updates regarding ${form.subject}. 
 Our platform continues to evolve, and we want you at the forefront of this sonic revolution.
@@ -84,7 +85,7 @@ Our platform continues to evolve, and we want you at the forefront of this sonic
 Don't miss out on the future of music management.
 
 Best,
-The TrackFlow Editorial Team
+The AudioGenes Editorial Team
       `;
       
       setForm({ ...form, content: mockedContent });
@@ -180,7 +181,7 @@ The TrackFlow Editorial Team
               <div className="space-y-4 pt-8">
                 <label className="text-[10px] font-black uppercase tracking-widest text-gray-500">Newsletter Body (Markdown Supported)</label>
                 <textarea 
-                  className="w-full h-96 bg-dark-950 border border-white/10 rounded-[2rem] p-8 text-lg font-medium text-gray-400 placeholder:text-dark-700 focus:ring-1 focus:ring-primary leading-relaxed shadow-inner"
+                  className="w-full h-96 bg-dark-950 border border-white/10 rounded-4xl p-8 text-lg font-medium text-gray-400 placeholder:text-dark-700 focus:ring-1 focus:ring-primary leading-relaxed shadow-inner"
                   placeholder="Draft your story or let AI do the work..."
                   value={form.content}
                   onChange={(e) => setForm({...form, content: e.target.value})}
