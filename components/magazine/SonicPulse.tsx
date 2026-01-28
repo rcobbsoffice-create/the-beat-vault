@@ -3,6 +3,42 @@
 import { motion, useScroll, useTransform, useSpring } from 'framer-motion';
 import { useEffect, useState, useRef } from 'react';
 
+// Sub-component for individual particles to handle their own hooks
+function GeneticParticle({ p, i, springX, springY }: { p: any, i: number, springX: any, springY: any }) {
+  const xTransform = useTransform(springX, [-0.5, 0.5], [-(10 + i * 5), 10 + i * 5]);
+  const yTransform = useTransform(springY, [-0.5, 0.5], [-(10 + i * 5), 10 + i * 5]);
+
+  return (
+    <motion.div
+      key={p.id}
+      className="absolute w-2 h-2 rounded-full bg-primary/40 blur-sm flex items-center justify-center"
+      initial={{
+        x: p.x + "%",
+        y: p.y + "%",
+        scale: p.scale,
+      }}
+      animate={{
+        y: ["0%", "-20%", "0%"],
+        x: ["0%", p.driftX + "%", "0%"],
+        opacity: [0.2, 0.6, 0.2],
+      }}
+      transition={{
+        duration: p.duration,
+        repeat: Infinity,
+        ease: "easeInOut",
+        delay: p.delay,
+      }}
+      style={{
+        x: xTransform,
+        y: yTransform,
+      }}
+    >
+      {/* Genetic Linkage Line */}
+      <div className="w-[1px] h-12 bg-linear-to-b from-primary/0 via-primary/20 to-primary/0 rotate-45" />
+    </motion.div>
+  );
+}
+
 export function SonicPulse() {
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const [mounted, setMounted] = useState(false);
@@ -42,6 +78,10 @@ export function SonicPulse() {
 
   const moveX = useTransform(springX, [-0.5, 0.5], [-30, 30]);
   const moveY = useTransform(springY, [-0.5, 0.5], [-30, 30]);
+  
+  // Define constant transforms for background paths to avoid hook violation
+  const moveXSlow = useTransform(moveX, (v) => v * -0.5);
+  const moveYSlow = useTransform(moveY, (v) => v * -0.5);
 
   if (!mounted) return null;
 
@@ -73,7 +113,7 @@ export function SonicPulse() {
             fillOpacity="0.15"
           />
           <motion.path
-            style={{ x: useTransform(moveX, (v) => v * -0.5), y: useTransform(moveY, (v) => v * -0.5) }}
+            style={{ x: moveXSlow, y: moveYSlow }}
             animate={{
               d: [
                 "M0 500C360 400 720 600 1080 500C1440 400 1800 600 2160 500V800H0V500Z",
@@ -104,33 +144,13 @@ export function SonicPulse() {
 
       {/* Genetic Particles */}
       {particles.map((p, i) => (
-        <motion.div
-          key={p.id}
-          className="absolute w-2 h-2 rounded-full bg-primary/40 blur-sm flex items-center justify-center"
-          initial={{
-            x: p.x + "%",
-            y: p.y + "%",
-            scale: p.scale,
-          }}
-          animate={{
-            y: ["0%", "-20%", "0%"],
-            x: ["0%", p.driftX + "%", "0%"],
-            opacity: [0.2, 0.6, 0.2],
-          }}
-          transition={{
-            duration: p.duration,
-            repeat: Infinity,
-            ease: "easeInOut",
-            delay: p.delay,
-          }}
-          style={{
-            x: useTransform(springX, [-0.5, 0.5], [-(10 + i * 5), 10 + i * 5]),
-            y: useTransform(springY, [-0.5, 0.5], [-(10 + i * 5), 10 + i * 5]),
-          }}
-        >
-          {/* Genetic Linkage Line */}
-          <div className="w-[1px] h-12 bg-linear-to-b from-primary/0 via-primary/20 to-primary/0 rotate-45" />
-        </motion.div>
+        <GeneticParticle 
+          key={p.id} 
+          p={p} 
+          i={i} 
+          springX={springX} 
+          springY={springY} 
+        />
       ))}
 
       {/* Subtle Noise Texture Overlay */}
