@@ -8,6 +8,8 @@ import { usePlayer } from '@/stores/player';
 import toast from 'react-hot-toast';
 import type { Beat } from '@/types/supabase';
 
+import { sanitizeUrl } from '@/lib/utils/url';
+
 interface BeatCardProps {
   beat: Beat;
   onFavorite?: () => void;
@@ -46,19 +48,19 @@ export function BeatCard({ beat, onFavorite, isFavorited = false }: BeatCardProp
         <div className="relative aspect-square overflow-hidden">
           {beat.artwork_url ? (
             <Image
-              src={beat.artwork_url}
+              src={sanitizeUrl(beat.artwork_url)}
               alt={beat.title}
               fill
               className="object-cover transition-transform duration-500 group-hover:scale-110"
             />
           ) : (
-            <div className="w-full h-full bg-gradient-to-br from-primary/30 to-secondary/30 flex items-center justify-center">
+            <div className="w-full h-full bg-linear-to-br from-primary/30 to-secondary/30 flex items-center justify-center">
               <div className="text-4xl">🎵</div>
             </div>
           )}
           
           {/* Gradient overlay */}
-          <div className="absolute inset-0 bg-gradient-to-t from-dark-950/90 via-transparent to-transparent" />
+          <div className="absolute inset-0 bg-linear-to-t from-dark-950/90 via-transparent to-transparent" />
 
           {/* Play Button */}
           <button

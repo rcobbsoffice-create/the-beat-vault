@@ -27,6 +27,7 @@ import { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
 import { supabase } from '@/lib/supabase/client';
 import { format } from 'date-fns';
+import { usePlayer } from '@/stores/player';
 
 export default function AdminBeatsPage() {
   const [beats, setBeats] = useState<any[]>([]);
@@ -35,6 +36,7 @@ export default function AdminBeatsPage() {
   const [statusFilter, setStatusFilter] = useState('all');
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState<any>(null);
+  const { currentBeat, isPlaying, setCurrentBeat } = usePlayer();
 
   const fetchBeats = async () => {
     try {

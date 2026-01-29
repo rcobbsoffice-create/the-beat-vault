@@ -21,7 +21,26 @@ export default function ArtistPage() {
     async function fetchArtist() {
       if (!id) return;
       try {
-        const data = await magazineService.getArtistExtension(id);
+        // Try fetching by ID (UUID) first
+        let data = await magazineService.getArtistExtension(id);
+        
+        // If not found, try fetching by slug/display_name
+        if (!data) {
+          const profileBySlug = await magazineService.getArtistBySlug(id);
+          if (profileBySlug) {
+            data = {
+              profile_id: profileBySlug.id,
+              bio: profileBySlug.bio || '',
+              location: profileBySlug.location || '',
+              ...profileBySlug.artist_profiles_ext,
+              profiles: {
+                display_name: profileBySlug.display_name,
+                avatar_url: profileBySlug.avatar_url
+              }
+            };
+          }
+        }
+
         if (data) {
           setArtistData(data);
         }
@@ -82,7 +101,7 @@ export default function ArtistPage() {
       
       <main className="flex-1 pb-24">
         {/* Header with Hero Background */}
-        <ArtistProfileHeader artist={artist} />
+        <ArtistProfileHeader artist={artist} />Condition
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Stats Breakdown */}

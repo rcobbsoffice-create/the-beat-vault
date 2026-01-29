@@ -36,8 +36,12 @@ CREATE TRIGGER on_auth_user_created
 -- Profiles: Users can only read/write their own
 ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Users can view own profile" ON profiles;
+
 CREATE POLICY "Users can view own profile" ON profiles FOR
 SELECT USING (auth.uid () = id);
+
+DROP POLICY IF EXISTS "Users can update own profile" ON profiles;
 
 CREATE POLICY "Users can update own profile" ON profiles FOR
 UPDATE USING (auth.uid () = id);
@@ -45,17 +49,25 @@ UPDATE USING (auth.uid () = id);
 -- Producers: Producers can only manage their own producer profile
 ALTER TABLE producers ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Producers can view own record" ON producers;
+
 CREATE POLICY "Producers can view own record" ON producers FOR
 SELECT USING (auth.uid () = profile_id);
 
+DROP POLICY IF EXISTS "Producers can update own record" ON producers;
+
 CREATE POLICY "Producers can update own record" ON producers FOR
 UPDATE USING (auth.uid () = profile_id);
+
+DROP POLICY IF EXISTS "Public can view active producer info" ON producers;
 
 CREATE POLICY "Public can view active producer info" ON producers FOR
 SELECT USING (status = 'active');
 
 -- Merch: Producers manage own products, public can view published
 ALTER TABLE merch_products ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Producers manage own merch" ON merch_products;
 
 CREATE POLICY "Producers manage own merch" ON merch_products FOR ALL USING (
     EXISTS (
@@ -67,11 +79,15 @@ CREATE POLICY "Producers manage own merch" ON merch_products FOR ALL USING (
     )
 );
 
+DROP POLICY IF EXISTS "Public can view published merch" ON merch_products;
+
 CREATE POLICY "Public can view published merch" ON merch_products FOR
 SELECT USING (status = 'published');
 
 -- Orders: Producers manage own orders, customers (if authed) view own via email
 ALTER TABLE orders ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Producers view own orders" ON orders;
 
 CREATE POLICY "Producers view own orders" ON orders FOR
 SELECT USING (

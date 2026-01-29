@@ -34,7 +34,7 @@ function GeneticParticle({ p, i, springX, springY }: { p: any, i: number, spring
       }}
     >
       {/* Genetic Linkage Line */}
-      <div className="w-[1px] h-12 bg-linear-to-b from-primary/0 via-primary/20 to-primary/0 rotate-45" />
+      <div className="w-px h-12 bg-linear-to-b from-primary/0 via-primary/20 to-primary/0 rotate-45" />
     </motion.div>
   );
 }
@@ -97,6 +97,7 @@ export function SonicPulse() {
         >
           <motion.path
             style={{ x: moveX, y: moveY }}
+            initial={{ d: "M0 400C240 320 480 480 720 400C960 320 1200 480 1440 400V800H0V400Z" }}
             animate={{
               d: [
                 "M0 400C240 320 480 480 720 400C960 320 1200 480 1440 400V800H0V400Z",
@@ -114,6 +115,7 @@ export function SonicPulse() {
           />
           <motion.path
             style={{ x: moveXSlow, y: moveYSlow }}
+            initial={{ d: "M0 500C360 400 720 600 1080 500C1440 400 1800 600 2160 500V800H0V500Z" }}
             animate={{
               d: [
                 "M0 500C360 400 720 600 1080 500C1440 400 1800 600 2160 500V800H0V500Z",

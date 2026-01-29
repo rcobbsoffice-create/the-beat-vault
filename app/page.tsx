@@ -50,6 +50,8 @@ export default function HomePage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let isMounted = true;
+
     async function fetchData() {
       try {
         const [fetchedArticles, fetchedPicks, fetchedCharts] = await Promise.all([
@@ -58,6 +60,8 @@ export default function HomePage() {
           magazineService.getCharts('top_100', 6)
         ]);
         
+        if (!isMounted) return;
+
         if (fetchedArticles && fetchedArticles.length > 0) {
           setArticles(fetchedArticles.map(a => ({
             ...a,
@@ -86,6 +90,7 @@ export default function HomePage() {
           })));
         }
       } catch (error: any) {
+        if (!isMounted) return;
         console.error('Error fetching magazine data full error:', JSON.stringify(error, null, 2));
         console.error('Error details:', {
           message: error.message,
@@ -94,11 +99,16 @@ export default function HomePage() {
           hint: error.hint,
         });
       } finally {
-        setLoading(false);
+        if (isMounted) {
+          setLoading(false);
+        }
       }
     }
 
     fetchData();
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   return (

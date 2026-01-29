@@ -17,6 +17,7 @@ import {
 import { usePlayer } from '@/stores/player';
 import Image from 'next/image';
 import Link from 'next/link';
+import { sanitizeUrl } from '@/lib/utils/url';
 
 export function AudioPlayer() {
   const waveformRef = useRef<HTMLDivElement>(null);
@@ -58,7 +59,7 @@ export function AudioPlayer() {
       normalize: true,
     });
 
-    wavesurfer.load(currentBeat.preview_url);
+    wavesurfer.load(sanitizeUrl(currentBeat.preview_url));
 
     wavesurfer.on('ready', () => {
       setIsReady(true);
@@ -138,7 +139,7 @@ export function AudioPlayer() {
             <div className="w-12 h-12 rounded-lg overflow-hidden shrink-0 relative">
               {currentBeat.artwork_url ? (
                 <Image 
-                  src={currentBeat.artwork_url} 
+                  src={sanitizeUrl(currentBeat.artwork_url)} 
                   alt={currentBeat.title}
                   fill
                   className="object-cover"

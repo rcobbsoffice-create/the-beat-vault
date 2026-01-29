@@ -60,8 +60,12 @@ ALTER TABLE artist_profiles_ext ENABLE ROW LEVEL SECURITY;
 -- RLS Policies for Articles
 ALTER TABLE articles ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Articles are viewable by everyone" ON articles;
+
 CREATE POLICY "Articles are viewable by everyone" ON articles FOR
 SELECT USING (status = 'published');
+
+DROP POLICY IF EXISTS "Admins and Editors can manage articles" ON articles;
 
 CREATE POLICY "Admins and Editors can manage articles" ON articles FOR ALL USING (
     EXISTS (
@@ -76,8 +80,12 @@ CREATE POLICY "Admins and Editors can manage articles" ON articles FOR ALL USING
 -- RLS Policies for Charts
 ALTER TABLE charts ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Charts are viewable by everyone" ON charts;
+
 CREATE POLICY "Charts are viewable by everyone" ON charts FOR
 SELECT USING (TRUE);
+
+DROP POLICY IF EXISTS "Admins can manage charts" ON charts;
 
 CREATE POLICY "Admins can manage charts" ON charts FOR ALL USING (
     EXISTS (
@@ -92,13 +100,19 @@ CREATE POLICY "Admins can manage charts" ON charts FOR ALL USING (
 -- RLS Policies for Submissions
 ALTER TABLE submissions ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Users can view their own submissions" ON submissions;
+
 CREATE POLICY "Users can view their own submissions" ON submissions FOR
 SELECT USING (auth.uid () = artist_id);
+
+DROP POLICY IF EXISTS "Users can create submissions" ON submissions;
 
 CREATE POLICY "Users can create submissions" ON submissions FOR
 INSERT
 WITH
     CHECK (auth.uid () = artist_id);
+
+DROP POLICY IF EXISTS "Admins and Editors can manage submissions" ON submissions;
 
 CREATE POLICY "Admins and Editors can manage submissions" ON submissions FOR ALL USING (
     EXISTS (
@@ -110,8 +124,12 @@ CREATE POLICY "Admins and Editors can manage submissions" ON submissions FOR ALL
     )
 );
 
+DROP POLICY IF EXISTS "Public can view artist extensions" ON artist_profiles_ext;
+
 CREATE POLICY "Public can view artist extensions" ON artist_profiles_ext FOR
 SELECT USING (TRUE);
+
+DROP POLICY IF EXISTS "Artists can update own extension" ON artist_profiles_ext;
 
 CREATE POLICY "Artists can update own extension" ON artist_profiles_ext FOR
 UPDATE USING (auth.uid () = profile_id);
