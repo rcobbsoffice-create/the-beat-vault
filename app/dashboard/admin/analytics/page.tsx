@@ -53,8 +53,8 @@ export default function AdvancedAnalyticsPage() {
       ];
 
       setData(mockData);
-      setTotalStreams(mockData.reduce((acc, curr) => acc + curr.stream_count, 0));
-      setTotalRevenue(mockData.reduce((acc, curr) => acc + curr.revenue_usd, 0));
+      setTotalStreams(mockData.reduce((acc: number, curr: any) => acc + curr.stream_count, 0));
+      setTotalRevenue(mockData.reduce((acc: number, curr: any) => acc + curr.revenue_usd, 0));
     } catch (error: any) {
       toast.error(error.message);
     } finally {

@@ -18,7 +18,7 @@ export const MotionArtwork: React.FC<MotionArtworkProps> = ({
   const { fps } = useVideoConfig();
 
   // Get pulse for current frame
-  const pulse = pulseData[frame] || 0;
+  const pulse = pulseData?.[frame] || 0;
 
   // Pulse effect (scale and glow)
   const scale = interpolate(pulse, [0, 1], [1, 1.1]);

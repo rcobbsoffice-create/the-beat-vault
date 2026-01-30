@@ -63,7 +63,7 @@ export default function HomePage() {
         if (!isMounted) return;
 
         if (fetchedArticles && fetchedArticles.length > 0) {
-          setArticles(fetchedArticles.map(a => ({
+          setArticles(fetchedArticles.map((a: any) => ({
             ...a,
             author: a.profiles?.display_name || 'Staff',
             image: a.image_url,
@@ -72,7 +72,7 @@ export default function HomePage() {
         }
 
         if (fetchedPicks && fetchedPicks.length > 0) {
-          setEditorsPicks(fetchedPicks.map(a => ({
+          setEditorsPicks(fetchedPicks.map((a: any) => ({
             ...a,
             author: a.profiles?.display_name || 'Staff',
             image: a.image_url,
@@ -81,7 +81,7 @@ export default function HomePage() {
         }
 
         if (fetchedCharts && fetchedCharts.length > 0) {
-          setCharts(fetchedCharts.map(c => ({
+          setCharts(fetchedCharts.map((c: any) => ({
             rank: c.rank,
             lastRank: c.last_rank,
             title: c.title,

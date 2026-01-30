@@ -20,7 +20,7 @@ export default function EditorialPage() {
       try {
         const fetched = await magazineService.getArticles(50);
         if (fetched) {
-          setArticles(fetched.map(a => ({
+          setArticles(fetched.map((a: any) => ({
             ...a,
             author: a.profiles?.display_name || 'Staff',
             image: a.image_url,

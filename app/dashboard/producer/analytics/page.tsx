@@ -36,7 +36,7 @@ export default function ProducerAnalyticsPage() {
       
       try {
         const { data: beats } = await supabase.from('beats').select('id').eq('producer_id', profile.id);
-        const beatIds = beats?.map(b => b.id) || [];
+        const beatIds = beats?.map((b: any) => b.id) || [];
 
         // Fetch counts for conversion funnel
         const { data: events } = await supabase
@@ -45,10 +45,10 @@ export default function ProducerAnalyticsPage() {
           .in('beat_id', beatIds);
 
         const counts = {
-          play: events?.filter(e => e.event_type === 'play').length || 0,
-          wishlist: events?.filter(e => e.event_type === 'wishlist').length || 0,
-          cart: events?.filter(e => e.event_type === 'cart_add').length || 0,
-          purchase: events?.filter(e => e.event_type === 'purchase').length || 0,
+          play: events?.filter((e: any) => e.event_type === 'play').length || 0,
+          wishlist: events?.filter((e: any) => e.event_type === 'wishlist').length || 0,
+          cart: events?.filter((e: any) => e.event_type === 'cart_add').length || 0,
+          purchase: events?.filter((e: any) => e.event_type === 'purchase').length || 0,
         };
 
         setStats({

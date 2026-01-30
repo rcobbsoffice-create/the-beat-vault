@@ -82,14 +82,14 @@ export default function DashboardPage() {
           .select('id')
           .eq('producer_id', profile.id);
         
-        const beatIds = producerBeats?.map(b => b.id) || [];
+        const beatIds = producerBeats?.map((b: any) => b.id) || [];
         
         const { data: salesData } = await supabase
           .from('purchases' as any)
           .select('amount_paid')
           .in('beat_id', beatIds);
         
-        const totalSalesCents = salesData?.reduce((sum, item) => sum + item.amount_paid, 0) || 0;
+        const totalSalesCents = salesData?.reduce((sum: number, item: any) => sum + item.amount_paid, 0) || 0;
         const totalSalesFormatted = new Intl.NumberFormat('en-US', {
           style: 'currency',
           currency: 'USD',
