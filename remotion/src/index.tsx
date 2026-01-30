@@ -1,5 +1,5 @@
 import React from 'react';
-import { registerRoot, Composition } from 'remotion';
+import { registerRoot, Composition, random } from 'remotion';
 import { MotionArtwork } from './Composition';
 
 const RemotionRoot: React.FC = () => {
@@ -13,7 +13,7 @@ const RemotionRoot: React.FC = () => {
         width={1080}
         height={1080}
         defaultProps={{
-          pulseData: Array.from({ length: 900 }, () => Math.random() * 0.5),
+          pulseData: Array.from({ length: 900 }, (_, i) => random(i) * 0.5),
           albumArtUrl: 'https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?w=1000&auto=format&fit=crop',
           title: 'Sample Beat',
           producerName: 'AudioGenes AI',
@@ -27,7 +27,7 @@ const RemotionRoot: React.FC = () => {
         width={1080}
         height={1920}
         defaultProps={{
-          pulseData: Array.from({ length: 240 }, () => Math.random() * 0.5),
+          pulseData: Array.from({ length: 240 }, (_, i) => random(i) * 0.5),
           albumArtUrl: 'https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?w=1000&auto=format&fit=crop',
           title: 'Sample Beat',
           producerName: 'AudioGenes AI',
