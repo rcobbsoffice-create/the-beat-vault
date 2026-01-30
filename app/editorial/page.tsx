@@ -91,7 +91,7 @@ export default function EditorialPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-12 gap-y-24">
                 {filteredArticles.slice(4).map((article) => (
                   <Link key={article.id} href={`/editorial/${article.slug}`} className="group block">
-                    <div className="relative aspect-[4/5] bg-gray-100 mb-8 overflow-hidden grayscale group-hover:grayscale-0 transition-all duration-700">
+                    <div className="relative aspect-4/5 bg-gray-100 mb-8 overflow-hidden grayscale group-hover:grayscale-0 transition-all duration-700">
                       <img src={article.image} alt={article.title} className="w-full h-full object-cover" />
                     </div>
                     <div className="space-y-4">
