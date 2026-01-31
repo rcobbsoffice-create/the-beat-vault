@@ -265,7 +265,7 @@ export default function HomePage() {
                  Join thousands of producers and artists who have already upgraded their workflow with AudioGenes.
               </p>
               <div className="flex flex-col sm:flex-row gap-6 justify-center">
-                 <Link href="/register">
+                 <Link href="/signup">
                     <Button className="h-16 px-12 text-lg font-black uppercase tracking-widest rounded-xl">Create Account</Button>
                  </Link>
                  <Link href="/contact">
