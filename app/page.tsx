@@ -92,7 +92,7 @@ export default function HomePage() {
                     <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
                   </Button>
                 </Link>
-                <Link href="/dashboard/producer">
+                <Link href="/sell">
                   <Button variant="outline" className="h-16 px-10 text-lg font-black uppercase tracking-wider rounded-xl border-white/20 hover:border-white transition-all">
                     Join as Producer
                   </Button>

@@ -52,6 +52,7 @@ export default function ProducerStorefrontPage() {
   const [isInitialLoading, setIsInitialLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [producerData, setProducerData] = useState<any>(null);
+  const [setupError, setSetupError] = useState<string | null>(null);
   
   // Add Merch Modal State
   const [isAddMerchModalOpen, setIsAddMerchModalOpen] = useState(false);
@@ -149,7 +150,14 @@ export default function ProducerStorefrontPage() {
              setProducerData(newProducer);
              setIsInitialLoading(false);
           } catch (initErr) {
-             console.error('[Storefront] Auto-initialization failed:', initErr);
+             console.error('[Storefront] Auto-initialization failed:', {
+                 message: (initErr as any)?.message,
+                 code: (initErr as any)?.code,
+                 details: (initErr as any)?.details,
+                 hint: (initErr as any)?.hint,
+                 fullError: initErr
+             });
+             setSetupError((initErr as any)?.message || 'Automatic setup failed. Database permissions may be missing.');
              useMockDataFallback();
           }
           return;
@@ -172,6 +180,7 @@ export default function ProducerStorefrontPage() {
         setIsInitialLoading(false);
       } catch (err: any) {
         console.error('[Storefront] Critical Loading Error:', err.message || 'Unknown Error', err);
+        setSetupError(err.message || 'Critical error loading storefront data');
         useMockDataFallback();
       }
     }
@@ -201,11 +210,36 @@ export default function ProducerStorefrontPage() {
       // 1. Get or verify producer ID
       let pId = producerData?.id;
       if (!pId) {
+        // Retry fetch
         const { data: p } = await supabase.from('producers').select('id').eq('profile_id', profile.id).maybeSingle();
         pId = p?.id;
       }
 
-      if (!pId) throw new Error('Storefront profile not initialized. Please refresh.');
+      // LAZY INITIALIZATION: If still missing, try to create it now
+      if (!pId) {
+          console.log('[Storefront] Profile missing while saving. Attempting lazy creation...');
+          const slug = profile.display_name?.toLowerCase().replace(/\s+/g, '-') || `store-${profile.id.slice(0, 5)}`;
+          
+          const { data: newProducer, error: createError } = await supabase
+               .from('producers')
+               .insert({
+                  profile_id: profile.id,
+                  store_slug: slug,
+                  status: 'active',
+                  branding: { tagline: settings.tagline || 'Independent Music Brand' }
+               })
+               .select()
+               .single();
+            
+           if (createError) {
+               console.error('[Storefront] Lazy creation failed:', createError);
+               throw new Error('Failed to create producer profile. Please run database migrations to fix permissions.');
+           }
+           pId = newProducer.id;
+           setProducerData(newProducer);
+      }
+
+      if (!pId) throw new Error('Storefront profile could not be initialized. Please refresh.');
 
       const { error: storeError } = await supabase
         .from('stores')
@@ -352,6 +386,22 @@ export default function ProducerStorefrontPage() {
           </Button>
         </div>
       </div>
+
+      {setupError && (
+        <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-4 flex items-center gap-3 text-red-400">
+           <div className="p-2 bg-red-500/20 rounded-lg shrink-0">
+             <X className="w-5 h-5" />
+           </div>
+           <div className="flex-1">
+             <h3 className="font-bold text-sm text-white">Initialization Error</h3>
+             <p className="text-xs">{setupError}</p>
+             <p className="text-[10px] mt-1 opacity-70">If this persists, please run the latest database migration to fix permissions.</p>
+           </div>
+           <Button size="sm" variant="outline" className="text-xs h-8 border-red-500/30 hover:bg-red-500/20" onClick={() => window.location.reload()}>
+             Retry
+           </Button>
+        </div>
+      )}
 
       {isInitialLoading ? (
          <div className="h-[60vh] flex flex-col items-center justify-center space-y-4">
