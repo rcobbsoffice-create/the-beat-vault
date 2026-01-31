@@ -28,10 +28,30 @@ export async function POST(request: NextRequest) {
     const { data: { user } } = await supabase.auth.getUser(token);
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-    // 1. Create Beat record
+    // 1. Check Role & Producer ID
+    let finalProducerId = user.id;
+
+    // Check if user is admin and if they provided a specific producerId
+    if (body.producerId && body.producerId !== user.id) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', user.id)
+          .single();
+        
+        if (profile?.role === 'admin') {
+            finalProducerId = body.producerId;
+            console.log('Admin override: Creating beat for producer', finalProducerId);
+        } else {
+            console.warn('Unauthorized attempt to set producerId by non-admin user', user.id);
+            // Fallback to user.id or block? Plan said "force producer_id = user.id" which implies fallback/ignore
+        }
+    }
+
+    // 2. Create Beat record
     const beatData = {
       id: beatId || crypto.randomUUID(),
-      producer_id: user.id,
+      producer_id: finalProducerId,
       title,
       description,
       genre,

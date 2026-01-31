@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { Play, Pause, Heart, ShoppingCart, Clock } from 'lucide-react';
+import { Play, Pause, Heart, ShoppingCart, Clock, Eye } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
 import { usePlayer } from '@/stores/player';
 import toast from 'react-hot-toast';
@@ -11,8 +11,8 @@ import type { Beat } from '@/types/supabase';
 import { sanitizeUrl } from '@/lib/utils/url';
 
 interface BeatCardProps {
-  beat: Beat;
-  onFavorite?: () => void;
+  beat: Beat & { favorite_count?: number };
+  onFavorite?: (id: string) => void;
   isFavorited?: boolean;
 }
 
@@ -27,6 +27,12 @@ export function BeatCard({ beat, onFavorite, isFavorited = false }: BeatCardProp
     } else {
       setCurrentBeat(beat);
     }
+  };
+
+  const handleFavoriteClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    onFavorite?.(beat.id);
   };
 
   const formatDuration = (seconds: number | null) => {
@@ -84,11 +90,8 @@ export function BeatCard({ beat, onFavorite, isFavorited = false }: BeatCardProp
 
           {/* Favorite Button */}
           <button
-            onClick={(e) => {
-              e.preventDefault();
-              onFavorite?.();
-            }}
-            className="absolute top-3 right-3 w-8 h-8 rounded-full bg-dark-950/70 backdrop-blur-sm flex items-center justify-center transition-transform hover:scale-110"
+            onClick={handleFavoriteClick}
+            className="absolute top-3 right-3 w-8 h-8 rounded-full bg-dark-950/70 backdrop-blur-sm flex items-center justify-center transition-transform hover:scale-110 z-10"
           >
             <Heart 
               className={`w-4 h-4 ${isFavorited ? 'text-secondary fill-secondary' : 'text-white'}`} 
@@ -105,15 +108,25 @@ export function BeatCard({ beat, onFavorite, isFavorited = false }: BeatCardProp
             {beat.producer?.display_name || 'Unknown Producer'}
           </p>
 
-          {/* Tags */}
-          <div className="flex flex-wrap gap-2 mt-3">
+          {/* Tags & Stats */}
+          <div className="flex flex-wrap items-center gap-2 mt-3">
             {beat.genre && <Badge variant="primary">{beat.genre}</Badge>}
             {beat.bpm && <Badge>{beat.bpm} BPM</Badge>}
-            {beat.is_sync_ready && (
-              <Badge className="bg-primary/10 text-primary border-primary/20">
-                Sync Ready
-              </Badge>
-            )}
+            
+            <div className="flex items-center gap-3 ml-auto text-xs text-gray-500">
+              <div className="flex items-center gap-1" title="Plays">
+                <Play className="w-3 h-3" />
+                <span>{beat.play_count || 0}</span>
+              </div>
+              <div className="flex items-center gap-1" title="Views">
+                <Eye className="w-3 h-3" />
+                <span>{(beat as any).view_count || 0}</span>
+              </div>
+              <div className="flex items-center gap-1" title="Favorites">
+                <Heart className={`w-3 h-3 ${isFavorited ? 'text-secondary fill-secondary' : ''}`} />
+                <span>{beat.favorite_count || 0}</span>
+              </div>
+            </div>
           </div>
 
           {/* Price & Cart */}

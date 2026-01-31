@@ -21,13 +21,15 @@ import {
   Calendar,
   Edit2,
   Save,
-  X
+  X,
+  Share2
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
 import { supabase } from '@/lib/supabase/client';
 import { format } from 'date-fns';
 import { usePlayer } from '@/stores/player';
+import { AdminBeatUploadForm } from '@/components/admin/AdminBeatUploadForm';
 
 export default function AdminBeatsPage() {
   const [beats, setBeats] = useState<any[]>([]);
@@ -36,6 +38,7 @@ export default function AdminBeatsPage() {
   const [statusFilter, setStatusFilter] = useState('all');
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState<any>(null);
+  const [showUploadModal, setShowUploadModal] = useState(false);
   const { currentBeat, isPlaying, setCurrentBeat } = usePlayer();
 
   const fetchBeats = async () => {
@@ -60,6 +63,7 @@ export default function AdminBeatsPage() {
 
       const { data, error } = await query;
       if (error) throw error;
+      console.log('Fetched beats data:', data?.map(b => ({ id: b.id, title: b.title, audio_url: b.audio_url?.substring(0, 60) + '...' })));
       setBeats(data || []);
     } catch (err: any) {
       console.error('Fetch error:', err);
@@ -113,8 +117,13 @@ export default function AdminBeatsPage() {
           title: editForm.title,
           genre: editForm.genre,
           bpm: editForm.bpm,
+          key: editForm.key,
           price: editForm.price,
-          status: editForm.status
+          status: editForm.status,
+          description: editForm.description,
+          mood_tags: editForm.mood_tags, // Array
+          isrc: editForm.isrc,
+          metadata: { ...editForm.metadata } // Preserve other metadata
         })
         .eq('id', editingId);
 
@@ -126,6 +135,24 @@ export default function AdminBeatsPage() {
     } catch (err: any) {
       console.error('Save error:', err);
       toast.error(err.message, { id: toastId });
+    }
+  };
+
+  const handleShare = (beat: any) => {
+    const url = `${window.location.origin}/beats/${beat.id}`;
+    if (typeof navigator !== 'undefined' && navigator.share) {
+      navigator.share({
+        title: beat.title,
+        text: `Check out this beat: ${beat.title}`,
+        url: url,
+      }).catch((err) => {
+        if (err.name !== 'AbortError') {
+          console.error('Share error:', err);
+        }
+      });
+    } else {
+      navigator.clipboard.writeText(url);
+      toast.success('Link copied to clipboard!', { icon: '🔗', style: { background: '#0A0A0A', color: '#D4AF37', border: '1px solid #1C1C1C' } });
     }
   };
 
@@ -147,7 +174,15 @@ export default function AdminBeatsPage() {
           <p className="text-gray-500 font-bold uppercase tracking-widest text-xs mt-2">Manage and moderate all platform assets</p>
         </div>
         
-        <div className="flex flex-col sm:flex-row gap-4">
+        <div className="flex flex-col sm:flex-row gap-4 items-center">
+            <Button 
+                onClick={() => setShowUploadModal(true)}
+                className="bg-primary text-black font-black uppercase tracking-widest gap-2"
+            >
+                <Music className="w-4 h-4" />
+                Add Beat
+            </Button>
+
           <form onSubmit={handleSearch} className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
             <input 
@@ -171,6 +206,21 @@ export default function AdminBeatsPage() {
         </div>
       </div>
 
+    {/* Upload Modal */}
+    {showUploadModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+            <div className="w-full max-w-2xl animate-in fade-in zoom-in duration-200">
+                <AdminBeatUploadForm 
+                    onCancel={() => setShowUploadModal(false)}
+                    onSuccess={() => {
+                        setShowUploadModal(false);
+                        fetchBeats();
+                    }}
+                />
+            </div>
+        </div>
+    )}
+
       {/* Assets Grid */}
       <div className="grid grid-cols-1 gap-6">
         {beats.length === 0 ? (
@@ -190,9 +240,16 @@ export default function AdminBeatsPage() {
                     ) : (
                       <Music className="w-10 h-10 text-dark-600 absolute inset-0 m-auto" />
                     )}
-                    <button className="absolute inset-0 bg-primary/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        console.log('Play button clicked for beat:', beat.id, beat.title);
+                        setCurrentBeat(beat);
+                      }}
+                      className="absolute inset-0 bg-primary/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
                        <div className="w-12 h-12 rounded-full bg-primary text-black flex items-center justify-center shadow-2xl">
-                         <Play className="w-5 h-5 fill-current ml-1" />
+                          <Play className="w-5 h-5 fill-current ml-1" />
                        </div>
                     </button>
                   </div>
@@ -200,34 +257,145 @@ export default function AdminBeatsPage() {
                   {/* Details / Edit Form */}
                   <div className="flex-1 w-full space-y-4">
                     {editingId === beat.id ? (
-                      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 animate-in fade-in duration-300">
-                        <div className="space-y-1">
-                          <label className="text-[10px] font-black uppercase text-gray-500 tracking-widest">Title</label>
-                          <Input 
-                            value={editForm.title} 
-                            onChange={(e) => setEditForm({...editForm, title: e.target.value})}
-                            className="bg-dark-950 border-white/10 text-white font-bold"
-                          />
+                      /* Edit Form Container */
+                      <div className="bg-dark-900/80 p-6 rounded-2xl border border-white/10 animate-in fade-in duration-300">
+                        {/* AI Toolbar */}
+                        <div className="flex justify-between items-center mb-6 border-b border-white/5 pb-4">
+                           <h4 className="text-sm font-black uppercase text-white tracking-widest">Edit Mode</h4>
+                           <button 
+                             onClick={async () => {
+                               const toastId = toast.loading('Generating metadata...');
+                               try {
+                                 const res = await fetch('/api/ai/metadata', {
+                                   method: 'POST',
+                                   body: JSON.stringify({ 
+                                     title: editForm.title, 
+                                     producer: editForm.producer?.display_name 
+                                   })
+                                 });
+                                 const data = await res.json();
+                                 if (data.error) throw new Error(data.error);
+                                 
+                                 setEditForm((prev: any) => ({
+                                   ...prev,
+                                   genre: data.genre || prev.genre,
+                                   description: data.description || prev.description,
+                                   mood_tags: data.moods || prev.mood_tags,
+                                   bpm: data.bpm_estimate || prev.bpm
+                                 }));
+                                 toast.success('Metadata auto-filled!', { id: toastId });
+                               } catch (err: any) {
+                                 toast.error(err.message, { id: toastId });
+                               }
+                             }}
+                             className="flex items-center gap-2 px-3 py-1.5 bg-primary/10 text-primary hover:bg-primary hover:text-white rounded-lg transition-all text-xs font-bold uppercase tracking-wider"
+                           >
+                             ✨ Auto-Fill
+                           </button>
                         </div>
-                        <div className="space-y-1">
-                          <label className="text-[10px] font-black uppercase text-gray-500 tracking-widest">Genre</label>
-                          <Input 
-                            value={editForm.genre} 
-                            onChange={(e) => setEditForm({...editForm, genre: e.target.value})}
-                            className="bg-dark-950 border-white/10 text-white font-bold"
-                          />
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                           {/* Column 1: Core Info */}
+                           <div className="space-y-4">
+                              <div className="space-y-1">
+                                <label className="text-[10px] font-black uppercase text-gray-500 tracking-widest">Title</label>
+                                <Input 
+                                  value={editForm.title || ''} 
+                                  onChange={(e) => setEditForm({...editForm, title: e.target.value})}
+                                  className="bg-dark-950 border-white/10"
+                                />
+                              </div>
+                              <div className="space-y-1">
+                                <label className="text-[10px] font-black uppercase text-gray-500 tracking-widest">Genre</label>
+                                <Input 
+                                  value={editForm.genre || ''} 
+                                  onChange={(e) => setEditForm({...editForm, genre: e.target.value})}
+                                  className="bg-dark-950 border-white/10"
+                                />
+                              </div>
+                              <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-1">
+                                  <label className="text-[10px] font-black uppercase text-gray-500 tracking-widest">BPM</label>
+                                  <Input 
+                                    type="number"
+                                    value={editForm.bpm || ''} 
+                                    onChange={(e) => setEditForm({...editForm, bpm: Number(e.target.value)})}
+                                    className="bg-dark-950 border-white/10"
+                                  />
+                                </div>
+                                <div className="space-y-1">
+                                  <label className="text-[10px] font-black uppercase text-gray-500 tracking-widest">Key</label>
+                                  <Input 
+                                    value={editForm.key || ''} 
+                                    onChange={(e) => setEditForm({...editForm, key: e.target.value})}
+                                    className="bg-dark-950 border-white/10"
+                                  />
+                                </div>
+                              </div>
+                           </div>
+
+                           {/* Column 2: Metadata & Rights */}
+                           <div className="space-y-4">
+                              <div className="space-y-1">
+                                <label className="text-[10px] font-black uppercase text-gray-500 tracking-widest">Status</label>
+                                <select 
+                                  value={editForm.status}
+                                  onChange={(e) => setEditForm({...editForm, status: e.target.value})}
+                                  className="w-full h-10 bg-dark-950 border border-white/10 rounded-lg px-3 text-sm font-bold text-white focus:outline-none focus:border-primary"
+                                >
+                                  <option value="pending">Pending</option>
+                                  <option value="published">Published</option>
+                                  <option value="rejected">Rejected</option>
+                                  <option value="draft">Draft</option>
+                                </select>
+                              </div>
+                              <div className="space-y-1">
+                                <label className="text-[10px] font-black uppercase text-gray-500 tracking-widest">ISRC</label>
+                                <Input 
+                                  value={editForm.isrc || ''} 
+                                  onChange={(e) => setEditForm({...editForm, isrc: e.target.value})}
+                                  className="bg-dark-950 border-white/10 font-mono text-xs"
+                                  placeholder="US-XXX-XX-XXXXX"
+                                />
+                              </div>
+                              <div className="space-y-1">
+                                <label className="text-[10px] font-black uppercase text-gray-500 tracking-widest">Moods (comma sep)</label>
+                                <Input 
+                                  value={editForm.mood_tags?.join(', ') || ''} 
+                                  onChange={(e) => setEditForm({...editForm, mood_tags: e.target.value.split(',').map((s: string) => s.trim())})}
+                                  className="bg-dark-950 border-white/10"
+                                  placeholder="Chill, Dark, Hype"
+                                />
+                              </div>
+                           </div>
                         </div>
-                        <div className="space-y-1">
-                          <label className="text-[10px] font-black uppercase text-gray-500 tracking-widest">Status</label>
-                          <select 
-                            value={editForm.status}
-                            onChange={(e) => setEditForm({...editForm, status: e.target.value})}
-                            className="w-full h-10 bg-dark-950 border border-white/10 rounded-lg px-3 text-sm font-bold"
-                          >
-                            <option value="pending">Pending</option>
-                            <option value="approved">Approved</option>
-                            <option value="rejected">Rejected</option>
-                          </select>
+                        
+                        {/* Description - Full Width */}
+                        <div className="mt-4 space-y-1">
+                           <label className="text-[10px] font-black uppercase text-gray-500 tracking-widest">Description</label>
+                           <textarea
+                             value={editForm.description || ''}
+                             onChange={(e) => setEditForm({...editForm, description: e.target.value})}
+                             className="w-full h-20 bg-dark-950 border border-white/10 rounded-lg p-3 text-sm text-white focus:outline-none focus:border-primary resize-none"
+                             placeholder="Track description..."
+                           />
+                        </div>
+
+                        {/* Action Buttons */}
+                        <div className="flex gap-3 justify-end mt-6 pt-4 border-t border-white/5">
+                           <Button 
+                             onClick={() => setEditingId(null)}
+                             variant="ghost" 
+                             className="text-gray-400 hover:text-white text-xs font-black uppercase tracking-widest"
+                           >
+                             Cancel
+                           </Button>
+                           <Button 
+                             onClick={handleSaveEdit}
+                             className="bg-primary text-black hover:bg-primary-light text-xs font-black uppercase tracking-widest"
+                           >
+                             Save Changes
+                           </Button>
                         </div>
                       </div>
                     ) : (
@@ -248,10 +416,28 @@ export default function AdminBeatsPage() {
                           </p>
                         </div>
                         <div className="flex items-center gap-6">
+                           {/* Analytics Stats */}
+                           <div className="flex items-center gap-4 text-center">
+                             <div>
+                               <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1">Plays</p>
+                               <p className="text-lg font-black italic text-primary">{beat.play_count || 0}</p>
+                             </div>
+                             <div>
+                               <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1">Views</p>
+                               <p className="text-lg font-black italic text-blue-400">{beat.view_count || 0}</p>
+                             </div>
+                           </div>
                            <div className="text-right">
                              <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1">Revenue</p>
                              <p className="text-lg font-black italic text-success">${beat.revenue || '0.00'}</p>
                            </div>
+                           <button 
+                             onClick={() => handleShare(beat)} 
+                             className="p-3 bg-white/5 hover:bg-white/10 rounded-xl border border-white/10 transition-all text-gray-400 hover:text-white"
+                             title="Share Beat"
+                           >
+                             <Share2 className="w-5 h-5" />
+                           </button>
                            <button onClick={() => handleEdit(beat)} className="p-3 bg-white/5 hover:bg-white/10 rounded-xl border border-white/10 transition-all text-gray-400 hover:text-white">
                              <Edit2 className="w-5 h-5" />
                            </button>
@@ -265,17 +451,7 @@ export default function AdminBeatsPage() {
                         {beat.is_sync_ready && <span className="text-success flex items-center gap-1"><CheckCircle2 className="w-3 h-3" /> Sync Ready</span>}
                       </div>
                       
-                      {editingId === beat.id ? (
-                        <div className="flex gap-2">
-                           <Button variant="ghost" className="gap-2 font-bold uppercase text-[10px] h-8" onClick={() => setEditingId(null)}>
-                             <X className="w-3 h-3" /> Cancel
-                           </Button>
-                           <Button className="bg-primary text-black gap-2 font-bold uppercase text-[10px] h-8" onClick={handleSaveEdit}>
-                             <Save className="w-3 h-3" /> Save Changes
-                           </Button>
-                        </div>
-                      ) : (
-                        beat.status === 'pending' && (
+                      {editingId !== beat.id && beat.status === 'pending' && (
                           <div className="flex gap-2">
                             <Button variant="outline" size="sm" onClick={() => handleAction(beat.id, 'rejected')} className="h-8 text-[10px] font-black uppercase tracking-widest border-white/10 hover:bg-error/10 hover:text-error hover:border-error/30">
                               Reject
@@ -284,7 +460,6 @@ export default function AdminBeatsPage() {
                               Approve
                             </Button>
                           </div>
-                        )
                       )}
                     </div>
                   </div>

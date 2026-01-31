@@ -1,4 +1,5 @@
 const { S3Client, PutBucketCorsCommand } = require('@aws-sdk/client-s3');
+require('dotenv').config({ path: '.env.local' });
 
 async function setCors() {
   const r2Client = new S3Client({

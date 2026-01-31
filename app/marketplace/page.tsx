@@ -145,6 +145,7 @@ function MarketplaceContent() {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [showFilters, setShowFilters] = useState(false);
   const [sortBy, setSortBy] = useState<BeatSortOption>('newest');
+  const [favorites, setFavorites] = useState<Set<string>>(new Set());
   
   const [filters, setFilters] = useState<BeatFilters>({
     genre: searchParams.get('genre') || undefined,
@@ -181,6 +182,83 @@ function MarketplaceContent() {
     }
     fetchBeats();
   }, []);
+
+  // Fetch Favorites
+  useEffect(() => {
+    async function fetchFavorites() {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+
+      const { data, error } = await supabase
+        .from('favorites')
+        .select('beat_id')
+        .eq('user_id', session.user.id);
+
+      if (error) {
+        console.error('Error fetching favorites:', error);
+      } else {
+        setFavorites(new Set(data.map(f => f.beat_id)));
+      }
+    }
+    fetchFavorites();
+  }, []);
+
+  const handleFavoriteToggle = async (beatId: string) => {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+      toast.error('Please sign in to favorite beats', {
+        style: { background: '#0A0A0A', color: '#D4AF37', border: '1px solid #1C1C1C' }
+      });
+      return;
+    }
+
+    // Optimistic UI update
+    const isAdding = !favorites.has(beatId);
+    setFavorites(prev => {
+      const next = new Set(prev);
+      if (isAdding) next.add(beatId);
+      else next.delete(beatId);
+      return next;
+    });
+
+    // Update beat count optimistically in the local state
+    setBeats(prev => prev.map(b => {
+      if (b.id === beatId) {
+        return {
+          ...b,
+          favorite_count: Math.max(0, (b.favorite_count || 0) + (isAdding ? 1 : -1))
+        } as any;
+      }
+      return b;
+    }));
+
+    try {
+      const response = await fetch(`/api/beats/${beatId}/favorite`, { method: 'POST' });
+      const data = await response.json();
+      
+      if (data.error) {
+        toast.error('Failed to update favorite');
+        // Rollback
+        setFavorites(prev => {
+          const next = new Set(prev);
+          if (isAdding) next.delete(beatId);
+          else next.add(beatId);
+          return next;
+        });
+        setBeats(prev => prev.map(b => {
+          if (b.id === beatId) {
+            return {
+              ...b,
+              favorite_count: Math.max(0, (b.favorite_count || 0) + (isAdding ? -1 : 1))
+            } as any;
+          }
+          return b;
+        }));
+      }
+    } catch (err) {
+      console.error('Favorite toggle error:', err);
+    }
+  };
 
   useEffect(() => {
     const newActiveFilters: string[] = [];
@@ -431,7 +509,12 @@ function MarketplaceContent() {
                 : 'grid-cols-1'
             }`}>
               {filteredBeats.map((beat) => (
-                <BeatCard key={beat.id} beat={beat} />
+                <BeatCard 
+                  key={beat.id} 
+                  beat={beat as any} 
+                  isFavorited={favorites.has(beat.id)}
+                  onFavorite={handleFavoriteToggle}
+                />
               ))}
             </div>
           )}

@@ -22,6 +22,7 @@ import { sanitizeUrl } from '@/lib/utils/url';
 export function AudioPlayer() {
   const waveformRef = useRef<HTMLDivElement>(null);
   const wavesurferRef = useRef<WaveSurfer | null>(null);
+  const audioRef = useRef<HTMLAudioElement>(null);
   const [isReady, setIsReady] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const previousVolumeRef = useRef(0.7);
@@ -42,12 +43,31 @@ export function AudioPlayer() {
     reset,
   } = usePlayer();
 
+  // Track plays
+  useEffect(() => {
+    if (currentBeat && isPlaying) {
+      // Small delay to ensure it's not a quick skip
+      const timer = setTimeout(() => {
+        fetch(`/api/beats/${currentBeat.id}/track-play`, { method: 'POST' })
+          .catch(err => console.error('Failed to track play:', err));
+      }, 5000); // 5 seconds of playback counts as a play
+      
+      return () => clearTimeout(timer);
+    }
+  }, [currentBeat?.id, isPlaying]);
+
   // Initialize WaveSurfer
   useEffect(() => {
-    if (!waveformRef.current || !currentBeat) return;
+    if (!waveformRef.current || !currentBeat || !audioRef.current) return;
+
+    // cleanup old instance
+    if (wavesurferRef.current) {
+        wavesurferRef.current.destroy();
+    }
 
     const wavesurfer = WaveSurfer.create({
       container: waveformRef.current,
+      media: audioRef.current,
       waveColor: 'rgba(255, 255, 255, 0.2)',
       progressColor: '#D4AF37',
       cursorColor: '#D4AF37',
@@ -59,15 +79,19 @@ export function AudioPlayer() {
       normalize: true,
     });
 
-    wavesurfer.load(sanitizeUrl(currentBeat.preview_url));
-
     wavesurfer.on('ready', () => {
       setIsReady(true);
       setDuration(wavesurfer.getDuration());
       wavesurfer.setVolume(volume);
       if (isPlaying) {
-        wavesurfer.play();
+        wavesurfer.play().catch(err => {
+          console.log('Autoplay blocked:', err);
+        });
       }
+    });
+
+    wavesurfer.on('error', (err) => {
+      console.error('WaveSurfer error:', err);
     });
 
     wavesurfer.on('audioprocess', () => {
@@ -84,13 +108,13 @@ export function AudioPlayer() {
       try {
         wavesurfer.destroy();
       } catch (err) {
-        // Ignore AbortError during cleanup
         if (err instanceof Error && err.name !== 'AbortError') {
            console.error('WaveSurfer cleanup error:', err);
         }
       }
       if (wavesurferRef.current === wavesurfer) {
         wavesurferRef.current = null;
+        setIsReady(false);
       }
     };
   }, [currentBeat?.id]);
@@ -100,7 +124,7 @@ export function AudioPlayer() {
     if (!wavesurferRef.current || !isReady) return;
 
     if (isPlaying) {
-      wavesurferRef.current.play();
+      wavesurferRef.current.play().catch(e => console.warn('Play failed', e));
     } else {
       wavesurferRef.current.pause();
     }
@@ -130,18 +154,37 @@ export function AudioPlayer() {
 
   if (!currentBeat) return null;
 
+  const audioSrc = `/api/beats/${currentBeat.id}/stream`;
+  const artworkSrc = currentBeat.artwork_url || null;
+
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50 glass border-t border-white/10 backdrop-blur-xl bg-dark-950/80">
+      {/* Hidden Audio Element */}
+      <audio 
+        ref={audioRef} 
+        src={audioSrc}
+        crossOrigin="anonymous" 
+        onEnded={playNext}
+        onError={(e) => {
+          console.error('Audio playback error', e);
+          const target = e.target as HTMLAudioElement;
+          console.error('Audio Error Code:', target.error?.code, target.error?.message);
+          // Optional: You might want to import toast from react-hot-toast if not available
+          // toast.error(`Playback failed: ${target.error?.message || 'Unknown error'}`);
+        }}
+      />
+      
       <div className="max-w-7xl mx-auto px-4 py-3">
         <div className="flex items-center gap-4">
           {/* Beat Info */}
           <div className="flex items-center gap-3 min-w-0 w-64">
             <div className="w-12 h-12 rounded-lg overflow-hidden shrink-0 relative">
-              {currentBeat.artwork_url ? (
+              {artworkSrc ? (
                 <Image 
-                  src={sanitizeUrl(currentBeat.artwork_url)} 
+                  src={artworkSrc} 
                   alt={currentBeat.title}
                   fill
+                  sizes="48px"
                   className="object-cover"
                 />
               ) : (
@@ -177,11 +220,16 @@ export function AudioPlayer() {
               </button>
               <button
                 onClick={() => {
-                  if (wavesurferRef.current) {
-                    const ctx = (wavesurferRef.current as any).backend?.getAudioContext?.();
-                    if (ctx?.state === 'suspended') ctx.resume();
-                  }
-                  isPlaying ? pause() : play();
+                   if (audioRef.current && audioRef.current.paused) {
+                        try {
+                           // Try resuming audio context if suspended (WaveSurfer handles this but specific mobile browsers need explicit touch)
+                           if (wavesurferRef.current) {
+                               const ctx = (wavesurferRef.current as any).backend?.getAudioContext?.();
+                               if (ctx?.state === 'suspended') ctx.resume();
+                           }
+                        } catch(e) { console.warn(e); }
+                   }
+                   isPlaying ? pause() : play();
                 }}
                 className="w-10 h-10 rounded-full bg-white flex items-center justify-center transition-transform hover:scale-105"
               >

@@ -1,29 +1,33 @@
 
-const { createClient } = require('@supabase/supabase-js');
-const dotenv = require('dotenv');
-const path = require('path');
+        const { createClient } = require('@supabase/supabase-js');
+        require('dotenv').config({ path: '.env.local' });
 
-dotenv.config({ path: path.resolve(process.cwd(), '.env.local') });
+        const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+        async function checkColumns() {
+            const { data, error } = await supabase
+                .rpc('get_columns', { table_name: 'beats' });
+                
+            if (error) {
+                // If RPC fails (likely), try direct query if possible or just assume missing if I can't check
+                console.error('RPC Error:', error);
+                
+                // Fallback: Try a select * limit 1 and see keys
+                const { data: beats, error: selectError } = await supabase
+                    .from('beats')
+                    .select('*')
+                    .limit(1);
+                    
+                if (selectError) {
+                     console.error('Select Error:', selectError);
+                } else if (beats && beats.length > 0) {
+                    console.log('Existing columns:', Object.keys(beats[0]));
+                } else {
+                    console.log('No beats found to infer columns.');
+                }
+            } else {
+                console.log('Columns:', data);
+            }
+        }
 
-const supabase = createClient(supabaseUrl, serviceRoleKey);
-
-async function checkColumns() {
-  const tables = ['orders', 'producers', 'beats', 'stores'];
-  
-  for (const table of tables) {
-    console.log(`\n--- Checking ${table} ---`);
-    const { data, error } = await supabase.from(table).select('*').limit(1);
-    if (error) {
-      console.error(`Error fetching from ${table}:`, error.message);
-    } else if (data && data.length > 0) {
-      console.log(`Columns for ${table}:`, Object.keys(data[0]));
-    } else {
-      console.log(`No data in ${table}, but table exists.`);
-    }
-  }
-}
-
-checkColumns();
+        checkColumns();

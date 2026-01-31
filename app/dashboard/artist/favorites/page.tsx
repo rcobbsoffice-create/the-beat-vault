@@ -1,37 +1,72 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { BeatCard } from '@/components/BeatCard';
 import { Card } from '@/components/ui/Card';
-import { Music } from 'lucide-react';
+import { Music, Loader2 } from 'lucide-react';
 import type { Beat } from '@/types/supabase';
-
-// Demo favorites
-const demoFavorites: Beat[] = [
-  {
-    id: '1',
-    producer_id: 'p1',
-    title: 'Midnight Dreams',
-    description: 'Smooth trap beat',
-    genre: 'Trap',
-    mood_tags: ['Melodic', 'Dark'],
-    bpm: 140,
-    key: 'F# Minor',
-    duration: 180,
-    audio_url: '/demo/beat1.wav',
-    preview_url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3',
-    artwork_url: null,
-    waveform_data: null,
-    status: 'published',
-    play_count: 1250,
-    metadata: null,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-    producer: { id: 'p1', email: '', role: 'producer', display_name: 'Metro Vibes', bio: null, avatar_url: null, status: 'active', stripe_connect_account_id: null, stripe_onboarding_complete: false, created_at: '', updated_at: '' },
-    licenses: [{ id: 'l1', beat_id: '1', type: 'basic', price: 2999, terms: null, files_included: ['mp3'], is_active: true, created_at: '', updated_at: '' }],
-  },
-];
+import { supabase } from '@/lib/supabase';
+import toast from 'react-hot-toast';
 
 export default function ArtistFavoritesPage() {
+  const [favorites, setFavorites] = useState<Beat[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const fetchFavorites = async () => {
+    setLoading(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+
+      const { data, error } = await supabase
+        .from('favorites')
+        .select(`
+          beat_id,
+          beat:beats (
+            *,
+            producer:profiles(*),
+            licenses(*)
+          )
+        `)
+        .eq('user_id', session.user.id)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      
+      const beats = data
+        .map(f => f.beat)
+        .filter(b => b !== null) as unknown as Beat[];
+      
+      setFavorites(beats);
+    } catch (error) {
+      console.error('Error fetching favorites:', error);
+      toast.error('Failed to load favorites');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchFavorites();
+  }, []);
+
+  const handleFavoriteToggle = async (beatId: string) => {
+    try {
+      // Optimistic remove for the favorites page
+      setFavorites(prev => prev.filter(b => b.id !== beatId));
+
+      const response = await fetch(`/api/beats/${beatId}/favorite`, { method: 'POST' });
+      const data = await response.json();
+      
+      if (data.error) {
+        toast.error('Failed to update favorite');
+        fetchFavorites(); // Rollback fetch
+      }
+    } catch (err) {
+      console.error('Favorite toggle error:', err);
+    }
+  };
+
   return (
     <div className="space-y-8">
       <div>
@@ -39,17 +74,27 @@ export default function ArtistFavoritesPage() {
         <p className="text-gray-400">Beats you&apos;ve saved for later</p>
       </div>
 
-      {demoFavorites.length > 0 ? (
+      {loading ? (
+        <div className="flex flex-col items-center justify-center py-20 gap-4">
+          <Loader2 className="w-8 h-8 text-primary animate-spin" />
+          <p className="text-gray-400 font-bold uppercase tracking-widest text-xs">Syncing Favorites...</p>
+        </div>
+      ) : favorites.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {demoFavorites.map((beat) => (
-            <BeatCard key={beat.id} beat={beat} isFavorited />
+          {favorites.map((beat) => (
+            <BeatCard 
+              key={beat.id} 
+              beat={beat as any} 
+              isFavorited={true} 
+              onFavorite={handleFavoriteToggle}
+            />
           ))}
         </div>
       ) : (
-        <Card className="p-12 text-center">
-          <Music className="w-16 h-16 text-gray-500 mx-auto mb-4" />
-          <h2 className="text-xl font-semibold text-white mb-2">No favorites yet</h2>
-          <p className="text-gray-400">Browse the marketplace and save beats you like</p>
+        <Card className="p-12 text-center bg-dark-900/50 border-white/5 backdrop-blur-sm">
+          <Music className="w-16 h-16 text-gray-700 mx-auto mb-4" />
+          <h2 className="text-xl font-bold text-white uppercase italic mb-2">No favorites yet</h2>
+          <p className="text-gray-400 font-medium text-sm">Browse the marketplace and save beats you like</p>
         </Card>
       )}
     </div>

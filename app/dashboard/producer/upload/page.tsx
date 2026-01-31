@@ -196,8 +196,8 @@ export default function UploadPage() {
           throw err;
         }
         
-        const r2BaseUrl = process.env.NEXT_PUBLIC_R2_PUBLIC_URL || 'https://118d3f495ee79c8de7fe0a297e16b33d.r2.cloudflarestorage.com/beatvault';
-        artwork_url = `${r2BaseUrl}/artwork/${key}`;
+        const r2BaseUrl = process.env.NEXT_PUBLIC_R2_PUBLIC_URL || 'https://beatvault.118d3f495ee79c8de7fe0a297e16b33d.r2.cloudflarestorage.com/beatvault';
+        artwork_url = `${r2BaseUrl}/${key}`;
       }
 
       // 2. Upload Main Audio
@@ -243,7 +243,7 @@ export default function UploadPage() {
         }
         throw err;
       }
-      const r2BaseUrl = process.env.NEXT_PUBLIC_R2_PUBLIC_URL || 'https://118d3f495ee79c8de7fe0a297e16b33d.r2.cloudflarestorage.com/beatvault';
+      const r2BaseUrl = process.env.NEXT_PUBLIC_R2_PUBLIC_URL || 'https://beatvault.118d3f495ee79c8de7fe0a297e16b33d.r2.cloudflarestorage.com/beatvault';
       const audio_url = `${r2BaseUrl}/${audioKey}`;
 
       // 2.5. Upload Project ZIP if exists (Issue 2)
@@ -275,8 +275,8 @@ export default function UploadPage() {
           throw err;
         }
         
-        const r2BaseUrl = process.env.NEXT_PUBLIC_R2_PUBLIC_URL || 'https://118d3f495ee79c8de7fe0a297e16b33d.r2.cloudflarestorage.com/beatvault';
-        stems_url = `${r2BaseUrl}/stems/${zipKey}`;
+        const r2BaseUrl = process.env.NEXT_PUBLIC_R2_PUBLIC_URL || 'https://beatvault.118d3f495ee79c8de7fe0a297e16b33d.r2.cloudflarestorage.com/beatvault';
+        stems_url = `${r2BaseUrl}/${zipKey}`;
       }
 
       // 3. Create record in Supabase

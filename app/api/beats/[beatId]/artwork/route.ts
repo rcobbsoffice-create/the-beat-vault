@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
-import { generateDownloadUrl } from '@/lib/r2';
+
+// Force dynamic rendering - no caching
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 export async function GET(
   request: NextRequest,
@@ -20,21 +23,23 @@ export async function GET(
       return NextResponse.json({ error: 'Artwork not found' }, { status: 404 });
     }
 
-    // Extract Key from URL
+    // Extract URL from database and redirect directly
     const targetUrl = beat.artwork_url;
-    const keyMatch = targetUrl.match(/(beats\/.*)/);
-    const key = keyMatch ? keyMatch[1] : null;
-
-    if (!key) {
-      console.error('Could not extract R2 key from URL:', targetUrl);
+    
+    if (!targetUrl) {
+      console.error('Artwork URL not found for beat:', beatId);
       return NextResponse.json({ error: 'Invalid storage URL format' }, { status: 500 });
     }
 
-    // Generate Signed URL
-    const signedUrl = await generateDownloadUrl(key);
-
-    // Redirect
-    return NextResponse.redirect(signedUrl);
+    console.log('Artwork API: Redirecting to public URL:', targetUrl);
+    
+    // Redirect directly to the public R2 URL
+    const response = NextResponse.redirect(targetUrl);
+    response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate');
+    response.headers.set('Pragma', 'no-cache');
+    response.headers.set('Expires', '0');
+    
+    return response;
 
   } catch (error: any) {
     console.error('Artwork Stream Error:', error);

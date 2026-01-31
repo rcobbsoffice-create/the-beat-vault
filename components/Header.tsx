@@ -26,7 +26,7 @@ export function Header() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-20">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-2">
+          <Link href="/" className="flex items-center gap-2 mr-8">
             <div className="relative w-[120px] h-[40px] flex items-center justify-center">
               <img src="/audiogenes-logo.png" alt="AudioGenes" className="w-full h-full object-contain" />
             </div>

@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
-import { generateDownloadUrl } from '@/lib/r2';
+
+// Force dynamic rendering - no caching
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 export async function GET(
   request: NextRequest,
@@ -8,45 +11,56 @@ export async function GET(
 ) {
   try {
     const { beatId } = await params;
+    console.log('🎵 Stream API called for beatId:', beatId);
 
     // 1. Fetch Beat
     const supabase = createServiceClient();
+    console.log('🔍 Querying database...');
+    
     const { data: beat, error } = await supabase
       .from('beats')
-      .select('audio_url, preview_url')
+      .select('id, title, audio_url, preview_url')
       .eq('id', beatId)
       .single();
 
+    console.log('📊 Database response:', { 
+      beat: beat ? {
+        id: beat.id,
+        title: beat.title,
+        audio_url: beat.audio_url?.substring(0, 80) + '...',
+        preview_url: beat.preview_url?.substring(0, 80) + '...' || 'null'
+      } : null,
+      error 
+    });
+
     if (error || !beat) {
+      console.error('❌ Stream API: Beat not found or DB error', error, beatId);
       return NextResponse.json({ error: 'Beat not found' }, { status: 404 });
     }
 
     // 2. Extract Key
-    // URL format expected: https://<account>.r2.cloudflarestorage.com/<bucket>/beats/...
-    // We need to extract: beats/...
-    // We look for the "beats/" pattern in the URL.
     const targetUrl = beat.preview_url || beat.audio_url;
+    console.log('🎯 Target URL:', targetUrl);
+    console.log('🌐 URL domain:', targetUrl?.split('/').slice(0, 3).join('/'));
     
     if (!targetUrl) {
+      console.error('❌ Stream API: No audio source found for beat', beatId);
       return NextResponse.json({ error: 'No audio source found' }, { status: 404 });
     }
 
-    const keyMatch = targetUrl.match(/(beats\/.*)/);
-    const key = keyMatch ? keyMatch[1] : null;
-
-    if (!key) {
-      console.error('Could not extract R2 key from URL:', targetUrl);
-      return NextResponse.json({ error: 'Invalid storage URL format' }, { status: 500 });
-    }
-
-    // 3. Generate Signed URL (valid for 1 hour)
-    const signedUrl = await generateDownloadUrl(key);
-
-    // 4. Redirect to the signed URL
-    return NextResponse.redirect(signedUrl);
+    // Since files are now public on R2.dev, redirect directly to the stored URL
+    console.log('✅ Redirecting to:', targetUrl);
+    
+    // Create response with cache control headers
+    const response = NextResponse.redirect(targetUrl);
+    response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate');
+    response.headers.set('Pragma', 'no-cache');
+    response.headers.set('Expires', '0');
+    
+    return response;
 
   } catch (error: any) {
-    console.error('Stream Error:', error);
+    console.error('❌ Stream API: Internal Error', error);
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }
