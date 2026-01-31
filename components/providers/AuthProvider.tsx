@@ -81,13 +81,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const signIn = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({
+    const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
 
-    if (!error) {
-      router.push('/dashboard');
+    if (!error && data.user) {
+      // Fetch profile to determine redirect
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', data.user.id)
+        .single();
+      
+      if (profile?.role === 'admin') {
+        router.push('/dashboard/admin');
+      } else if (profile?.role === 'producer') {
+        router.push('/dashboard/producer/beats');
+      } else {
+        router.push('/dashboard/artist/library');
+      }
     }
 
     return { error };

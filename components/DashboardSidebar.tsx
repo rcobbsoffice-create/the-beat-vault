@@ -60,7 +60,7 @@ export function DashboardSidebar() {
 
   const links: { [key: string]: SidebarLink[] } = {
     producer: [
-      { name: 'Overview', href: '/dashboard', icon: LayoutDashboard },
+      { name: 'Overview', href: '/dashboard/producer/beats', icon: LayoutDashboard },
       { name: 'Upload Beat', href: '/dashboard/producer/upload', icon: Upload, highlight: true },
       { name: 'My Catalog', href: '/dashboard/producer/beats', icon: Music },
       { name: 'Sales & Revenue', href: '/dashboard/producer/sales', icon: DollarSign },
@@ -70,7 +70,7 @@ export function DashboardSidebar() {
       { name: 'Settings', href: '/dashboard/settings', icon: Settings },
     ],
     artist: [
-      { name: 'Overview', href: '/dashboard', icon: LayoutDashboard },
+      { name: 'Overview', href: '/dashboard/artist/library', icon: LayoutDashboard },
       { name: 'My Insights', href: '/dashboard/artist/insights', icon: BrainCircuit },
       { name: 'Tell Your Story', href: '/dashboard/artist/questionnaire', icon: Sparkles, highlight: true },
       { name: 'Music Distribution', href: '/dashboard/artist/distribution', icon: Music },
