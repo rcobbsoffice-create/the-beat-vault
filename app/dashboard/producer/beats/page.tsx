@@ -20,7 +20,17 @@ import { useEffect } from 'react';
 import { usePlayer } from '@/stores/player';
 import { useCatalogStore } from '@/stores/catalog';
 import toast from 'react-hot-toast';
-import type { Beat } from '@/types/supabase';
+import type { Database } from '@/types/supabase';
+
+type Beat = Database['public']['Tables']['beats']['Row'] & {
+  producer?: Database['public']['Tables']['profiles']['Row'];
+  licenses?: Database['public']['Tables']['licenses']['Row'][];
+  favorite_count?: number;
+  play_count?: number;
+  view_count?: number;
+  is_sync_ready?: boolean;
+};
+
 import { Loader2 } from 'lucide-react';
 import { supabase } from '@/lib/supabase/client';
 

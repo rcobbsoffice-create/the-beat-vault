@@ -6,7 +6,15 @@ import { Play, Pause, Heart, ShoppingCart, Clock, Eye } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
 import { usePlayer } from '@/stores/player';
 import toast from 'react-hot-toast';
-import type { Beat } from '@/types/supabase';
+import type { Database } from '@/types/supabase';
+
+type Beat = Database['public']['Tables']['beats']['Row'] & {
+  producer?: Database['public']['Tables']['profiles']['Row'];
+  licenses?: Database['public']['Tables']['licenses']['Row'][];
+  favorite_count?: number;
+  play_count?: number;
+  view_count?: number;
+};
 
 import { sanitizeUrl } from '@/lib/utils/url';
 

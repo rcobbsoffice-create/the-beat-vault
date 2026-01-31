@@ -4,9 +4,17 @@ import { useState, useEffect } from 'react';
 import { BeatCard } from '@/components/BeatCard';
 import { Card } from '@/components/ui/Card';
 import { Music, Loader2 } from 'lucide-react';
-import type { Beat } from '@/types/supabase';
+import type { Database } from '@/types/supabase';
 import { supabase } from '@/lib/supabase';
 import toast from 'react-hot-toast';
+
+type Beat = Database['public']['Tables']['beats']['Row'] & {
+  producer?: Database['public']['Tables']['profiles']['Row'];
+  licenses?: Database['public']['Tables']['licenses']['Row'][];
+  favorite_count?: number;
+  play_count?: number;
+  view_count?: number;
+};
 
 export default function ArtistFavoritesPage() {
   const [favorites, setFavorites] = useState<Beat[]>([]);

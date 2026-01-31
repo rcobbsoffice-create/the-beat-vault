@@ -1,6 +1,16 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { Beat } from '@/types/supabase';
+import type { Database } from '@/types/supabase';
+
+type Beat = Database['public']['Tables']['beats']['Row'] & {
+  producer?: Database['public']['Tables']['profiles']['Row'];
+  licenses?: Database['public']['Tables']['licenses']['Row'][];
+  favorite_count?: number;
+  play_count?: number;
+  view_count?: number;
+  is_sync_ready?: boolean;
+};
+
 
 interface PlayerState {
   currentBeat: Beat | null;

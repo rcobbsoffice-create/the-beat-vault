@@ -9,8 +9,33 @@ import { AudioPlayer } from '@/components/AudioPlayer';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import { Search, SlidersHorizontal, Grid, List, ChevronDown, X } from 'lucide-react';
-import type { Beat, BeatFilters, BeatSortOption } from '@/types/supabase';
+import type { Database } from '@/types/supabase';
 import { supabase } from '@/lib/supabase';
+import toast from 'react-hot-toast';
+
+type BeatSortOption = 'newest' | 'popular' | 'price_asc' | 'price_desc';
+
+interface BeatFilters {
+  genre?: string;
+  search?: string;
+  bpmMin?: number;
+  bpmMax?: number;
+  key?: string;
+  isSyncReady?: boolean;
+}
+
+type Beat = Database['public']['Tables']['beats']['Row'] & {
+  producer?: Database['public']['Tables']['profiles']['Row'];
+  licenses?: Database['public']['Tables']['licenses']['Row'][];
+  favorite_count?: number;
+  play_count?: number;
+  view_count?: number;
+  is_sync_ready?: boolean;
+  isrc?: string | null;
+  upc?: string | null;
+  label?: string | null;
+  publisher?: string | null;
+};
 
 const genres = ['Hip Hop', 'Trap', 'R&B', 'Pop', 'Lo-Fi', 'Drill', 'Afrobeat', 'Dance'];
 const moods = ['Dark', 'Energetic', 'Chill', 'Aggressive', 'Melodic', 'Emotional', 'Happy'];
@@ -31,6 +56,7 @@ const demoBeats: Beat[] = [
     audio_url: '/demo/beat1.wav',
     preview_url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3',
     artwork_url: null,
+    stems_url: null,
     waveform_data: null,
     status: 'published',
     play_count: 1250,
@@ -61,6 +87,7 @@ const demoBeats: Beat[] = [
     audio_url: '/demo/beat2.wav',
     preview_url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3',
     artwork_url: null,
+    stems_url: null,
     waveform_data: null,
     status: 'published',
     play_count: 890,
@@ -90,6 +117,7 @@ const demoBeats: Beat[] = [
     audio_url: '/demo/beat3.wav',
     preview_url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3',
     artwork_url: null,
+    stems_url: null,
     waveform_data: null,
     status: 'published',
     play_count: 2100,
@@ -120,6 +148,7 @@ const demoBeats: Beat[] = [
     audio_url: '/demo/beat4.wav',
     preview_url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3',
     artwork_url: null,
+    stems_url: null,
     waveform_data: null,
     status: 'published',
     play_count: 560,

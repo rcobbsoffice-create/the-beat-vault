@@ -24,7 +24,21 @@ import {
 import { usePlayer } from '@/stores/player';
 import toast from 'react-hot-toast';
 import { supabase } from '@/lib/supabase';
-import type { Beat } from '@/types/supabase';
+import type { Database } from '@/types/supabase';
+
+type BeatRow = Database['public']['Tables']['beats']['Row'];
+type LicenseRow = Database['public']['Tables']['licenses']['Row'];
+
+type ProfileRow = Database['public']['Tables']['profiles']['Row'];
+
+type Beat = BeatRow & {
+  favorite_count?: number;
+  play_count?: number;
+  view_count?: number;
+  licenses?: LicenseRow[];
+  is_sync_ready?: boolean;
+  producer?: ProfileRow;
+};
 import { sanitizeUrl } from '@/lib/utils/url';
 import Image from 'next/image';
 
@@ -243,7 +257,7 @@ export default function BeatDetailsPage({ params }: { params: Promise<{ id: stri
                 <div className="flex items-center gap-3 mb-4">
                   {beat.is_sync_ready && <Badge variant="primary" className="bg-primary/10 text-primary border-none">Exclusive Available</Badge>}
                   <span className="text-gray-500 flex items-center gap-1.5 text-sm">
-                    <Calendar className="w-4 h-4" /> {new Date(beat.created_at).toLocaleDateString()}
+                    <Calendar className="w-4 h-4" /> {new Date(beat.created_at || new Date()).toLocaleDateString()}
                   </span>
                 </div>
                 <h1 className="text-4xl md:text-6xl font-black text-white mb-4 italic tracking-tight">
