@@ -43,7 +43,7 @@ function SignupContent() {
     <div className="glass border border-white/10 rounded-2xl p-8 backdrop-blur-xl">
       {/* Logo */}
       <div className="flex items-center justify-center gap-2 mb-8">
-        <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
+        <div className="w-10 h-10 rounded-lg bg-linear-to-br from-primary to-secondary flex items-center justify-center">
           <Music className="w-6 h-6 text-white" />
         </div>
         <span className="text-xl font-bold gradient-text">AudioGenes</span>
@@ -156,7 +156,7 @@ export default function SignupPage() {
     <div className="min-h-screen flex items-center justify-center bg-dark-950 px-4 py-12">
       {/* Background */}
       <div className="absolute inset-0">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-dark-950 to-secondary/10" />
+        <div className="absolute inset-0 bg-linear-to-br from-primary/10 via-dark-950 to-secondary/10" />
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-primary/20 rounded-full blur-[120px] pointer-events-none" />
       </div>
 

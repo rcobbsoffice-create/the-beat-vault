@@ -91,7 +91,13 @@ export function AudioPlayer() {
     });
 
     wavesurfer.on('error', (err) => {
-      console.error('WaveSurfer error:', err);
+      console.error('WaveSurfer error detail:', {
+        message: err,
+        beatId: currentBeat.id,
+        src: audioSrc
+      });
+      // Import toast if possible, otherwise just log
+      import('react-hot-toast').then(m => m.default.error(`WaveSurfer error: ${err}`));
     });
 
     wavesurfer.on('audioprocess', () => {
@@ -124,7 +130,10 @@ export function AudioPlayer() {
     if (!wavesurferRef.current || !isReady) return;
 
     if (isPlaying) {
-      wavesurferRef.current.play().catch(e => console.warn('Play failed', e));
+      wavesurferRef.current.play().catch(e => {
+        console.warn('Play failed:', e);
+        import('react-hot-toast').then(m => m.default.error('Playback failed. Please try again.'));
+      });
     } else {
       wavesurferRef.current.pause();
     }
@@ -166,11 +175,14 @@ export function AudioPlayer() {
         crossOrigin="anonymous" 
         onEnded={playNext}
         onError={(e) => {
-          console.error('Audio playback error', e);
           const target = e.target as HTMLAudioElement;
-          console.error('Audio Error Code:', target.error?.code, target.error?.message);
-          // Optional: You might want to import toast from react-hot-toast if not available
-          // toast.error(`Playback failed: ${target.error?.message || 'Unknown error'}`);
+          const errorMsg = target.error?.message || 'Unknown network error';
+          console.error('Audio playback error:', {
+            code: target.error?.code,
+            message: errorMsg,
+            src: audioSrc
+          });
+          import('react-hot-toast').then(m => m.default.error(`Audio error: ${errorMsg}`));
         }}
       />
       

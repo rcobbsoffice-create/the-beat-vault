@@ -26,6 +26,8 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase/client';
 import toast from 'react-hot-toast';
 import { format } from 'date-fns';
+import { createAdminUser } from '@/app/actions/admin';
+
 
 export default function AdminUsersPage() {
   const [users, setUsers] = useState<any[]>([]);
@@ -110,21 +112,10 @@ export default function AdminUsersPage() {
     const toastId = toast.loading('Creating user...');
 
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) throw new Error('No active session');
+      const result = await createAdminUser(formData);
 
-      const res = await fetch('/api/admin/users/invite', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session.access_token}`
-        },
-        body: JSON.stringify(formData)
-      });
-
-      if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error || 'Failed to create user');
+      if (!result.success) {
+        throw new Error('Failed to create user');
       }
 
       toast.success('User created successfully', { id: toastId });
