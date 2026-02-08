@@ -1,11 +1,11 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, memo } from 'react';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { supabase } from '@/lib/supabase/client';
 import toast from 'react-hot-toast';
-import { Upload, X, Check, Loader2, Music, Layers, Image as ImageIcon } from 'lucide-react';
+import { Upload, X, Check, Loader2, Music, Layers, Image as ImageIcon, Sparkles } from 'lucide-react';
 
 interface ProducerProfile {
   id: string;
@@ -18,7 +18,7 @@ interface AdminBeatUploadFormProps {
   onCancel: () => void;
 }
 
-export function AdminBeatUploadForm({ onSuccess, onCancel }: AdminBeatUploadFormProps) {
+export const AdminBeatUploadForm = memo(function AdminBeatUploadForm({ onSuccess, onCancel }: AdminBeatUploadFormProps) {
   const [loading, setLoading] = useState(false);
   const [producers, setProducers] = useState<ProducerProfile[]>([]);
   const [selectedProducerId, setSelectedProducerId] = useState('');
@@ -27,6 +27,7 @@ export function AdminBeatUploadForm({ onSuccess, onCancel }: AdminBeatUploadForm
   const [audioFile, setAudioFile] = useState<File | null>(null);
   const [artworkFile, setArtworkFile] = useState<File | null>(null);
   const [stemsFile, setStemsFile] = useState<File | null>(null);
+  const [artworkPreviewUrl, setArtworkPreviewUrl] = useState<string | null>(null);
 
   // Metadata States
   const [title, setTitle] = useState('');
@@ -43,6 +44,66 @@ export function AdminBeatUploadForm({ onSuccess, onCancel }: AdminBeatUploadForm
     exclusive: { enabled: false, price: 199.99 },
     sync: { enabled: false, price: 499.99 },
   });
+
+  const handleAutoFill = async () => {
+    if (!audioFile) {
+        toast.error('Please upload an audio file first');
+        return;
+    }
+
+    const toastId = toast.loading('AI is analyzing the beat...');
+    try {
+        // 1. Convert audio file to Base64
+        const reader = new FileReader();
+        const fileBase64 = await new Promise<string>((resolve) => {
+            reader.onloadend = () => resolve(reader.result as string);
+            reader.readAsDataURL(audioFile);
+        });
+
+        // 2. Perform AI Analysis
+        const analyzeRes = await fetch('/api/ai/analyze', {
+            method: 'POST',
+            body: JSON.stringify({ 
+                filename: audioFile.name,
+                fileBase64,
+                contentType: audioFile.type
+            })
+        });
+        
+        const aiData = await analyzeRes.json();
+        if (aiData.error) throw new Error(aiData.error);
+        
+        // 3. Update Text Fields
+        setTitle(aiData.title || title);
+        setGenre(aiData.genre || genre);
+        setBpm(aiData.bpm?.toString() || bpm);
+        setKey(aiData.key || key);
+        setDescription(aiData.description || description);
+        setMoodTags(aiData.moods?.join(', ') || moodTags);
+
+        // 4. Generate Artwork
+        if (aiData.artwork_prompt) {
+            toast.loading('Generating custom artwork...', { id: toastId });
+            const artRes = await fetch('/api/ai/artwork', {
+                method: 'POST',
+                body: JSON.stringify({ 
+                    prompt: aiData.artwork_prompt,
+                    beatId: 'temp' 
+                })
+            });
+            const artData = await artRes.json();
+            
+            if (artData.url) {
+                setArtworkPreviewUrl(artData.url);
+            }
+        }
+
+        toast.success('Sync Complete: AI has prepared your release!', { id: toastId });
+    } catch (err: any) {
+        console.error('Auto-fill error:', err);
+        toast.error(err.message || 'Failed to analyze track', { id: toastId });
+    }
+  };
 
   useEffect(() => {
     fetchProducers();
@@ -150,6 +211,8 @@ export function AdminBeatUploadForm({ onSuccess, onCancel }: AdminBeatUploadForm
 
       if (artworkFile) {
         artworkUrl = await uploadToR2(artworkFile, 'artwork');
+      } else if (artworkPreviewUrl) {
+        artworkUrl = artworkPreviewUrl;
       }
       if (stemsFile) {
         stemsUrl = await uploadToR2(stemsFile, 'stems');
@@ -197,10 +260,24 @@ export function AdminBeatUploadForm({ onSuccess, onCancel }: AdminBeatUploadForm
   return (
     <div className="bg-dark-900 border border-white/10 rounded-2xl p-6 max-h-[80vh] overflow-y-auto w-full max-w-2xl mx-auto">
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-black uppercase italic">Add New Beat</h2>
-        <button onClick={onCancel} className="text-gray-400 hover:text-white">
-          <X className="w-6 h-6" />
-        </button>
+        <div>
+            <h2 className="text-2xl font-black uppercase italic">Add New Beat</h2>
+            <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest mt-1">Direct upload to catalog</p>
+        </div>
+        <div className="flex items-center gap-3">
+            {audioFile && (
+                <button 
+                   onClick={handleAutoFill}
+                   className="flex items-center gap-2 px-3 py-1.5 bg-primary/10 text-primary hover:bg-primary hover:text-white rounded-lg transition-all text-[10px] font-black uppercase tracking-wider border border-primary/20"
+                >
+                   <Sparkles className="w-3 h-3" />
+                   AI Auto-Fill
+                </button>
+            )}
+            <button onClick={onCancel} className="text-gray-400 hover:text-white p-2">
+                <X className="w-6 h-6" />
+            </button>
+        </div>
       </div>
 
       <div className="space-y-6">
@@ -245,11 +322,15 @@ export function AdminBeatUploadForm({ onSuccess, onCancel }: AdminBeatUploadForm
                   accept="image/*" 
                   className="hidden" 
                   id="art-upload"
-                  onChange={(e) => setArtworkFile(e.target.files?.[0] || null)}
+                  onChange={(e) => {
+                    const file = e.target.files?.[0] || null;
+                    setArtworkFile(file);
+                    if (file) setArtworkPreviewUrl(URL.createObjectURL(file));
+                  }}
                 />
                 <label htmlFor="art-upload" className="cursor-pointer flex flex-col items-center gap-2">
-                  {artworkFile ? (
-                    <img src={URL.createObjectURL(artworkFile)} className="w-8 h-8 object-cover rounded" />
+                  {artworkPreviewUrl ? (
+                    <img src={artworkPreviewUrl} className="w-8 h-8 object-cover rounded" />
                   ) : (
                     <ImageIcon className="w-8 h-8 text-gray-500" />
                   )}

@@ -8,7 +8,7 @@ export async function PATCH(
   try {
     const { userId } = await params;
     const body = await request.json();
-    const { role, status } = body;
+    const { role, status, is_top_producer, display_name, bio, avatar_url } = body;
 
     const authHeader = request.headers.get('authorization');
     if (!authHeader) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -34,6 +34,10 @@ export async function PATCH(
     const updateData: any = {};
     if (role) updateData.role = role;
     if (status) updateData.status = status;
+    if (typeof is_top_producer === 'boolean') updateData.is_top_producer = is_top_producer;
+    if (display_name !== undefined) updateData.display_name = display_name;
+    if (bio !== undefined) updateData.bio = bio;
+    if (avatar_url !== undefined) updateData.avatar_url = avatar_url;
 
     if (Object.keys(updateData).length === 0) {
       return NextResponse.json({ error: 'No update data provided' }, { status: 400 });

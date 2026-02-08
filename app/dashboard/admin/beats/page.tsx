@@ -25,7 +25,7 @@ import {
   Share2,
   Trash2
 } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import toast from 'react-hot-toast';
 import { supabase } from '@/lib/supabase/client';
 import { format } from 'date-fns';
@@ -41,9 +41,13 @@ export default function AdminBeatsPage() {
   const [editForm, setEditForm] = useState<any>(null);
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [producers, setProducers] = useState<any[]>([]);
-  const { currentBeat, isPlaying, setCurrentBeat } = usePlayer();
+  
+  // PERFORMANCE FIX: Only subscribe to need player state to avoid re-renders on 'currentTime'
+  const currentBeat = usePlayer(state => state.currentBeat);
+  const isPlaying = usePlayer(state => state.isPlaying);
+  const setCurrentBeat = usePlayer(state => state.setCurrentBeat);
 
-  const fetchBeats = async () => {
+  const fetchBeats = useCallback(async () => {
     try {
       setIsLoading(true);
       
@@ -65,7 +69,6 @@ export default function AdminBeatsPage() {
 
       const { data, error } = await query;
       if (error) throw error;
-      console.log('Fetched beats data:', data?.map(b => ({ id: b.id, title: b.title, audio_url: b.audio_url?.substring(0, 60) + '...' })));
       setBeats(data || []);
     } catch (err: any) {
       console.error('Fetch error:', err);
@@ -73,7 +76,7 @@ export default function AdminBeatsPage() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [statusFilter, searchQuery]); // Stable dependencies
 
   useEffect(() => {
     fetchBeats();
@@ -278,11 +281,8 @@ export default function AdminBeatsPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
             <div className="w-full max-w-2xl animate-in fade-in zoom-in duration-200">
                 <AdminBeatUploadForm 
-                    onCancel={() => setShowUploadModal(false)}
-                    onSuccess={() => {
-                        setShowUploadModal(false);
-                        fetchBeats();
-                    }}
+                    onCancel={handleCancelUpload}
+                    onSuccess={handleUploadSuccess}
                 />
             </div>
         </div>
@@ -337,36 +337,68 @@ export default function AdminBeatsPage() {
                         {/* AI Toolbar */}
                         <div className="flex justify-between items-center mb-6 border-b border-white/5 pb-4">
                            <h4 className="text-sm font-black uppercase text-white tracking-widest">Edit Mode</h4>
-                           <button 
-                             onClick={async () => {
-                               const toastId = toast.loading('Generating metadata...');
-                               try {
-                                 const res = await fetch('/api/ai/metadata', {
-                                   method: 'POST',
-                                   body: JSON.stringify({ 
-                                     title: editForm.title, 
-                                     producer: editForm.producer?.display_name 
-                                   })
-                                 });
-                                 const data = await res.json();
-                                 if (data.error) throw new Error(data.error);
-                                 
-                                 setEditForm((prev: any) => ({
-                                   ...prev,
-                                   genre: data.genre || prev.genre,
-                                   description: data.description || prev.description,
-                                   mood_tags: data.moods || prev.mood_tags,
-                                   bpm: data.bpm_estimate || prev.bpm
-                                 }));
-                                 toast.success('Metadata auto-filled!', { id: toastId });
-                               } catch (err: any) {
-                                 toast.error(err.message, { id: toastId });
-                               }
-                             }}
-                             className="flex items-center gap-2 px-3 py-1.5 bg-primary/10 text-primary hover:bg-primary hover:text-white rounded-lg transition-all text-xs font-bold uppercase tracking-wider"
-                           >
-                             ✨ Auto-Fill
-                           </button>
+                            <button 
+                              onClick={async () => {
+                                const toastId = toast.loading('AI is listening to the track...');
+                                try {
+                                  // Perform AI Analysis using the audio URL directly
+                                  // This avoids fetching the large audio file in the browser
+                                  const analyzeRes = await fetch('/api/ai/analyze', {
+                                    method: 'POST',
+                                    body: JSON.stringify({ 
+                                      filename: editForm.title || 'Unknown Beat',
+                                      audioUrl: editForm.audio_url // Let backend fetch it
+                                    })
+                                  });
+                                  
+                                  const aiData = await analyzeRes.json();
+                                  if (aiData.error) throw new Error(aiData.error);
+                                  
+                                  // 3. Generate Artwork if prompt available
+                                  let artworkUrl = editForm.artwork_url;
+                                  if (aiData.artwork_prompt) {
+                                    toast.loading('Generating matching artwork...', { id: toastId });
+                                    const artRes = await fetch('/api/ai/artwork', {
+                                      method: 'POST',
+                                      body: JSON.stringify({ 
+                                        prompt: aiData.artwork_prompt,
+                                        beatId: editingId 
+                                      })
+                                    });
+                                    
+                                    const artData = await artRes.json();
+                                    if (artData.error) {
+                                      console.error('Artwork generation error:', artData.error, artData.details);
+                                      toast.error(`Artwork error: ${artData.error}`, { id: toastId, duration: 2000 });
+                                      // Continue with metadata even if artwork fails
+                                    } else if (artData.url) {
+                                      console.log('AI Artwork Generated:', artData.url);
+                                      artworkUrl = artData.url;
+                                    }
+                                  }
+
+                                  // 4. Update Form
+                                  setEditForm((prev: any) => ({
+                                    ...prev,
+                                    title: aiData.title || prev.title,
+                                    genre: aiData.genre || prev.genre,
+                                    description: aiData.description || prev.description,
+                                    mood_tags: aiData.moods || prev.mood_tags,
+                                    bpm: aiData.bpm || prev.bpm,
+                                    key: aiData.key || prev.key,
+                                    artwork_url: artworkUrl
+                                  }));
+
+                                  toast.success('Sync Complete: AI has analyzed your track!', { id: toastId });
+                                } catch (err: any) {
+                                  console.error('Auto-fill error:', err);
+                                  toast.error(err.message || 'Failed to analyze track', { id: toastId });
+                                }
+                              }}
+                              className="flex items-center gap-2 px-3 py-1.5 bg-primary/10 text-primary hover:bg-primary hover:text-white rounded-lg transition-all text-xs font-bold uppercase tracking-wider"
+                            >
+                              ✨ Auto-Fill
+                            </button>
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

@@ -3,23 +3,34 @@ import { model } from '@/lib/ai/gemini';
 
 export async function POST(request: NextRequest) {
   try {
-    const { filename, fileBase64, contentType } = await request.json();
+    const { filename, fileBase64, contentType, audioUrl } = await request.json();
 
     console.log('--- AI Analysis Request ---');
     console.log('Filename:', filename);
-    console.log('Content-Type:', contentType);
-    console.log('Base64 Length:', fileBase64 ? fileBase64.length : 'MISSING');
-
-    if (!filename) {
-      return NextResponse.json({ error: 'Filename is required' }, { status: 400 });
-    }
-
+    console.log('Audio URL:', audioUrl ? 'PROVIDED' : 'NONE');
+    
     // Initialize prompt parts
     let promptParts: any[] = [];
     
-    // If we have actual file data, include it
-    if (fileBase64 && contentType) {
-      // Remove data URL prefix if present
+    // 1. If we have a URL, fetch it server-side to bypass CORS/Size limits in browser
+    if (audioUrl) {
+      console.log('Fetching audio from URL:', audioUrl);
+      const audioRes = await fetch(audioUrl);
+      if (!audioRes.ok) throw new Error('Failed to fetch audio from URL');
+      
+      const buffer = await audioRes.arrayBuffer();
+      const base64Data = Buffer.from(buffer).toString('base64');
+      const detectedMime = audioRes.headers.get('Content-Type') || 'audio/mpeg';
+
+      promptParts.push({
+        inlineData: {
+          data: base64Data,
+          mimeType: detectedMime
+        }
+      });
+    } 
+    // 2. Fallback to provided base64 if no URL
+    else if (fileBase64 && contentType) {
       const base64Data = fileBase64.replace(/^data:audio\/\w+;base64,/, '');
       
       promptParts.push({
@@ -28,33 +39,48 @@ export async function POST(request: NextRequest) {
           mimeType: contentType
         }
       });
+    }
+
+    if (promptParts.length > 0) {
       promptParts.push("Listen to this audio track.");
     }
 
     promptParts.push(`
-      Analyze this beat (Filename: "${filename}") and generate JSON metadata.
+      As an expert musicologist and audio engineer, perform a technical analysis of this audio file (Filename: "${filename}"). 
+      Focus on extracting highly reliable metadata for a professional music library.
+
       STRICT JSON FORMAT ONLY. No markdown blocks.
       
-      Extract/Generate:
-      - title: A creative, commercial title based on the vibe (not just the filename).
-      - bpm: Estimated BPM (integer).
-      - key: Estimated Key (e.g. C Minor).
-      - genre: Primary genre (Hip Hop, Trap, R&B, Drill, etc.).
-      - moods: Array of 3-5 mood strings.
-      - description: A compelling 2-sentence marketing description.
-      - suggested_label: A creative imaginary label name fitting the style.
-      - suggested_publisher: A creative imaginary publisher name.
+      Technical Analysis Instructions:
+      1. BPM DETECTION: Identify the dominant pulse or transient pattern. Be precise. Even for complex rhythms, determine the core tempo.
+      2. KEY & SCALE DETECTION: Identify the tonic center (root note) and the scale/mode (e.g., Minor, Major, Phrygian). Use standard notation (e.g., "C# Minor").
+      3. MUSICAL VIBE: Identify the primary genre and specific sub-genres or styles.
+      4. ARTWORK PROMPT: Create a detailed, atmospheric prompt for a high-end album cover based on the sonic textures detected.
+
+      Return the results in this JSON structure:
+      {
+        "title": "Creative Title",
+        "bpm": number (integer),
+        "key": "Note + Scale (e.g. Eb Major)",
+        "genre": "Primary Genre",
+        "moods": ["Mood1", "Mood2", "Mood3"],
+        "description": "Short marketing description (max 2 sentences)",
+        "suggested_label": "Creative imaginary label",
+        "suggested_publisher": "Creative imaginary publisher",
+        "artwork_prompt": "Vivid artistic prompt for AI image generation"
+      }
 
       Example JSON:
       {
         "title": "Neon Nights",
-        "bpm": 140,
-        "key": "F# Minor",
+        "bpm": 128,
+        "key": "G Minor",
         "genre": "Synthwave",
-        "moods": ["Retro", "Driving", "Nocturnal"],
-        "description": "A driving synthwave track with pulsating basslines. Perfect for night drives and retro visuals.",
-        "suggested_label": "Midnight Run Records",
-        "suggested_publisher": "Retro Wave Publishing"
+        "moods": ["Atmospheric", "Driving", "Nostalgic"],
+        "description": "A driving synthwave track with pulsating basslines and lush pads. Perfect for retro-futuristic visuals.",
+        "suggested_label": "Quartz Records",
+        "suggested_publisher": "Midnight Music Publishing",
+        "artwork_prompt": "A cinematic retro-futuristic city at night with purple neon lights and a sports car driving into the distance, highly detailed digital art."
       }
     `);
 

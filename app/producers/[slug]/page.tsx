@@ -33,39 +33,58 @@ export default function ProducerProfilePage({ params }: { params: Promise<{ slug
       setLoading(true);
       setError(null);
       try {
-        // 1. Find profile by display_name (case-insensitive slug match)
-        // Note: In a production app, we should use a dedicated 'slug' field.
-        // For now, we'll try to match the display_name.
-        const displayName = slug.split('-').join(' ');
+        // 1. Try to find profile by ID first (if slug is a UUID)
+        const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(slug);
         
-        const { data: profiles, error: profileError } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('role', 'producer')
-          .ilike('display_name', displayName)
-          .limit(1);
+        let profileData = null;
 
-        if (profileError) throw profileError;
-        
-        if (!profiles || profiles.length === 0) {
-          // Try a second attempt: direct match if ilike fails or slug is weird
-          const { data: secondAttempt } = await supabase
+        if (isUUID) {
+          const { data, error: idError } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', slug)
+            .single();
+          
+          if (!idError && data) {
+            profileData = data;
+          }
+        }
+
+        // 2. If no profile found by ID, try matching display_name (slug match)
+        if (!profileData) {
+          const displayName = slug.split('-').join(' ');
+          const { data: profiles, error: profileError } = await supabase
             .from('profiles')
             .select('*')
             .eq('role', 'producer')
-            .eq('display_name', displayName)
+            .ilike('display_name', displayName)
             .limit(1);
+
+          if (!profileError && profiles && profiles.length > 0) {
+            profileData = profiles[0];
+          } else {
+            // Last ditch effort: exact match
+            const { data: exactMatch } = await supabase
+              .from('profiles')
+              .select('*')
+              .eq('role', 'producer')
+              .eq('display_name', displayName)
+              .limit(1);
             
-          if (!secondAttempt || secondAttempt.length === 0) {
-            setError('Producer not found');
-            return;
+            if (exactMatch && exactMatch.length > 0) {
+              profileData = exactMatch[0];
+            }
           }
-          setProducer(secondAttempt[0]);
-        } else {
-          setProducer(profiles[0]);
         }
 
-        const profileId = profiles?.[0]?.id || (producer?.id);
+        if (!profileData) {
+          setError('Producer not found');
+          return;
+        }
+
+        setProducer(profileData);
+
+        const profileId = profileData.id;
         if (!profileId) return;
 
         // 2. Fetch Beats for this producer

@@ -20,7 +20,11 @@ import {
   XCircle,
   Clock,
   X,
-  Plus
+  Plus,
+  Star,
+  Camera,
+  Upload,
+  Key
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase/client';
@@ -44,6 +48,18 @@ export default function AdminUsersPage() {
     displayName: '',
     role: 'artist',
     status: 'active'
+  });
+
+  // Edit User Modal State
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editFormData, setEditFormData] = useState({
+    id: '',
+    email: '',
+    display_name: '',
+    role: 'artist',
+    status: 'active',
+    bio: '',
+    avatar_url: ''
   });
 
   const fetchData = async () => {
@@ -124,6 +140,99 @@ export default function AdminUsersPage() {
       fetchData();
     } catch (err: any) {
       toast.error(err.message, { id: toastId });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleResetPassword = async (userId: string, email: string) => {
+    if (!confirm(`Are you sure you want to send a password reset email to ${email}?`)) return;
+
+    const toastId = toast.loading('Sending reset email...');
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error('No active session');
+
+      const res = await fetch(`/api/admin/users/${userId}/reset-password`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`
+        }
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || 'Failed to send reset email');
+      }
+
+      toast.success('Password reset email sent!', { id: toastId });
+    } catch (err: any) {
+      console.error('Reset error:', err);
+      toast.error(err.message, { id: toastId });
+    }
+  };
+
+  const handleEditClick = (user: any) => {
+    setEditFormData({
+      id: user.id,
+      email: user.email,
+      display_name: user.display_name || '',
+      role: user.role,
+      status: user.status || 'active',
+      bio: user.bio || '',
+      avatar_url: user.avatar_url || ''
+    });
+    setIsEditModalOpen(true);
+  };
+
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      toast.error('Please upload an image file');
+      return;
+    }
+
+    const toastId = toast.loading('Uploading profile picture...');
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${editFormData.id}-${Math.random()}.${fileExt}`;
+      const filePath = `${fileName}`;
+
+      const { data, error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(filePath);
+
+      setEditFormData(prev => ({ ...prev, avatar_url: publicUrl }));
+      toast.success('Image uploaded successfully', { id: toastId });
+    } catch (err: any) {
+      console.error('Upload error:', err);
+      toast.error('Failed to upload image', { id: toastId });
+    }
+  };
+
+  const handleEditSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    
+    try {
+      await handleUpdateUser(editFormData.id, {
+        display_name: editFormData.display_name,
+        role: editFormData.role,
+        status: editFormData.status,
+        bio: editFormData.bio,
+        avatar_url: editFormData.avatar_url
+      });
+      setIsEditModalOpen(false);
+    } catch (err) {
+      // Error handled in handleUpdateUser
     } finally {
       setIsSubmitting(false);
     }
@@ -248,7 +357,15 @@ export default function AdminUsersPage() {
                           )}
                         </div>
                         <div>
-                          <p className="font-medium text-white">{user.display_name || 'Anonymous'}</p>
+                          <p className="font-medium text-white flex items-center gap-2">
+                            {user.display_name || 'Anonymous'}
+                            {user.is_top_producer && (
+                              <Badge className="bg-accent/10 text-accent border-accent/20 px-1 py-0 text-[10px]">
+                                <Star className="w-2.5 h-2.5 fill-current mr-1" />
+                                Top Producer
+                              </Badge>
+                            )}
+                          </p>
                           <p className="text-xs text-gray-500">{user.email}</p>
                         </div>
                       </div>
@@ -289,6 +406,19 @@ export default function AdminUsersPage() {
                             <UserCheck className="w-4 h-4" />
                           </button>
                         )}
+                        {user.role === 'producer' && (
+                          <button 
+                            className={`p-2 rounded-lg transition-colors ${
+                              user.is_top_producer 
+                                ? 'bg-accent/20 text-accent hover:bg-accent/30' 
+                                : 'hover:bg-accent/10 text-gray-400 hover:text-accent'
+                            }`}
+                            title={user.is_top_producer ? 'Remove from Top Producers' : 'Mark as Top Producer'}
+                            onClick={() => handleUpdateUser(user.id, { is_top_producer: !user.is_top_producer })}
+                          >
+                            <Star className={`w-4 h-4 ${user.is_top_producer ? 'fill-current' : ''}`} />
+                          </button>
+                        )}
                         {user.status !== 'suspended' ? (
                           <button 
                             className="p-2 hover:bg-error/10 rounded-lg text-gray-400 hover:text-error transition-colors" 
@@ -310,10 +440,24 @@ export default function AdminUsersPage() {
                             <UserCheck className="w-4 h-4" />
                           </button>
                         )}
-                        <button className="p-2 hover:bg-white/10 rounded-lg text-gray-400 transition-colors" title="Change Role">
+                        <button 
+                          className="p-2 hover:bg-white/10 rounded-lg text-gray-400 transition-colors" 
+                          title="Change Role"
+                        >
                           <Shield className="w-4 h-4" />
                         </button>
-                        <button className="p-2 hover:bg-white/10 rounded-lg text-gray-400 transition-colors">
+                        <button 
+                          className="p-2 hover:bg-white/10 rounded-lg text-gray-400 transition-colors" 
+                          title="Reset Password"
+                          onClick={() => handleResetPassword(user.id, user.email)}
+                        >
+                          <Key className="w-4 h-4" />
+                        </button>
+                        <button 
+                          className="p-2 hover:bg-white/10 rounded-lg text-gray-400 transition-colors"
+                          onClick={() => handleEditClick(user)}
+                          title="Edit User Details"
+                        >
                           <MoreVertical className="w-4 h-4" />
                         </button>
                       </div>
@@ -416,6 +560,128 @@ export default function AdminUsersPage() {
                     <Loader2 className="w-4 h-4 animate-spin" />
                   ) : (
                     'Create User'
+                  )}
+                </Button>
+              </div>
+            </form>
+          </Card>
+        </div>
+      )}
+      {/* Edit User Modal */}
+      {isEditModalOpen && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <Card className="w-full max-w-md bg-dark-900 border-white/10 shadow-2xl animate-in fade-in zoom-in duration-200">
+            <div className="flex items-center justify-between p-6 border-b border-white/5">
+              <h2 className="text-xl font-bold text-white">Edit User Details</h2>
+              <button 
+                onClick={() => setIsEditModalOpen(false)}
+                className="text-gray-400 hover:text-white transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            
+            <form onSubmit={handleEditSubmit} className="p-6 space-y-4">
+              {/* Avatar Upload */}
+              <div className="flex flex-col items-center gap-4 mb-6">
+                <div className="relative group">
+                  <div className="w-24 h-24 rounded-full bg-dark-800 border-2 border-white/10 flex items-center justify-center overflow-hidden">
+                    {editFormData.avatar_url ? (
+                      <img src={editFormData.avatar_url} alt="" className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="text-3xl font-bold text-primary">
+                        {editFormData.display_name?.charAt(0) || 'U'}
+                      </div>
+                    )}
+                  </div>
+                  <label className="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer rounded-full">
+                    <Camera className="w-6 h-6 text-white" />
+                    <input 
+                      type="file" 
+                      className="hidden" 
+                      accept="image/*"
+                      onChange={handleAvatarUpload}
+                    />
+                  </label>
+                </div>
+                <p className="text-xs text-gray-500">Click to update profile picture</p>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-300">Email Address (Read-only)</label>
+                <Input 
+                  type="email"
+                  disabled
+                  className="bg-dark-950 border-white/10 text-gray-400 cursor-not-allowed"
+                  value={editFormData.email}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-300">Display Name</label>
+                <Input 
+                  placeholder="John Doe"
+                  className="bg-dark-950 border-white/10 text-white"
+                  value={editFormData.display_name}
+                  onChange={e => setEditFormData({...editFormData, display_name: e.target.value})}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-300">Bio</label>
+                <textarea 
+                  placeholder="Tell us about this user..."
+                  className="w-full bg-dark-950 border border-white/10 rounded-lg px-3 py-2 text-sm text-white min-h-[100px] outline-none focus:border-primary/50 transition-colors"
+                  value={editFormData.bio}
+                  onChange={e => setEditFormData({...editFormData, bio: e.target.value})}
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-gray-300">Role</label>
+                  <select 
+                    className="w-full bg-dark-950 border border-white/10 rounded-lg px-3 py-2 text-sm text-gray-300 outline-none"
+                    value={editFormData.role}
+                    onChange={e => setEditFormData({...editFormData, role: e.target.value})}
+                  >
+                    <option value="artist">Artist</option>
+                    <option value="producer">Producer</option>
+                    <option value="admin">Admin</option>
+                  </select>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-gray-300">Status</label>
+                  <select 
+                    className="w-full bg-dark-950 border border-white/10 rounded-lg px-3 py-2 text-sm text-gray-300 outline-none"
+                    value={editFormData.status}
+                    onChange={e => setEditFormData({...editFormData, status: e.target.value})}
+                  >
+                    <option value="active">Active</option>
+                    <option value="verified">Verified</option>
+                    <option value="suspended">Suspended</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="flex gap-3 pt-4">
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  className="flex-1"
+                  onClick={() => setIsEditModalOpen(false)}
+                >
+                  Cancel
+                </Button>
+                <Button 
+                  type="submit" 
+                  className="flex-1 bg-primary text-black font-bold"
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    'Save Changes'
                   )}
                 </Button>
               </div>
