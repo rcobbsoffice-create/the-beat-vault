@@ -131,6 +131,18 @@ export function AdminBeatUploadForm({ onSuccess, onCancel }: AdminBeatUploadForm
       const token = session?.access_token;
       if (!token) throw new Error('Not authenticated');
 
+      // 0. Get Duration
+      const getAudioDuration = (file: File): Promise<number> => {
+        return new Promise((resolve) => {
+          const audio = new Audio(URL.createObjectURL(file));
+          audio.onloadedmetadata = () => {
+             resolve(Math.round(audio.duration));
+          };
+        });
+      };
+      
+      const duration = await getAudioDuration(audioFile);
+
       // 1. Upload Files
       const audioUrl = await uploadToR2(audioFile, 'original');
       let artworkUrl = null;
@@ -157,6 +169,7 @@ export function AdminBeatUploadForm({ onSuccess, onCancel }: AdminBeatUploadForm
           genre,
           bpm,
           key,
+          duration,
           mood_tags: moodTags.split(',').map(t => t.trim()).filter(Boolean),
           audio_url: audioUrl,
           preview_url: audioUrl, // Using same for now, or cloudflare logic

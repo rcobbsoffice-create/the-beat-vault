@@ -200,8 +200,13 @@ export function AudioPlayer() {
                   className="object-cover"
                 />
               ) : (
-                <div className="w-full h-full bg-linear-to-br from-primary to-secondary flex items-center justify-center text-xl">
-                  🎵
+                <div className="w-full h-full relative bg-dark-800">
+                  <Image
+                    src="/images/placeholder-instrumental.png"
+                    alt="Placeholder"
+                    fill
+                    className="object-cover opacity-80"
+                  />
                 </div>
               )}
             </div>

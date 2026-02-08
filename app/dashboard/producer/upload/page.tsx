@@ -202,6 +202,19 @@ export default function UploadPage() {
 
       // 2. Upload Main Audio
       const audioFile = audioFiles[0];
+
+      // 2a. Get Duration
+      const getAudioDuration = (file: File): Promise<number> => {
+        return new Promise((resolve) => {
+          const audio = new Audio(URL.createObjectURL(file));
+          audio.onloadedmetadata = () => {
+             resolve(Math.round(audio.duration));
+          };
+        });
+      };
+      
+      const duration = await getAudioDuration(audioFile);
+
       const audioRes = await fetch('/api/upload/presigned-url', {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}` },
@@ -293,6 +306,7 @@ export default function UploadPage() {
           genre,
           bpm,
           key,
+          duration,
           mood_tags: selectedMoods,
           audio_url,
           preview_url: audio_url,

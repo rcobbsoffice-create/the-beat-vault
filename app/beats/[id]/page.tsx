@@ -203,10 +203,16 @@ export default function BeatDetailsPage({ params }: { params: Promise<{ id: stri
                     className="object-cover"
                    />
                  ) : (
-                   <div className="absolute inset-0 flex items-center justify-center">
-                      <Music className="w-32 h-32 text-white/5 opacity-20" />
-                   </div>
-                 )}
+                    <div className="absolute inset-0 flex items-center justify-center bg-dark-900">
+                      <Image 
+                        src="/images/placeholder-instrumental.png" 
+                        alt="Placeholder" 
+                        fill 
+                        className="object-cover opacity-50 grayscale"
+                      />
+                      <Music className="w-32 h-32 text-white/5 opacity-20 relative z-10" />
+                    </div>
+                  )}
                  <button 
                   onClick={handlePlay}
                   className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all backdrop-blur-sm"

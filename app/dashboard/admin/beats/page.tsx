@@ -22,7 +22,8 @@ import {
   Edit2,
   Save,
   X,
-  Share2
+  Share2,
+  Trash2
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
@@ -39,6 +40,7 @@ export default function AdminBeatsPage() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState<any>(null);
   const [showUploadModal, setShowUploadModal] = useState(false);
+  const [producers, setProducers] = useState<any[]>([]);
   const { currentBeat, isPlaying, setCurrentBeat } = usePlayer();
 
   const fetchBeats = async () => {
@@ -75,6 +77,16 @@ export default function AdminBeatsPage() {
 
   useEffect(() => {
     fetchBeats();
+    
+    // Fetch producers for assignment
+    const fetchProducers = async () => {
+      const { data } = await supabase
+        .from('profiles')
+        .select('id, display_name')
+        .in('role', ['producer', 'admin']);
+      if (data) setProducers(data);
+    };
+    fetchProducers();
   }, [statusFilter]);
 
   const handleSearch = (e: React.FormEvent) => {
@@ -102,9 +114,56 @@ export default function AdminBeatsPage() {
     }
   };
 
+  const handleDelete = async (id: string) => {
+    if (!confirm('Are you sure you want to permanently delete this beat? This cannot be undone.')) return;
+
+    const toastId = toast.loading('Deleting beat...');
+    try {
+      const { error } = await supabase
+        .from('beats')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+
+      setBeats(prev => prev.filter(b => b.id !== id));
+      toast.success('Beat deleted successfully', { id: toastId });
+    } catch (err: any) {
+      console.error('Delete error:', err);
+      toast.error(err.message, { id: toastId });
+    }
+  };
+
   const handleEdit = (beat: any) => {
     setEditingId(beat.id);
     setEditForm({ ...beat });
+  };
+
+  const handleArtworkUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !editingId) return;
+
+    const toastId = toast.loading('Uploading artwork...');
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${editingId}-${Math.random()}.${fileExt}`;
+      const filePath = `${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('beat-covers')
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('beat-covers')
+        .getPublicUrl(filePath);
+
+      setEditForm((prev: any) => ({ ...prev, artwork_url: publicUrl }));
+      toast.success('Artwork uploaded!', { id: toastId });
+    } catch (error: any) {
+      toast.error('Upload failed: ' + error.message, { id: toastId });
+    }
   };
 
   const handleSaveEdit = async () => {
@@ -123,7 +182,9 @@ export default function AdminBeatsPage() {
           description: editForm.description,
           mood_tags: editForm.mood_tags, // Array
           isrc: editForm.isrc,
-          metadata: { ...editForm.metadata } // Preserve other metadata
+          metadata: { ...editForm.metadata }, // Preserve other metadata
+          producer_id: editForm.producer_id,
+          artwork_url: editForm.artwork_url
         })
         .eq('id', editingId);
 
@@ -151,8 +212,14 @@ export default function AdminBeatsPage() {
         }
       });
     } else {
-      navigator.clipboard.writeText(url);
-      toast.success('Link copied to clipboard!', { icon: '🔗', style: { background: '#0A0A0A', color: '#D4AF37', border: '1px solid #1C1C1C' } });
+      navigator.clipboard.writeText(url)
+        .then(() => {
+          toast.success('Link copied to clipboard!', { icon: '🔗', style: { background: '#0A0A0A', color: '#D4AF37', border: '1px solid #1C1C1C' } });
+        })
+        .catch((err) => {
+          console.error('Clipboard error:', err);
+          toast.error('Failed to copy link. Please manually copy the URL.');
+        });
     }
   };
 
@@ -234,24 +301,32 @@ export default function AdminBeatsPage() {
             <Card key={beat.id} className="p-6 hover:border-primary/30 transition-all duration-500 group bg-dark-900/50 backdrop-blur-xl border-white/5 relative overflow-hidden">
                <div className="flex flex-col lg:flex-row gap-8 items-center lg:items-start">
                   {/* Artwork & Play */}
-                  <div className="w-32 h-32 rounded-2xl bg-dark-800 shrink-0 relative overflow-hidden border border-white/5">
-                    {beat.artwork_url ? (
-                      <img src={beat.artwork_url} alt={beat.title} className="w-full h-full object-cover" />
+                  <div className="w-32 h-32 rounded-2xl bg-dark-800 shrink-0 relative overflow-hidden border border-white/5 group-artwork">
+                    <img 
+                      src={editingId === beat.id && editForm.artwork_url ? editForm.artwork_url : (beat.artwork_url || '/images/placeholder-instrumental.png')} 
+                      alt={beat.title} 
+                      className={`w-full h-full object-cover ${!beat.artwork_url && editingId !== beat.id ? 'opacity-50 grayscale' : ''}`} 
+                    />
+                    
+                    {editingId === beat.id ? (
+                      <label className="absolute inset-0 bg-black/60 flex flex-col items-center justify-center cursor-pointer hover:bg-black/70 transition-colors">
+                        <span className="text-[10px] font-black uppercase text-white tracking-widest border border-white/20 px-2 py-1 rounded hover:bg-white/10">Change</span>
+                        <input type="file" className="hidden" accept="image/*" onChange={handleArtworkUpload} />
+                      </label>
                     ) : (
-                      <Music className="w-10 h-10 text-dark-600 absolute inset-0 m-auto" />
+                      <button 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          console.log('Play button clicked for beat:', beat.id, beat.title);
+                          setCurrentBeat(beat);
+                        }}
+                        className="absolute inset-0 bg-primary/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
+                         <div className="w-12 h-12 rounded-full bg-primary text-black flex items-center justify-center shadow-2xl">
+                            <Play className="w-5 h-5 fill-current ml-1" />
+                         </div>
+                      </button>
                     )}
-                    <button 
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        console.log('Play button clicked for beat:', beat.id, beat.title);
-                        setCurrentBeat(beat);
-                      }}
-                      className="absolute inset-0 bg-primary/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-                    >
-                       <div className="w-12 h-12 rounded-full bg-primary text-black flex items-center justify-center shadow-2xl">
-                          <Play className="w-5 h-5 fill-current ml-1" />
-                       </div>
-                    </button>
                   </div>
 
                   {/* Details / Edit Form */}
@@ -297,6 +372,19 @@ export default function AdminBeatsPage() {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                            {/* Column 1: Core Info */}
                            <div className="space-y-4">
+                              <div className="space-y-1">
+                                <label className="text-[10px] font-black uppercase text-gray-500 tracking-widest">Producer</label>
+                                <select 
+                                  value={editForm.producer_id || ''}
+                                  onChange={(e) => setEditForm({...editForm, producer_id: e.target.value})}
+                                  className="w-full h-10 bg-dark-950 border border-white/10 rounded-lg px-3 text-sm font-bold text-white focus:outline-none focus:border-primary"
+                                >
+                                  <option value="">Unknown / Legacy</option>
+                                  {producers.map(p => (
+                                    <option key={p.id} value={p.id}>{p.display_name}</option>
+                                  ))}
+                                </select>
+                              </div>
                               <div className="space-y-1">
                                 <label className="text-[10px] font-black uppercase text-gray-500 tracking-widest">Title</label>
                                 <Input 
@@ -438,9 +526,12 @@ export default function AdminBeatsPage() {
                            >
                              <Share2 className="w-5 h-5" />
                            </button>
-                           <button onClick={() => handleEdit(beat)} className="p-3 bg-white/5 hover:bg-white/10 rounded-xl border border-white/10 transition-all text-gray-400 hover:text-white">
-                             <Edit2 className="w-5 h-5" />
-                           </button>
+                            <button onClick={() => handleDelete(beat.id)} className="p-3 bg-white/5 hover:bg-error/10 hover:border-error/30 rounded-xl border border-white/10 transition-all text-gray-400 hover:text-error" title="Delete Beat">
+                              <Trash2 className="w-5 h-5" />
+                            </button>
+                            <button onClick={() => handleEdit(beat)} className="p-3 bg-white/5 hover:bg-white/10 rounded-xl border border-white/10 transition-all text-gray-400 hover:text-white">
+                              <Edit2 className="w-5 h-5" />
+                            </button>
                         </div>
                       </div>
                     )}

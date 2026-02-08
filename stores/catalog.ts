@@ -22,6 +22,7 @@ export interface ProducerBeat {
   isrc?: string;
   upc?: string;
   artwork_url?: string;
+  producer_id?: string;
 }
 
 interface CatalogState {
@@ -102,6 +103,7 @@ export const useCatalogStore = create<CatalogState>()(
             key: beat.key,
             moods: beat.mood_tags,
             artwork_url: beat.artwork_url,
+            producer_id: beat.producer_id,
           }));
 
           set({ beats: mappedBeats.length > 0 ? mappedBeats : INITIAL_BEATS, isLoading: false });

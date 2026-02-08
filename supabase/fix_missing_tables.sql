@@ -9,6 +9,7 @@ CREATE TABLE IF NOT EXISTS producers (
 );
 
 -- 2. Merch Products Table
+
 CREATE TABLE IF NOT EXISTS merch_products (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   producer_id UUID REFERENCES producers(id) ON DELETE CASCADE,
@@ -19,8 +20,9 @@ CREATE TABLE IF NOT EXISTS merch_products (
   category TEXT DEFAULT 'Apparel',
   inventory INTEGER DEFAULT 0,
   source TEXT DEFAULT 'Manual', 
-  supplier_product_id TEXT,
+  supplier_product_id TEXT UNIQUE,
   variant_ids JSONB DEFAULT '[]'::jsonb,
+
   status TEXT DEFAULT 'published' CHECK (status IN ('draft', 'published', 'archived', 'hidden')),
   created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
@@ -64,7 +66,11 @@ CREATE TABLE IF NOT EXISTS newsletters (
 
 -- 6. Re-apply RLS
 ALTER TABLE producers ENABLE ROW LEVEL SECURITY;
+
 ALTER TABLE merch_products ENABLE ROW LEVEL SECURITY;
+
 ALTER TABLE stores ENABLE ROW LEVEL SECURITY;
+
 ALTER TABLE orders ENABLE ROW LEVEL SECURITY;
+
 ALTER TABLE newsletters ENABLE ROW LEVEL SECURITY;

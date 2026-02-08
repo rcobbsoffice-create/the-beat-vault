@@ -473,12 +473,67 @@ export type Database = {
           },
         ]
       }
+      contacts: {
+        Row: {
+          created_at: string
+          email: string
+          phone: string | null
+          first_name: string | null
+          geolocation: Json | null
+          id: string
+          last_name: string | null
+          metadata: Json | null
+          owner_id: string | null
+          source: string | null
+          tags: string[] | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          phone?: string | null
+          first_name?: string | null
+          geolocation?: Json | null
+          id?: string
+          last_name?: string | null
+          metadata?: Json | null
+          owner_id?: string | null
+          source?: string | null
+          tags?: string[] | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          phone?: string | null
+          first_name?: string | null
+          geolocation?: Json | null
+          id?: string
+          last_name?: string | null
+          metadata?: Json | null
+          owner_id?: string | null
+          source?: string | null
+          tags?: string[] | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contacts_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       newsletters: {
         Row: {
           audience: string
           content: string
           created_at: string
           id: string
+          metadata: Json | null
+          sender_id: string | null
           sent_at: string | null
           status: string | null
           subject: string
@@ -488,6 +543,8 @@ export type Database = {
           content: string
           created_at?: string
           id?: string
+          metadata?: Json | null
+          sender_id?: string | null
           sent_at?: string | null
           status?: string | null
           subject: string
@@ -497,6 +554,8 @@ export type Database = {
           content?: string
           created_at?: string
           id?: string
+          metadata?: Json | null
+          sender_id?: string | null
           sent_at?: string | null
           status?: string | null
           subject?: string

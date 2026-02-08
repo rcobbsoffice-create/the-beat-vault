@@ -25,6 +25,7 @@ import {
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useCatalogStore } from '@/stores/catalog';
+import { supabase } from '@/lib/supabase/client';
 
 const genres = ['Hip Hop', 'Trap', 'R&B', 'Pop', 'Lo-Fi', 'Drill', 'Afrobeat', 'Dance', 'Electronic', 'Rock'];
 const moods = ['Dark', 'Energetic', 'Chill', 'Aggressive', 'Melodic', 'Emotional', 'Happy', 'Sad', 'Motivational'];
@@ -45,6 +46,8 @@ export default function EditBeatPage({ params }: { params: Promise<{ id: string 
   const [bpm, setBpm] = useState('');
   const [key, setKey] = useState('');
   const [artworkUrl, setArtworkUrl] = useState('');
+  const [producers, setProducers] = useState<any[]>([]);
+  const [producerId, setProducerId] = useState('');
 
   // AI Assistant state
   const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -83,8 +86,48 @@ export default function EditBeatPage({ params }: { params: Promise<{ id: string 
       if (beat.isrc) setIsrc(beat.isrc);
       if (beat.upc) setUpc(beat.upc);
       if (beat.artwork_url) setArtworkUrl(beat.artwork_url);
+      if (beat.producer_id) setProducerId(beat.producer_id);
     }
   }, [id, getBeat]);
+
+  useEffect(() => {
+    const fetchProducers = async () => {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('id, display_name')
+        .in('role', ['producer', 'admin']);
+      
+      if (data) setProducers(data);
+    };
+    fetchProducers();
+  }, []);
+
+  const handleArtworkUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const toastId = toast.loading('Uploading artwork...');
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${id}-${Math.random()}.${fileExt}`;
+      const filePath = `${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('beat-covers')
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('beat-covers')
+        .getPublicUrl(filePath);
+
+      setArtworkUrl(publicUrl);
+      toast.success('Artwork uploaded!', { id: toastId });
+    } catch (error: any) {
+      toast.error('Upload failed: ' + error.message, { id: toastId });
+    }
+  };
 
   const handleMoodToggle = (mood: string) => {
     setSelectedMoods(prev => 
@@ -96,32 +139,51 @@ export default function EditBeatPage({ params }: { params: Promise<{ id: string 
 
   const handleSave = async () => {
     setLoading(true);
-    // Simulate API update
-    await new Promise(resolve => setTimeout(resolve, 1500));
     
-    updateBeat(id, {
-      title,
-      description,
-      genre,
-      bpm: parseInt(bpm) || 0,
-      key,
-      moods: selectedMoods,
-      status,
-      price_basic: basicPrice,
-      price_premium: premiumPrice,
-      is_sync_ready: isSyncReady,
-      label,
-      publisher,
-      isrc,
-      upc,
-      artwork_url: artworkUrl,
-    });
+    try {
+      const updates = {
+        title,
+        description,
+        genre,
+        bpm: parseInt(bpm) || 0,
+        key,
+        mood_tags: selectedMoods,
+        status,
+        price_basic: basicPrice,
+        price_premium: premiumPrice,
+        is_sync_ready: isSyncReady,
+        label,
+        publisher,
+        isrc,
+        upc,
+        artwork_url: artworkUrl,
+        producer_id: producerId,
+        updated_at: new Date().toISOString(),
+      };
 
-    setLoading(false);
-    toast.success('Beat updated successfully!', {
-       style: { background: '#0A0A0A', color: '#D4AF37', border: '1px solid #D4AF37' }
-    });
-    router.push('/dashboard/producer/beats');
+      const { error } = await supabase
+        .from('beats')
+        .update(updates)
+        .eq('id', id);
+
+      if (error) throw error;
+      
+      // Update local store
+      updateBeat(id, {
+        ...updates,
+        moods: selectedMoods, // Store uses 'moods', DB uses 'mood_tags'
+      });
+
+      toast.success('Beat updated successfully!', {
+         style: { background: '#0A0A0A', color: '#D4AF37', border: '1px solid #D4AF37' }
+      });
+      router.push('/dashboard/producer/beats');
+    } catch (error: any) {
+      console.error('Update error:', error);
+      toast.error('Failed to update beat: ' + error.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleAIAnalyze = async () => {
@@ -210,7 +272,10 @@ export default function EditBeatPage({ params }: { params: Promise<{ id: string 
                 )}
                 
                 <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity cursor-pointer">
-                   <Button size="sm" variant="outline">Replace Art</Button>
+                   <label className="cursor-pointer bg-white/10 hover:bg-white/20 border border-white/20 rounded-lg px-4 py-2 text-sm font-bold text-white transition-all backdrop-blur-sm">
+                     Replace Art
+                     <input type="file" className="hidden" accept="image/*" onChange={handleArtworkUpload} />
+                   </label>
                 </div>
 
                 {isGeneratingArtwork && (
@@ -427,6 +492,22 @@ export default function EditBeatPage({ params }: { params: Promise<{ id: string 
                     </button>
                   ))}
                 </div>
+              </div>
+
+              <div>
+                <label className="text-sm font-medium text-foreground mb-2">
+                  Beat Assignment (Producer)
+                </label>
+                <select 
+                  value={producerId}
+                  onChange={(e) => setProducerId(e.target.value)}
+                  className="w-full px-4 py-3 bg-dark-900 border border-dark-700 rounded-xl text-foreground focus:ring-2 focus:ring-primary/50 outline-none font-medium"
+                >
+                  <option value="">Select Producer</option>
+                  {producers.map(p => (
+                    <option key={p.id} value={p.id}>{p.display_name}</option>
+                  ))}
+                </select>
               </div>
 
               <div>

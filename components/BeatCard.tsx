@@ -50,16 +50,15 @@ export function BeatCard({ beat, onFavorite, isFavorited = false }: BeatCardProp
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
-  const lowestPrice = beat.licenses?.reduce((min, license) => 
-    license.is_active && license.price < min ? license.price : min, 
-    Infinity
-  ) ?? 0;
+  // Get active licenses sorted by price
+  const activeLicenses = beat.licenses?.filter(l => l.is_active).sort((a, b) => a.price - b.price) || [];
+  const lowestPrice = activeLicenses[0]?.price ?? 0;
 
   return (
-    <Link href={`/beats/${beat.id}`}>
-      <div className="group relative bg-dark-900 border border-dark-700 rounded-xl overflow-hidden transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl hover:shadow-primary/10 hover:border-primary/30">
-        {/* Artwork */}
-        <div className="relative aspect-square overflow-hidden">
+    <div className="group bg-dark-900 border border-dark-700 hover:border-primary/30 rounded-xl overflow-hidden transition-all duration-300 hover:shadow-2xl hover:shadow-primary/5">
+      <div className="flex p-4 gap-4">
+        {/* Compact Artwork with Play Overlay */}
+        <div className="relative w-24 h-24 shrink-0 rounded-lg overflow-hidden bg-dark-800">
           {beat.artwork_url ? (
             <Image
               src={sanitizeUrl(beat.artwork_url)}
@@ -68,98 +67,91 @@ export function BeatCard({ beat, onFavorite, isFavorited = false }: BeatCardProp
               className="object-cover transition-transform duration-500 group-hover:scale-110"
             />
           ) : (
-            <div className="w-full h-full bg-linear-to-br from-primary/30 to-secondary/30 flex items-center justify-center">
-              <div className="text-4xl">🎵</div>
-            </div>
+             <div className="w-full h-full flex items-center justify-center bg-dark-800 text-dark-600 relative">
+               <Image
+                 src="/images/placeholder-instrumental.png"
+                 alt="Placeholder"
+                 fill
+                 className="object-cover opacity-50 grayscale transition-transform duration-500 group-hover:scale-110"
+               />
+               <span className="text-2xl relative z-10">🎵</span>
+             </div>
           )}
           
-          {/* Gradient overlay */}
-          <div className="absolute inset-0 bg-linear-to-t from-dark-950/90 via-transparent to-transparent" />
-
-          {/* Play Button */}
           <button
             onClick={handlePlayClick}
-            className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+            className={`absolute inset-0 flex items-center justify-center bg-black/40 transition-opacity duration-200 ${isCurrentBeat ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}
           >
-            <div className="w-14 h-14 rounded-full bg-primary flex items-center justify-center shadow-lg shadow-primary/40 transition-transform hover:scale-110">
-              {isCurrentBeat && isPlaying ? (
-                <Pause className="w-6 h-6 text-white" fill="white" />
-              ) : (
-                <Play className="w-6 h-6 text-white ml-1" fill="white" />
-              )}
+            <div className="w-10 h-10 rounded-full bg-primary text-black flex items-center justify-center shadow-lg transform hover:scale-105 transition-transform">
+               {isCurrentBeat && isPlaying ? (
+                 <Pause className="w-4 h-4 fill-current" />
+               ) : (
+                 <Play className="w-4 h-4 fill-current ml-0.5" />
+               )}
             </div>
-          </button>
-
-          {/* Duration Badge */}
-          <div className="absolute bottom-3 left-3 flex items-center gap-1.5 bg-dark-950/70 backdrop-blur-sm px-2 py-1 rounded text-xs text-gray-300">
-            <Clock className="w-3 h-3" />
-            {formatDuration(beat.duration)}
-          </div>
-
-          {/* Favorite Button */}
-          <button
-            onClick={handleFavoriteClick}
-            className="absolute top-3 right-3 w-8 h-8 rounded-full bg-dark-950/70 backdrop-blur-sm flex items-center justify-center transition-transform hover:scale-110 z-10"
-          >
-            <Heart 
-              className={`w-4 h-4 ${isFavorited ? 'text-secondary fill-secondary' : 'text-white'}`} 
-            />
           </button>
         </div>
 
-        {/* Info */}
-        <div className="p-4">
-          <h3 className="font-semibold text-white truncate group-hover:text-primary transition-colors">
-            {beat.title}
-          </h3>
-          <p className="text-sm text-gray-400 mt-1 truncate">
-            {beat.producer?.display_name || 'Unknown Producer'}
-          </p>
-
-          {/* Tags & Stats */}
-          <div className="flex flex-wrap items-center gap-2 mt-3">
-            {beat.genre && <Badge variant="primary">{beat.genre}</Badge>}
-            {beat.bpm && <Badge>{beat.bpm} BPM</Badge>}
-            
-            <div className="flex items-center gap-3 ml-auto text-xs text-gray-500">
-              <div className="flex items-center gap-1" title="Plays">
-                <Play className="w-3 h-3" />
-                <span>{beat.play_count || 0}</span>
-              </div>
-              <div className="flex items-center gap-1" title="Views">
-                <Eye className="w-3 h-3" />
-                <span>{(beat as any).view_count || 0}</span>
-              </div>
-              <div className="flex items-center gap-1" title="Favorites">
-                <Heart className={`w-3 h-3 ${isFavorited ? 'text-secondary fill-secondary' : ''}`} />
-                <span>{beat.favorite_count || 0}</span>
-              </div>
+        {/* Info & Metadata */}
+        <div className="flex-1 min-w-0 flex flex-col justify-between">
+            <div className="flex justify-between items-start">
+               <div>
+                 <Link href={`/beats/${beat.id}`} className="block">
+                    <h3 className="font-bold text-white text-lg truncate hover:text-primary transition-colors cursor-pointer" title={beat.title}>
+                      {beat.title}
+                    </h3>
+                 </Link>
+                 <p className="text-sm text-gray-400 truncate">{beat.producer?.display_name || 'Unknown'}</p>
+               </div>
+               
+               <button onClick={handleFavoriteClick} className="text-gray-500 hover:text-red-500 transition-colors">
+                  <Heart className={`w-5 h-5 ${isFavorited ? 'fill-current text-red-500' : ''}`} />
+               </button>
             </div>
-          </div>
 
-          {/* Price & Cart */}
-          <div className="flex items-center justify-between mt-4 pt-4 border-t border-dark-700">
-            <div>
-              <span className="text-xs text-gray-400">From</span>
-              <p className="text-lg font-bold text-white">
-                ${(lowestPrice / 100).toFixed(2)}
-              </p>
+            <div className="flex items-center gap-3 text-xs text-gray-500 mt-2">
+               <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> {formatDuration(beat.duration)}</span>
+               <span className="w-1 h-1 rounded-full bg-dark-600" />
+               <span>{beat.bpm} BPM</span>
+               <span className="w-1 h-1 rounded-full bg-dark-600" />
+               <span className="truncate max-w-[80px]">{beat.genre}</span>
             </div>
-            <button 
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                toast.success(`${beat.title} added to cart!`, {
-                  style: { background: '#0A0A0A', color: '#D4AF37', border: '1px solid #1C1C1C' }
-                });
-              }}
-              className="w-10 h-10 rounded-lg bg-dark-800 flex items-center justify-center transition-all hover:bg-primary hover:shadow-lg hover:shadow-primary/30 group/cart"
-            >
-              <ShoppingCart className="w-4 h-4 group-hover/cart:text-black transition-colors" />
-            </button>
-          </div>
         </div>
       </div>
-    </Link>
+
+      {/* License Actions */}
+      <div className="px-4 pb-4 pt-2">
+         <div className="grid grid-cols-2 gap-2">
+           {activeLicenses.slice(0, 2).map((license) => (
+             <button
+               key={license.id}
+               onClick={(e) => {
+                 e.stopPropagation();
+                 toast.success(`Added ${license.type} license to cart!`, {
+                    style: { background: '#0A0A0A', color: '#D4AF37', border: '1px solid #1C1C1C' }
+                 });
+               }}
+               className="flex flex-col items-center justify-center py-2 px-3 rounded-lg bg-dark-800 border border-dark-700 hover:border-primary/50 hover:bg-dark-750 transition-all group/btn"
+             >
+                <span className="text-[10px] font-bold uppercase text-gray-400 group-hover/btn:text-white transition-colors">{license.type}</span>
+                <span className="text-sm font-black text-primary">${(license.price / 100).toFixed(2)}</span>
+             </button>
+           ))}
+           {activeLicenses.length > 2 && (
+              <Link 
+                href={`/beats/${beat.id}`}
+                className="col-span-2 flex items-center justify-center py-1.5 text-xs text-gray-500 hover:text-white transition-colors"
+              >
+                + {activeLicenses.length - 2} more licenses
+              </Link>
+           )}
+           {activeLicenses.length === 0 && (
+              <div className="col-span-2 text-center py-2 text-xs text-gray-500 italic">
+                No licenses available
+              </div>
+           )}
+         </div>
+      </div>
+    </div>
   );
 }

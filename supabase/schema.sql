@@ -81,6 +81,16 @@ CREATE POLICY "Producers manage own merch" ON merch_products FOR ALL USING (
     )
 );
 
+CREATE POLICY "Admins manage all merch" ON merch_products FOR ALL USING (
+    EXISTS (
+        SELECT 1
+        FROM profiles
+        WHERE
+            profiles.id = auth.uid ()
+            AND profiles.role = 'admin'
+    )
+);
+
 DROP POLICY IF EXISTS "Public can view published merch" ON merch_products;
 
 CREATE POLICY "Public can view published merch" ON merch_products FOR
