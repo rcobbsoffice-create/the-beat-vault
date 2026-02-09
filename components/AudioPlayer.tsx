@@ -12,9 +12,12 @@ import {
   X,
   Repeat,
   Shuffle,
-  ListMusic
+  ListMusic,
+  Activity
 } from 'lucide-react';
 import { usePlayer } from '@/stores/player';
+import { CircularVisualizer } from './CircularVisualizer';
+import { LinearVisualizer } from './LinearVisualizer';
 import Image from 'next/image';
 import Link from 'next/link';
 import { sanitizeUrl } from '@/lib/utils/url';
@@ -38,6 +41,7 @@ export function AudioPlayer() {
     setVolume,
     setCurrentTime,
     setDuration,
+    setAnalyser: setGlobalAnalyser,
     playNext,
     playPrevious,
     reset,
@@ -68,13 +72,13 @@ export function AudioPlayer() {
     const wavesurfer = WaveSurfer.create({
       container: waveformRef.current,
       media: audioRef.current,
-      waveColor: 'rgba(255, 255, 255, 0.2)',
-      progressColor: '#D4AF37',
+      waveColor: 'rgba(255, 255, 255, 0.05)', // Almost invisible
+      progressColor: 'rgba(212, 175, 55, 0.1)', // Subtle progress
       cursorColor: '#D4AF37',
       barWidth: 2,
       barRadius: 2,
       cursorWidth: 1,
-      height: 40,
+      height: 48,
       barGap: 3,
       normalize: true,
     });
@@ -124,6 +128,44 @@ export function AudioPlayer() {
       }
     };
   }, [currentBeat?.id]);
+
+  // Visualizer setup
+  const { analyser } = usePlayer();
+  const [showVisualizer, setShowVisualizer] = useState(false);
+  const audioContextRef = useRef<AudioContext | null>(null);
+  const sourceNodeRef = useRef<MediaElementAudioSourceNode | null>(null);
+
+  useEffect(() => {
+    if (!audioRef.current || !isPlaying || analyser) return;
+
+    // We only initialize when playing for the first time to satisfy browser autoplay policies
+    const setupAnalyser = () => {
+      try {
+        if (!audioContextRef.current) {
+          audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
+        }
+        
+        const audioContext = audioContextRef.current;
+        if (audioContext.state === 'suspended') {
+          audioContext.resume();
+        }
+
+        if (!sourceNodeRef.current) {
+          sourceNodeRef.current = audioContext.createMediaElementSource(audioRef.current!);
+          const newAnalyser = audioContext.createAnalyser();
+          newAnalyser.fftSize = 256;
+          
+          sourceNodeRef.current.connect(newAnalyser);
+          newAnalyser.connect(audioContext.destination);
+          setGlobalAnalyser(newAnalyser);
+        }
+      } catch (err) {
+        console.warn('AudioContext setup failed:', err);
+      }
+    };
+
+    setupAnalyser();
+  }, [isPlaying]);
 
   // Sync play/pause state
   useEffect(() => {
@@ -186,11 +228,11 @@ export function AudioPlayer() {
         }}
       />
       
-      <div className="max-w-7xl mx-auto px-4 py-3">
+      <div className="max-w-7xl mx-auto px-4 py-4">
         <div className="flex items-center gap-4">
           {/* Beat Info */}
-          <div className="flex items-center gap-3 min-w-0 w-64">
-            <div className="w-12 h-12 rounded-lg overflow-hidden shrink-0 relative">
+          <div className="flex items-center gap-3 min-w-0 w-80">
+            <div className="w-20 h-20 rounded-xl overflow-hidden shrink-0 relative group shadow-2xl">
               {artworkSrc ? (
                 <Image 
                   src={artworkSrc} 
@@ -207,6 +249,16 @@ export function AudioPlayer() {
                     fill
                     className="object-cover opacity-80"
                   />
+                </div>
+              )}
+              {/* Overlay Visualizer */}
+              {showVisualizer && (
+                <div className="absolute inset-0 flex items-center justify-center bg-black/40 backdrop-blur-[2px]">
+                   <CircularVisualizer 
+                      analyser={analyser} 
+                      isPlaying={isPlaying} 
+                      size={76}
+                   />
                 </div>
               )}
             </div>
@@ -265,6 +317,13 @@ export function AudioPlayer() {
               <button className="text-gray-400 hover:text-white transition-colors">
                 <Repeat className="w-4 h-4" />
               </button>
+              <button 
+                onClick={() => setShowVisualizer(!showVisualizer)}
+                className={`transition-colors ${showVisualizer ? 'text-primary' : 'text-gray-400 hover:text-white'}`}
+                title="Toggle Visualizer"
+              >
+                <Activity className="w-4 h-4" />
+              </button>
             </div>
 
             {/* Waveform & Time */}
@@ -272,7 +331,18 @@ export function AudioPlayer() {
               <span className="text-xs text-gray-400 w-10 text-right">
                 {formatTime(currentTime)}
               </span>
-              <div ref={waveformRef} className="flex-1" />
+              <div className="flex-1 relative h-16 flex items-center">
+                {/* Real-time Reactive Visualizer (Background) */}
+                <div className="absolute inset-0 z-0 opacity-80 mt-2">
+                  <LinearVisualizer 
+                     analyser={analyser} 
+                     isPlaying={isPlaying} 
+                     height={40}
+                  />
+                </div>
+                {/* WaveSurfer (Foreground for seeking) */}
+                <div ref={waveformRef} className="flex-1 relative z-10 w-full" />
+              </div>
               <span className="text-xs text-gray-400 w-10">
                 {formatTime(duration)}
               </span>

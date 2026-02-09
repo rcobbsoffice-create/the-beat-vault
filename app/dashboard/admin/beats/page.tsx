@@ -36,11 +36,18 @@ export default function AdminBeatsPage() {
   const [beats, setBeats] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+  const [searchInput, setSearchInput] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState<any>(null);
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [producers, setProducers] = useState<any[]>([]);
+  
+  const handleCancelUpload = () => setShowUploadModal(false);
+  const handleUploadSuccess = () => {
+    setShowUploadModal(false);
+    fetchBeats();
+  };
   
   // PERFORMANCE FIX: Only subscribe to need player state to avoid re-renders on 'currentTime'
   const currentBeat = usePlayer(state => state.currentBeat);
@@ -77,6 +84,15 @@ export default function AdminBeatsPage() {
       setIsLoading(false);
     }
   }, [statusFilter, searchQuery]); // Stable dependencies
+
+  // PERFORMANCE FIX: Debounce search query to prevent excessive Supabase requests and re-renders
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setSearchQuery(searchInput);
+    }, 400); // 400ms debounce
+
+    return () => clearTimeout(handler);
+  }, [searchInput]);
 
   useEffect(() => {
     fetchBeats();
@@ -259,8 +275,8 @@ export default function AdminBeatsPage() {
               type="text" 
               placeholder="Search assets..."
               className="pl-10 pr-4 py-2 bg-dark-900 border border-white/10 rounded-xl text-sm focus:ring-1 focus:ring-primary focus:border-primary transition-all text-white w-full sm:w-64"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
             />
           </form>
           <select 
@@ -291,14 +307,14 @@ export default function AdminBeatsPage() {
       {/* Assets Grid */}
       <div className="grid grid-cols-1 gap-6">
         {beats.length === 0 ? (
-          <div className="text-center py-32 bg-dark-900/30 border border-dashed border-white/5 rounded-[3rem] backdrop-blur-sm">
+          <div className="text-center py-32 bg-dark-900/30 border border-dashed border-white/5 rounded-[3rem]">
              <Music className="w-16 h-16 text-primary/10 mx-auto mb-6" />
              <h3 className="text-xl font-black uppercase italic text-white mb-2">No Assets Found</h3>
              <p className="text-gray-500 font-bold uppercase tracking-widest text-[10px]">Adjust your filters or search query</p>
           </div>
         ) : (
           beats.map((beat) => (
-            <Card key={beat.id} className="p-6 hover:border-primary/30 transition-all duration-500 group bg-dark-900/50 backdrop-blur-xl border-white/5 relative overflow-hidden">
+            <Card key={beat.id} className="p-6 hover:border-primary/30 transition-all duration-500 group bg-dark-900/50 border-white/5 relative overflow-hidden">
                <div className="flex flex-col lg:flex-row gap-8 items-center lg:items-start">
                   {/* Artwork & Play */}
                   <div className="w-32 h-32 rounded-2xl bg-dark-800 shrink-0 relative overflow-hidden border border-white/5 group-artwork">

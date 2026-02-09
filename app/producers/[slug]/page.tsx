@@ -170,6 +170,7 @@ export default function ProducerProfilePage({ params }: { params: Promise<{ slug
     );
   }
 
+  const totalPlays = beats.reduce((sum, beat) => sum + (beat.play_count || 0), 0);
   const featuredBeat = beats.length > 0 ? beats[0] : null;
 
   return (
@@ -238,7 +239,7 @@ export default function ProducerProfilePage({ params }: { params: Promise<{ slug
               <div className="flex gap-8 md:gap-12 text-sm">
                 <div className="flex flex-col">
                   <span className="text-gray-500 uppercase text-xs tracking-wider">Total Plays</span>
-                  <span className="text-white font-bold text-lg">--</span>
+                  <span className="text-white font-bold text-lg">{totalPlays.toLocaleString()}</span>
                 </div>
                 <div className="flex flex-col">
                   <span className="text-gray-500 uppercase text-xs tracking-wider">Solds</span>
@@ -389,9 +390,15 @@ export default function ProducerProfilePage({ params }: { params: Promise<{ slug
 
                       <div className="flex-1 min-w-0">
                         <h4 className="font-bold text-white truncate">{beat.title}</h4>
-                        <p className="text-xs text-gray-400">
-                          {beat.bpm} BPM • {beat.key} • <span className="text-primary">{beat.genre}</span>
-                        </p>
+                        <div className="flex items-center gap-2">
+                          <p className="text-xs text-gray-400">
+                            {beat.bpm} BPM • {beat.key} • <span className="text-primary">{beat.genre}</span>
+                          </p>
+                          <div className="flex items-center gap-1 text-[10px] text-gray-500 font-bold ml-2">
+                            <Play className="w-2.5 h-2.5" />
+                            {beat.play_count || 0}
+                          </div>
+                        </div>
                       </div>
 
                       <div className="flex items-center gap-4">

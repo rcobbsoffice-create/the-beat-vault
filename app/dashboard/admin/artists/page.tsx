@@ -168,7 +168,7 @@ export default function AdminArtistsPage() {
           ))}
 
           {submissions.length === 0 && (
-            <div className="py-32 text-center bg-dark-900/30 border border-dashed border-white/5 rounded-[3rem] backdrop-blur-sm">
+            <div className="py-32 text-center bg-dark-900/30 border border-dashed border-white/5 rounded-[3rem]">
               <ShieldCheck className="w-16 h-16 text-primary/20 mx-auto mb-6" />
               <p className="text-gray-500 font-black uppercase tracking-[0.3em] text-sm italic">Queue is clear • Standards Met</p>
             </div>

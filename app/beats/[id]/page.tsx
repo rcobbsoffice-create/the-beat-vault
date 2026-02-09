@@ -10,25 +10,22 @@ import { Card } from '@/components/ui/Card';
 import { 
   Play, 
   Pause, 
-  ShoppingCart, 
   Heart, 
   Share2, 
   Music, 
-  Clock, 
   Calendar,
-  Waves,
-  MessageSquare,
-  Repeat,
-  Eye
+  MessageSquare
 } from 'lucide-react';
 import { usePlayer } from '@/stores/player';
 import toast from 'react-hot-toast';
-import { supabase } from '@/lib/supabase';
+import { supabase } from '@/lib/supabase/client';
 import type { Database } from '@/types/supabase';
+import { LinearVisualizer } from '@/components/LinearVisualizer';
+import { sanitizeUrl } from '@/lib/utils/url';
+import Image from 'next/image';
 
 type BeatRow = Database['public']['Tables']['beats']['Row'];
 type LicenseRow = Database['public']['Tables']['licenses']['Row'];
-
 type ProfileRow = Database['public']['Tables']['profiles']['Row'];
 
 type Beat = BeatRow & {
@@ -39,12 +36,10 @@ type Beat = BeatRow & {
   is_sync_ready?: boolean;
   producer?: ProfileRow;
 };
-import { sanitizeUrl } from '@/lib/utils/url';
-import Image from 'next/image';
 
 export default function BeatDetailsPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
-  const { currentBeat, isPlaying, setCurrentBeat, togglePlayPause } = usePlayer();
+  const { currentBeat, isPlaying, analyser, setCurrentBeat, togglePlayPause } = usePlayer();
   const [beat, setBeat] = useState<Beat | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -69,7 +64,6 @@ export default function BeatDetailsPage({ params }: { params: Promise<{ id: stri
         if (error) throw error;
         setBeat(data as any);
         
-        // Track view
         fetch(`/api/beats/${id}/track-view`, { method: 'POST' })
           .catch(err => console.error('Failed to track view:', err));
           
@@ -104,9 +98,7 @@ export default function BeatDetailsPage({ params }: { params: Promise<{ id: stri
     if (!beat) return;
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) {
-      toast.error('Please sign in to favorite beats', {
-        style: { background: '#0A0A0A', color: '#D4AF37', border: '1px solid #1C1C1C' }
-      });
+      toast.error('Please sign in to favorite beats');
       return;
     }
 
@@ -145,9 +137,7 @@ export default function BeatDetailsPage({ params }: { params: Promise<{ id: stri
 
   const handleCart = (licenseType: string) => {
     if (!beat) return;
-    toast.success(`${beat.title} (${licenseType}) added to cart!`, {
-      style: { background: '#0A0A0A', color: '#D4AF37', border: '1px solid #1C1C1C' }
-    });
+    toast.success(`${beat.title} (${licenseType}) added to cart!`);
   };
 
   const handleShare = () => {
@@ -188,159 +178,190 @@ export default function BeatDetailsPage({ params }: { params: Promise<{ id: stri
     <div className="min-h-screen flex flex-col bg-dark-950">
       <Header />
       
-      <main className="flex-1 pt-32 pb-24">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
+      <main className="flex-1 relative overflow-hidden">
+        {/* Immersive Blurred Background */}
+        {beat.artwork_url && (
+          <div className="absolute inset-0 pointer-events-none">
+            <Image 
+              src={sanitizeUrl(beat.artwork_url)} 
+              alt="" 
+              fill 
+              className="object-cover opacity-10 blur-[100px] scale-110"
+              priority
+            />
+            <div className="absolute inset-0 bg-gradient-to-b from-dark-950/60 via-dark-950/80 to-dark-950" />
             
-            {/* Left Column: Artwork & Player */}
-            <div className="lg:col-span-1 space-y-8">
-              <div className="aspect-square rounded-3xl bg-linear-to-br from-primary/20 to-secondary/20 border border-white/5 relative overflow-hidden group shadow-2xl">
+            {/* Background Linear Visualizer */}
+            <div className="absolute bottom-0 left-0 right-0 h-1/2 opacity-30 flex items-end justify-center">
+               <LinearVisualizer 
+                 analyser={isCurrentBeat ? analyser : null} 
+                 isPlaying={isCurrentBeat && isPlaying}
+                 height={300}
+                 barWidth={10}
+                 gap={4}
+               />
+            </div>
+          </div>
+        )}
+
+        <div className="relative pt-32 pb-24 max-w-[1600px] mx-auto px-6 lg:px-12">
+          {/* Breadcrumb */}
+          <div className="mb-8">
+            <Link href="/marketplace" className="text-gray-400 hover:text-primary transition-colors text-sm">
+              ← Back to Marketplace
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
+            
+            {/* Left: Artwork Hero */}
+            <div className="space-y-6">
+              <div className="aspect-square rounded-3xl bg-gradient-to-br from-primary/10 via-dark-900 to-secondary/10 border border-primary/20 relative overflow-hidden group shadow-2xl shadow-primary/10">
                  {beat.artwork_url ? (
                    <Image 
                     src={sanitizeUrl(beat.artwork_url)} 
                     alt={beat.title} 
                     fill 
                     className="object-cover"
+                    priority
                    />
                  ) : (
                     <div className="absolute inset-0 flex items-center justify-center bg-dark-900">
-                      <Image 
-                        src="/images/placeholder-instrumental.png" 
-                        alt="Placeholder" 
-                        fill 
-                        className="object-cover opacity-50 grayscale"
-                      />
-                      <Music className="w-32 h-32 text-white/5 opacity-20 relative z-10" />
+                      <Music className="w-48 h-48 text-primary/20" />
                     </div>
                   )}
+                 
+                 {/* Play Button Overlay */}
                  <button 
                   onClick={handlePlay}
-                  className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all backdrop-blur-sm"
+                  className="absolute inset-0 bg-black/30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all backdrop-blur-sm"
                  >
-                    <div className="w-24 h-24 rounded-full bg-primary flex items-center justify-center shadow-2xl transform scale-90 group-hover:scale-100 transition-transform">
+                    <div className="w-32 h-32 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center shadow-2xl shadow-primary/50 transform scale-90 group-hover:scale-100 transition-transform">
                       {isCurrentBeat && isPlaying ? (
-                        <Pause className="w-10 h-10 text-black fill-current" />
+                        <Pause className="w-14 h-14 text-black fill-current" />
                       ) : (
-                        <Play className="w-10 h-10 text-black fill-current ml-2" />
+                        <Play className="w-14 h-14 text-black fill-current ml-2" />
                       )}
                     </div>
                  </button>
               </div>
 
-              <div className="flex gap-4">
-                <Button fullWidth onClick={handlePlay} className="h-14 font-black text-lg gap-3">
-                   {isCurrentBeat && isPlaying ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5" />}
-                   {isCurrentBeat && isPlaying ? 'Pause Preview' : 'Play Preview'}
+              {/* Action Buttons */}
+              <div className="grid grid-cols-3 gap-4">
+                <Button fullWidth onClick={handlePlay} size="lg" className="h-16 text-lg font-bold">
+                   {isCurrentBeat && isPlaying ? <Pause className="w-5 h-5 mr-2" /> : <Play className="w-5 h-5 mr-2" />}
+                   {isCurrentBeat && isPlaying ? 'Pause' : 'Play'}
                 </Button>
-                <Button variant="outline" className="h-14 aspect-square p-0" onClick={handleFavorite} title={isFavorited ? 'Remove from Favorites' : 'Add to Favorites'}>
+                <Button variant="outline" size="lg" className="h-16" onClick={handleFavorite}>
                    <Heart className={`w-5 h-5 ${isFavorited ? 'text-secondary fill-secondary' : ''}`} />
                 </Button>
-                <Button variant="outline" className="h-14 aspect-square p-0" onClick={handleShare}>
+                <Button variant="outline" size="lg" className="h-16" onClick={handleShare}>
                    <Share2 className="w-5 h-5" />
                 </Button>
               </div>
               
-              {/* Analytics Sub-bar */}
-              <div className="flex items-center gap-6 px-4 py-3 bg-dark-900/30 rounded-xl border border-white/5 text-gray-400 text-sm">
-                <div className="flex items-center gap-2">
-                  <Play className="w-4 h-4" />
-                  <span>{beat.play_count || 0} plays</span>
+              {/* Stats */}
+              <div className="grid grid-cols-3 gap-4 p-4 bg-dark-900/50 backdrop-blur-xl rounded-2xl border border-white/5">
+                <div className="text-center">
+                  <div className="text-3xl font-black text-white mb-1">{beat.play_count || 0}</div>
+                  <div className="text-xs text-gray-500 uppercase tracking-wide">Plays</div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <Eye className="w-4 h-4" />
-                  <span>{(beat as any).view_count || 0} views</span>
+                <div className="text-center">
+                  <div className="text-3xl font-black text-white mb-1">{(beat as any).view_count || 0}</div>
+                  <div className="text-xs text-gray-500 uppercase tracking-wide">Views</div>
                 </div>
-                <div className="flex items-center gap-2">
-                   <Heart className={`w-4 h-4 ${isFavorited ? 'text-secondary fill-secondary' : ''}`} />
-                   <span>{beat.favorite_count || 0} favorites</span>
+                <div className="text-center">
+                  <div className="text-3xl font-black text-white mb-1">{beat.favorite_count || 0}</div>
+                  <div className="text-xs text-gray-500 uppercase tracking-wide">Favorites</div>
                 </div>
               </div>
             </div>
 
-            {/* Middle Column: Info */}
-            <div className="lg:col-span-2 space-y-10">
+            {/* Right: Info & Pricing */}
+            <div className="space-y-8">
               <div>
-                <div className="flex items-center gap-3 mb-4">
-                  {beat.is_sync_ready && <Badge variant="primary" className="bg-primary/10 text-primary border-none">Exclusive Available</Badge>}
-                  <span className="text-gray-500 flex items-center gap-1.5 text-sm">
-                    <Calendar className="w-4 h-4" /> {new Date(beat.created_at || new Date()).toLocaleDateString()}
-                  </span>
+                {beat.is_sync_ready && <Badge variant="primary" className="mb-4 text-base px-4 py-1">Sync Ready</Badge>}
+                <div className="text-sm text-gray-500 mb-4 flex items-center gap-2">
+                  <Calendar className="w-4 h-4" />
+                  {new Date(beat.created_at || new Date()).toLocaleDateString()}
                 </div>
-                <h1 className="text-4xl md:text-6xl font-black text-white mb-4 italic tracking-tight">
-                  {beat.title.toUpperCase()}
+                <h1 className="text-5xl lg:text-7xl font-black text-white mb-6 leading-none tracking-tighter">
+                  {beat.title}
                 </h1>
-                <Link href={`/producers/${beat.producer_id}`} className="text-xl text-primary hover:underline font-bold">
-                  {beat.producer?.display_name || 'Unknown Producer'}
+                <Link href={`/producers/${beat.producer_id}`} className="text-2xl text-primary hover:underline font-bold inline-block mb-8">
+                  by {beat.producer?.display_name || 'Unknown Producer'}
                 </Link>
               </div>
 
-              {/* Stats Bar */}
-              <div className="flex flex-wrap gap-8 items-center bg-dark-900/50 p-6 rounded-2xl border border-white/5">
-                <div className="flex flex-col">
-                   <span className="text-xs text-gray-500 uppercase font-black tracking-widest mb-1">BPM</span>
-                   <span className="text-white font-bold text-xl">{beat.bpm || '--'}</span>
+              {/* Metadata Pills */}
+              <div className="flex flex-wrap gap-6">
+                <div className="px-6 py-4 bg-dark-900/70 backdrop-blur-xl rounded-2xl border border-white/10">
+                   <div className="text-xs text-gray-500 uppercase tracking-widest mb-1">BPM</div>
+                   <div className="text-2xl font-black text-white">{beat.bpm || '--'}</div>
                 </div>
-                <div className="w-px h-10 bg-white/5" />
-                <div className="flex flex-col">
-                   <span className="text-xs text-gray-500 uppercase font-black tracking-widest mb-1">Key</span>
-                   <span className="text-white font-bold text-xl">{beat.key || '--'}</span>
+                <div className="px-6 py-4 bg-dark-900/70 backdrop-blur-xl rounded-2xl border border-white/10">
+                   <div className="text-xs text-gray-500 uppercase tracking-widest mb-1">Key</div>
+                   <div className="text-2xl font-black text-white">{beat.key || '--'}</div>
                 </div>
-                <div className="w-px h-10 bg-white/5" />
-                <div className="flex flex-col">
-                   <span className="text-xs text-gray-500 uppercase font-black tracking-widest mb-1">Duration</span>
-                   <span className="text-white font-bold text-xl">
-                      {beat.duration ? `${Math.floor(beat.duration / 60)}:${(beat.duration % 60).toString().padStart(2, '0')}` : '--:--'}
-                   </span>
+                <div className="px-6 py-4 bg-dark-900/70 backdrop-blur-xl rounded-2xl border border-white/10">
+                   <div className="text-xs text-gray-500 uppercase tracking-widest mb-1">Duration</div>
+                   <div className="text-2xl font-black text-white">
+                      {beat.duration ? `${Math.floor(beat.duration / 60)}:${(beat.duration % 60).toString().padStart(2, '0')}` : '--'}
+                   </div>
                 </div>
-                <div className="w-px h-10 bg-white/5" />
-                <div className="flex flex-col">
-                   <span className="text-xs text-gray-500 uppercase font-black tracking-widest mb-1">Genre</span>
-                   <span className="text-primary font-bold text-xl">{beat.genre || 'Uncategorized'}</span>
+                <div className="px-6 py-4 bg-dark-900/70 backdrop-blur-xl rounded-2xl border border-white/10">
+                   <div className="text-xs text-gray-500 uppercase tracking-widest mb-1">Genre</div>
+                   <div className="text-2xl font-black text-primary">{beat.genre || '--'}</div>
                 </div>
               </div>
 
               {/* Pricing Cards */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <Card className="p-6 bg-dark-900 border-white/5 hover:border-primary/30 transition-all group">
-                   <div className="flex justify-between items-start mb-4">
-                      <h3 className="font-black text-white text-lg">Basic License</h3>
-                      <span className="text-2xl font-black text-primary">${basePrice.toFixed(2)}</span>
+              <div className="grid grid-cols-1 gap-6">
+                <Card className="p-8 bg-gradient-to-br from-dark-900 to-dark-950 border-white/10 hover:border-primary/50 transition-all group">
+                   <div className="flex justify-between items-start mb-6">
+                      <h3 className="font-black text-white text-2xl">Basic License</h3>
+                      <span className="text-4xl font-black text-primary">${basePrice.toFixed(2)}</span>
                    </div>
-                   <p className="text-sm text-gray-500 mb-6 line-clamp-2">MP3 + Streaming Rights (Limited to 10k streams)</p>
-                   <Button fullWidth onClick={() => handleCart('Basic')} variant="outline" className="group-hover:bg-primary group-hover:text-black group-hover:border-primary transition-all">
+                   <p className="text-gray-400 mb-8">MP3 + Streaming Rights (Limited to 10k streams)</p>
+                   <Button fullWidth onClick={() => handleCart('Basic')} size="lg" variant="outline" className="group-hover:bg-primary group-hover:text-black transition-all h-14 text-lg font-bold">
                       Add to Cart
                    </Button>
                 </Card>
-                <Card className="p-6 bg-primary border-primary transition-all">
-                   <div className="flex justify-between items-start mb-4">
-                      <h3 className="font-black text-black text-lg">Exclusive Rights</h3>
-                      <span className="text-2xl font-black text-black">${exclusivePrice.toFixed(2)}</span>
+                <Card className="p-8 bg-gradient-to-br from-primary via-primary/90 to-secondary border-primary relative overflow-hidden">
+                   <div className="absolute top-0 right-0 bg-black text-primary px-4 py-1 text-xs font-bold rounded-bl-xl">EXCLUSIVE</div>
+                   <div className="flex justify-between items-start mb-6">
+                      <h3 className="font-black text-black text-2xl">Full Rights</h3>
+                      <span className="text-4xl font-black text-black">${exclusivePrice.toFixed(2)}</span>
                    </div>
-                   <p className="text-sm text-black/70 mb-6 line-clamp-2">WAV + Stems + Full Ownership + Unlimited Rights</p>
-                   <Button fullWidth onClick={() => handleCart('Exclusive')} className="bg-black text-white hover:bg-black/90 border-none transition-all">
+                   <p className="text-black/80 mb-8 font-medium">WAV + Stems + Full Ownership + Unlimited Rights</p>
+                   <Button fullWidth onClick={() => handleCart('Exclusive')} size="lg" className="bg-black text-white hover:bg-black/90 h-14 text-lg font-bold">
                       Purchase Exclusive
                    </Button>
                 </Card>
               </div>
 
-              {/* Description & Tags */}
-              <div className="space-y-6">
-                 <div>
-                    <h3 className="text-lg font-bold text-white mb-2 flex items-center gap-2">
-                       <MessageSquare className="w-5 h-5 text-primary" /> Description
-                    </h3>
-                    <p className="text-gray-400 leading-relaxed italic border-l-2 border-primary/20 pl-4">
-                       "{beat.description || 'No description provided.'}"
-                    </p>
-                 </div>
-                 {beat.mood_tags && (
-                   <div className="flex flex-wrap gap-2 pt-4">
-                      {beat.mood_tags.map(tag => (
-                        <Badge key={tag} className="bg-white/5 text-gray-400 border-white/10 px-4 py-1">#{tag.toLowerCase()}</Badge>
-                      ))}
-                   </div>
-                 )}
-              </div>
+              {/* Description */}
+              {beat.description && (
+                <div className="p-6 bg-dark-900/30 backdrop-blur-xl rounded-2xl border border-white/5">
+                   <h3 className="text-lg font-bold text-white mb-3 flex items-center gap-2">
+                      <MessageSquare className="w-5 h-5 text-primary" /> Description
+                   </h3>
+                   <p className="text-gray-300 leading-relaxed">
+                      {beat.description}
+                   </p>
+                </div>
+              )}
+
+              {/* Tags */}
+              {beat.mood_tags && (
+                <div className="flex flex-wrap gap-3">
+                   {beat.mood_tags.map(tag => (
+                     <Badge key={tag} className="bg-primary/10 text-primary border-primary/20 px-4 py-2 text-sm">
+                       #{tag.toLowerCase()}
+                     </Badge>
+                   ))}
+                </div>
+              )}
             </div>
 
           </div>

@@ -31,7 +31,10 @@ export async function POST(request: NextRequest) {
     } 
     // 2. Fallback to provided base64 if no URL
     else if (fileBase64 && contentType) {
-      const base64Data = fileBase64.replace(/^data:audio\/\w+;base64,/, '');
+      // Robustly remove data URL prefix if present
+      const base64Data = fileBase64.includes(',') 
+        ? fileBase64.split(',')[1] 
+        : fileBase64.replace(/^data:.*?;base64,/, '');
       
       promptParts.push({
         inlineData: {
@@ -46,41 +49,17 @@ export async function POST(request: NextRequest) {
     }
 
     promptParts.push(`
-      As an expert musicologist and audio engineer, perform a technical analysis of this audio file (Filename: "${filename}"). 
-      Focus on extracting highly reliable metadata for a professional music library.
-
-      STRICT JSON FORMAT ONLY. No markdown blocks.
+      Identify metadata for this audio file: "${filename}".
       
-      Technical Analysis Instructions:
-      1. BPM DETECTION: Identify the dominant pulse or transient pattern. Be precise. Even for complex rhythms, determine the core tempo.
-      2. KEY & SCALE DETECTION: Identify the tonic center (root note) and the scale/mode (e.g., Minor, Major, Phrygian). Use standard notation (e.g., "C# Minor").
-      3. MUSICAL VIBE: Identify the primary genre and specific sub-genres or styles.
-      4. ARTWORK PROMPT: Create a detailed, atmospheric prompt for a high-end album cover based on the sonic textures detected.
-
-      Return the results in this JSON structure:
+      Return ONLY valid JSON:
       {
-        "title": "Creative Title",
-        "bpm": number (integer),
-        "key": "Note + Scale (e.g. Eb Major)",
-        "genre": "Primary Genre",
-        "moods": ["Mood1", "Mood2", "Mood3"],
-        "description": "Short marketing description (max 2 sentences)",
-        "suggested_label": "Creative imaginary label",
-        "suggested_publisher": "Creative imaginary publisher",
-        "artwork_prompt": "Vivid artistic prompt for AI image generation"
-      }
-
-      Example JSON:
-      {
-        "title": "Neon Nights",
-        "bpm": 128,
-        "key": "G Minor",
-        "genre": "Synthwave",
-        "moods": ["Atmospheric", "Driving", "Nostalgic"],
-        "description": "A driving synthwave track with pulsating basslines and lush pads. Perfect for retro-futuristic visuals.",
-        "suggested_label": "Quartz Records",
-        "suggested_publisher": "Midnight Music Publishing",
-        "artwork_prompt": "A cinematic retro-futuristic city at night with purple neon lights and a sports car driving into the distance, highly detailed digital art."
+        "title": "Song Title",
+        "bpm": number,
+        "key": "Note + Scale",
+        "genre": "Genre",
+        "moods": ["Mood1", "Mood2"],
+        "description": "1 sentence description",
+        "artwork_prompt": "1 sentence visual prompt"
       }
     `);
 

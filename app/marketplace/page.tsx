@@ -5,7 +5,6 @@ import { useSearchParams } from 'next/navigation';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { BeatCard } from '@/components/BeatCard';
-import { AudioPlayer } from '@/components/AudioPlayer';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import { Search, SlidersHorizontal, Grid, List, ChevronDown, X } from 'lucide-react';
@@ -550,7 +549,6 @@ function MarketplaceContent() {
         </div>
       </main>
 
-      <AudioPlayer />
       <Footer />
     </div>
   );

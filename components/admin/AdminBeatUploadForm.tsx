@@ -53,16 +53,29 @@ export const AdminBeatUploadForm = memo(function AdminBeatUploadForm({ onSuccess
 
     const toastId = toast.loading('AI is analyzing the beat...');
     try {
-        // 1. Convert audio file to Base64
+        // 1. Convert audio slice to Base64 (only need 512KB for analysis)
+        // This dramatically reduces payload size, prevents "Unterminated string" and reduces timeouts
+        const ANALYSIS_SIZE_LIMIT = 512 * 1024; // 512KB
+        const audioSlice = audioFile.size > ANALYSIS_SIZE_LIMIT 
+            ? audioFile.slice(0, ANALYSIS_SIZE_LIMIT) 
+            : audioFile;
+
         const reader = new FileReader();
         const fileBase64 = await new Promise<string>((resolve) => {
-            reader.onloadend = () => resolve(reader.result as string);
-            reader.readAsDataURL(audioFile);
+            reader.onloadend = () => {
+                const result = reader.result as string;
+                // Only send the base64 data, strip "data:audio/...;base64," prefix
+                resolve(result.split(',')[1] || result);
+            };
+            reader.readAsDataURL(audioSlice);
         });
 
         // 2. Perform AI Analysis
         const analyzeRes = await fetch('/api/ai/analyze', {
             method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
             body: JSON.stringify({ 
                 filename: audioFile.name,
                 fileBase64,
@@ -86,6 +99,9 @@ export const AdminBeatUploadForm = memo(function AdminBeatUploadForm({ onSuccess
             toast.loading('Generating custom artwork...', { id: toastId });
             const artRes = await fetch('/api/ai/artwork', {
                 method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
                 body: JSON.stringify({ 
                     prompt: aiData.artwork_prompt,
                     beatId: 'temp' 
@@ -101,7 +117,10 @@ export const AdminBeatUploadForm = memo(function AdminBeatUploadForm({ onSuccess
         toast.success('Sync Complete: AI has prepared your release!', { id: toastId });
     } catch (err: any) {
         console.error('Auto-fill error:', err);
-        toast.error(err.message || 'Failed to analyze track', { id: toastId });
+        const errorMsg = err.message?.includes('Unterminated string') 
+            ? 'The audio file is too complex for auto-analysis. Please fill metadata manually.'
+            : (err.message || 'Failed to analyze track');
+        toast.error(errorMsg, { id: toastId });
     }
   };
 
@@ -386,4 +405,4 @@ export const AdminBeatUploadForm = memo(function AdminBeatUploadForm({ onSuccess
       </div>
     </div>
   );
-}
+});

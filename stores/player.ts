@@ -19,6 +19,7 @@ interface PlayerState {
   queue: Beat[];
   currentTime: number;
   duration: number;
+  analyser: AnalyserNode | null;
   
   // Actions
   setCurrentBeat: (beat: Beat) => void;
@@ -34,6 +35,7 @@ interface PlayerState {
   seek: (time: number) => void;
   setCurrentTime: (time: number) => void;
   setDuration: (duration: number) => void;
+  setAnalyser: (analyser: AnalyserNode) => void;
   reset: () => void;
 }
 
@@ -46,6 +48,7 @@ export const usePlayer = create<PlayerState>()(
       queue: [],
       currentTime: 0,
       duration: 0,
+      analyser: null,
 
       setCurrentBeat: (beat) => set({ currentBeat: beat, isPlaying: true }),
 
@@ -91,11 +94,14 @@ export const usePlayer = create<PlayerState>()(
 
       setDuration: (duration) => set({ duration }),
 
+      setAnalyser: (analyser) => set({ analyser }),
+
       reset: () => set({ 
         currentBeat: null, 
         isPlaying: false, 
         currentTime: 0,
-        duration: 0 
+        duration: 0,
+        analyser: null
       }),
     }),
     {
