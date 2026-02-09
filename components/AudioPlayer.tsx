@@ -16,7 +16,6 @@ import {
   Activity
 } from 'lucide-react';
 import { usePlayer } from '@/stores/player';
-import { CircularVisualizer } from './CircularVisualizer';
 import { LinearVisualizer } from './LinearVisualizer';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -131,7 +130,6 @@ export function AudioPlayer() {
 
   // Visualizer setup
   const { analyser } = usePlayer();
-  const [showVisualizer, setShowVisualizer] = useState(false);
   const audioContextRef = useRef<AudioContext | null>(null);
   const sourceNodeRef = useRef<MediaElementAudioSourceNode | null>(null);
 
@@ -252,15 +250,6 @@ export function AudioPlayer() {
                 </div>
               )}
               {/* Overlay Visualizer */}
-              {showVisualizer && (
-                <div className="absolute inset-0 flex items-center justify-center bg-black/40 backdrop-blur-[2px]">
-                   <CircularVisualizer 
-                      analyser={analyser} 
-                      isPlaying={isPlaying} 
-                      size={76}
-                   />
-                </div>
-              )}
             </div>
             <div className="min-w-0">
               <Link href={`/beats/${currentBeat.id}`}>
@@ -316,13 +305,6 @@ export function AudioPlayer() {
               </button>
               <button className="text-gray-400 hover:text-white transition-colors">
                 <Repeat className="w-4 h-4" />
-              </button>
-              <button 
-                onClick={() => setShowVisualizer(!showVisualizer)}
-                className={`transition-colors ${showVisualizer ? 'text-primary' : 'text-gray-400 hover:text-white'}`}
-                title="Toggle Visualizer"
-              >
-                <Activity className="w-4 h-4" />
               </button>
             </div>
 
