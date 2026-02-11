@@ -1,6 +1,5 @@
-'use client';
-
-import { useEffect, useRef, useState, useCallback } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
+import { View, Text, TouchableOpacity, Image, Platform, StyleSheet } from 'react-native';
 import WaveSurfer from 'wavesurfer.js';
 import { 
   Play, 
@@ -14,17 +13,15 @@ import {
   Shuffle,
   ListMusic,
   Activity
-} from 'lucide-react';
+} from 'lucide-react-native';
 import { usePlayer } from '@/stores/player';
 import { LinearVisualizer } from './LinearVisualizer';
-import Image from 'next/image';
-import Link from 'next/link';
-import { sanitizeUrl } from '@/lib/utils/url';
+import { Link } from 'expo-router';
 
 export function AudioPlayer() {
-  const waveformRef = useRef<HTMLDivElement>(null);
+  const waveformRef = useRef<any>(null);
   const wavesurferRef = useRef<WaveSurfer | null>(null);
-  const audioRef = useRef<HTMLAudioElement>(null);
+  const audioRef = useRef<any>(null);
   const [isReady, setIsReady] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const previousVolumeRef = useRef(0.7);
@@ -44,23 +41,12 @@ export function AudioPlayer() {
     playNext,
     playPrevious,
     reset,
+    analyser
   } = usePlayer();
-
-  // Track plays
-  useEffect(() => {
-    if (currentBeat && isPlaying) {
-      // Small delay to ensure it's not a quick skip
-      const timer = setTimeout(() => {
-        fetch(`/api/beats/${currentBeat.id}/track-play`, { method: 'POST' })
-          .catch(err => console.error('Failed to track play:', err));
-      }, 5000); // 5 seconds of playback counts as a play
-      
-      return () => clearTimeout(timer);
-    }
-  }, [currentBeat?.id, isPlaying]);
 
   // Initialize WaveSurfer
   useEffect(() => {
+    if (Platform.OS !== 'web') return;
     if (!waveformRef.current || !currentBeat || !audioRef.current) return;
 
     // cleanup old instance
@@ -71,8 +57,8 @@ export function AudioPlayer() {
     const wavesurfer = WaveSurfer.create({
       container: waveformRef.current,
       media: audioRef.current,
-      waveColor: 'rgba(255, 255, 255, 0.05)', // Almost invisible
-      progressColor: 'rgba(212, 175, 55, 0.1)', // Subtle progress
+      waveColor: 'rgba(255, 255, 255, 0.05)',
+      progressColor: 'rgba(212, 175, 55, 0.1)',
       cursorColor: '#D4AF37',
       barWidth: 2,
       barRadius: 2,
@@ -93,16 +79,6 @@ export function AudioPlayer() {
       }
     });
 
-    wavesurfer.on('error', (err) => {
-      console.error('WaveSurfer error detail:', {
-        message: err,
-        beatId: currentBeat.id,
-        src: audioSrc
-      });
-      // Import toast if possible, otherwise just log
-      import('react-hot-toast').then(m => m.default.error(`WaveSurfer error: ${err}`));
-    });
-
     wavesurfer.on('audioprocess', () => {
       setCurrentTime(wavesurfer.getCurrentTime());
     });
@@ -114,29 +90,22 @@ export function AudioPlayer() {
     wavesurferRef.current = wavesurfer;
 
     return () => {
-      try {
-        wavesurfer.destroy();
-      } catch (err) {
-        if (err instanceof Error && err.name !== 'AbortError') {
-           console.error('WaveSurfer cleanup error:', err);
+        if (wavesurferRef.current) {
+            wavesurferRef.current.destroy();
+            wavesurferRef.current = null;
         }
-      }
-      if (wavesurferRef.current === wavesurfer) {
-        wavesurferRef.current = null;
         setIsReady(false);
-      }
     };
   }, [currentBeat?.id]);
 
-  // Visualizer setup
-  const { analyser } = usePlayer();
+  // AudioContext setup for visualizer
   const audioContextRef = useRef<AudioContext | null>(null);
   const sourceNodeRef = useRef<MediaElementAudioSourceNode | null>(null);
 
   useEffect(() => {
+    if (Platform.OS !== 'web') return;
     if (!audioRef.current || !isPlaying || analyser) return;
 
-    // We only initialize when playing for the first time to satisfy browser autoplay policies
     const setupAnalyser = () => {
       try {
         if (!audioContextRef.current) {
@@ -149,7 +118,7 @@ export function AudioPlayer() {
         }
 
         if (!sourceNodeRef.current) {
-          sourceNodeRef.current = audioContext.createMediaElementSource(audioRef.current!);
+          sourceNodeRef.current = audioContext.createMediaElementSource(audioRef.current);
           const newAnalyser = audioContext.createAnalyser();
           newAnalyser.fftSize = 256;
           
@@ -167,13 +136,11 @@ export function AudioPlayer() {
 
   // Sync play/pause state
   useEffect(() => {
+    if (Platform.OS !== 'web') return;
     if (!wavesurferRef.current || !isReady) return;
 
     if (isPlaying) {
-      wavesurferRef.current.play().catch(e => {
-        console.warn('Play failed:', e);
-        import('react-hot-toast').then(m => m.default.error('Playback failed. Please try again.'));
-      });
+      wavesurferRef.current.play().catch(e => console.warn('Play failed:', e));
     } else {
       wavesurferRef.current.pause();
     }
@@ -203,169 +170,127 @@ export function AudioPlayer() {
 
   if (!currentBeat) return null;
 
-  const audioSrc = `/api/beats/${currentBeat.id}/stream`;
+  const audioSrc = currentBeat.preview_url || currentBeat.audio_url;
   const artworkSrc = currentBeat.artwork_url || null;
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 glass border-t border-white/10 backdrop-blur-xl bg-dark-950/80">
+    <View className="fixed bottom-0 left-0 right-0 z-50 bg-dark-950/90 border-t border-white/10" style={{ position: 'fixed' as any, bottom: 0, left: 0, right: 0 }}>
       {/* Hidden Audio Element */}
-      <audio 
-        ref={audioRef} 
-        src={audioSrc}
-        crossOrigin="anonymous" 
-        onEnded={playNext}
-        onError={(e) => {
-          const target = e.target as HTMLAudioElement;
-          const errorMsg = target.error?.message || 'Unknown network error';
-          console.error('Audio playback error:', {
-            code: target.error?.code,
-            message: errorMsg,
-            src: audioSrc
-          });
-          import('react-hot-toast').then(m => m.default.error(`Audio error: ${errorMsg}`));
-        }}
-      />
+      {Platform.OS === 'web' && (
+          <audio 
+            ref={audioRef} 
+            src={audioSrc}
+            crossOrigin="anonymous" 
+          />
+      )}
       
-      <div className="max-w-7xl mx-auto px-4 py-4">
-        <div className="flex items-center gap-4">
+      <View className="max-w-7xl mx-auto px-4 py-4 w-full">
+        <View className="flex-row items-center gap-4">
+          
           {/* Beat Info */}
-          <div className="flex items-center gap-3 min-w-0 w-80">
-            <div className="w-20 h-20 rounded-xl overflow-hidden shrink-0 relative group shadow-2xl">
+          <View className="flex-row items-center gap-3 w-64 lg:w-80 overflow-hidden">
+            <View className="w-16 h-16 rounded-lg overflow-hidden bg-dark-800">
               {artworkSrc ? (
                 <Image 
-                  src={artworkSrc} 
-                  alt={currentBeat.title}
-                  fill
-                  sizes="48px"
-                  className="object-cover"
+                  source={{ uri: artworkSrc }}
+                  style={{ width: '100%', height: '100%' }}
                 />
               ) : (
-                <div className="w-full h-full relative bg-dark-800">
-                  <Image
-                    src="/images/placeholder-instrumental.png"
-                    alt="Placeholder"
-                    fill
-                    className="object-cover opacity-80"
-                  />
-                </div>
+                <View className="w-full h-full items-center justify-center">
+                  <Activity size={24} color="#374151" />
+                </View>
               )}
-              {/* Overlay Visualizer */}
-            </div>
-            <div className="min-w-0">
-              <Link href={`/beats/${currentBeat.id}`}>
-                <p className="font-medium text-white truncate hover:text-primary transition-colors">
-                  {currentBeat.title}
-                </p>
+            </View>
+            <View className="flex-1">
+              <Link href={`/beats/${currentBeat.id}`} asChild>
+                <TouchableOpacity>
+                  <Text className="font-medium text-white text-sm lg:text-base" numberOfLines={1}>
+                    {currentBeat.title}
+                  </Text>
+                </TouchableOpacity>
               </Link>
-              <p className="text-sm text-gray-400 truncate">
+              <Text className="text-xs text-gray-400" numberOfLines={1}>
                 {currentBeat.producer?.display_name || 'Unknown Producer'}
-              </p>
-            </div>
-          </div>
+              </Text>
+            </View>
+          </View>
 
           {/* Controls & Waveform */}
-          <div className="flex-1 flex flex-col gap-2">
-            {/* Controls */}
-            <div className="flex items-center justify-center gap-4">
-              <button className="text-gray-400 hover:text-white transition-colors">
-                <Shuffle className="w-4 h-4" />
-              </button>
-              <button 
-                onClick={playPrevious}
-                className="text-gray-400 hover:text-white transition-colors"
-              >
-                <SkipBack className="w-5 h-5" />
-              </button>
-              <button
-                onClick={() => {
-                   if (audioRef.current && audioRef.current.paused) {
-                        try {
-                           // Try resuming audio context if suspended (WaveSurfer handles this but specific mobile browsers need explicit touch)
-                           if (wavesurferRef.current) {
-                               const ctx = (wavesurferRef.current as any).backend?.getAudioContext?.();
-                               if (ctx?.state === 'suspended') ctx.resume();
-                           }
-                        } catch(e) { console.warn(e); }
-                   }
-                   isPlaying ? pause() : play();
-                }}
-                className="w-10 h-10 rounded-full bg-white flex items-center justify-center transition-transform hover:scale-105"
+          <View className="flex-1 gap-1">
+            <View className="flex-row items-center justify-center gap-4 md:gap-6">
+              <TouchableOpacity><Shuffle size={16} color="#9CA3AF" /></TouchableOpacity>
+              <TouchableOpacity onPress={playPrevious}><SkipBack size={20} color="#9CA3AF" /></TouchableOpacity>
+              
+              <TouchableOpacity
+                onPress={() => isPlaying ? pause() : play()}
+                className="w-10 h-10 rounded-full bg-white items-center justify-center"
               >
                 {isPlaying ? (
-                  <Pause className="w-5 h-5 text-dark-950" fill="currentColor" />
+                  <Pause size={20} color="#0A0A0A" fill="#0A0A0A" />
                 ) : (
-                  <Play className="w-5 h-5 text-dark-950 ml-0.5" fill="currentColor" />
+                  <Play size={20} color="#0A0A0A" fill="#0A0A0A" className="ml-1" />
                 )}
-              </button>
-              <button 
-                onClick={playNext}
-                className="text-gray-400 hover:text-white transition-colors"
-              >
-                <SkipForward className="w-5 h-5" />
-              </button>
-              <button className="text-gray-400 hover:text-white transition-colors">
-                <Repeat className="w-4 h-4" />
-              </button>
-            </div>
+              </TouchableOpacity>
 
-            {/* Waveform & Time */}
-            <div className="flex items-center gap-2">
-              <span className="text-xs text-gray-400 w-10 text-right">
+              <TouchableOpacity onPress={playNext}><SkipForward size={20} color="#9CA3AF" /></TouchableOpacity>
+              <TouchableOpacity><Repeat size={16} color="#9CA3AF" /></TouchableOpacity>
+            </View>
+
+            <View className="flex-row items-center gap-2">
+              <Text className="text-[10px] text-gray-400 w-8 text-right">
                 {formatTime(currentTime)}
-              </span>
-              <div className="flex-1 relative h-16 flex items-center">
-                {/* Real-time Reactive Visualizer (Background) */}
-                <div className="absolute inset-0 z-0 opacity-80 mt-2">
+              </Text>
+              <View className="flex-1 relative h-12 justify-center">
+                {/* Visualizer Background */}
+                <View className="absolute inset-0 opacity-50">
                   <LinearVisualizer 
                      analyser={analyser} 
                      isPlaying={isPlaying} 
-                     height={40}
+                     height={32}
                   />
-                </div>
-                {/* WaveSurfer (Foreground for seeking) */}
-                <div ref={waveformRef} className="flex-1 relative z-10 w-full" />
-              </div>
-              <span className="text-xs text-gray-400 w-10">
+                </View>
+                {/* Waveform Container */}
+                <View ref={waveformRef} className="flex-1 z-10" />
+              </View>
+              <Text className="text-[10px] text-gray-400 w-8">
                 {formatTime(duration)}
-              </span>
-            </div>
-          </div>
+              </Text>
+            </View>
+          </View>
 
           {/* Volume & Actions */}
-          <div className="flex items-center gap-4 w-48 justify-end">
-            <button className="text-gray-400 hover:text-white transition-colors">
-              <ListMusic className="w-5 h-5" />
-            </button>
-            <div className="flex items-center gap-2">
-              <button onClick={toggleMute} className="text-gray-400 hover:text-white transition-colors">
+          <View className="hidden md:flex flex-row items-center gap-4 w-48 justify-end">
+            <TouchableOpacity><ListMusic size={20} color="#9CA3AF" /></TouchableOpacity>
+            <View className="flex-row items-center gap-2">
+              <TouchableOpacity onPress={toggleMute}>
                 {isMuted || volume === 0 ? (
-                  <VolumeX className="w-5 h-5" />
+                  <VolumeX size={20} color="#9CA3AF" />
                 ) : (
-                  <Volume2 className="w-5 h-5" />
+                  <Volume2 size={20} color="#9CA3AF" />
                 )}
-              </button>
-              <input
-                type="range"
-                min="0"
-                max="1"
-                step="0.01"
-                value={isMuted ? 0 : volume}
-                onChange={(e) => {
-                  setVolume(parseFloat(e.target.value));
-                  setIsMuted(false);
-                }}
-                className="w-20 accent-primary"
-              />
-            </div>
-            <button 
-              onClick={reset}
-              className="text-gray-400 hover:text-white transition-colors"
-            >
-              <X className="w-5 h-5" />
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
+              </TouchableOpacity>
+              {/* Note: Standard HTML range input for now on web */}
+              {Platform.OS === 'web' && (
+                <input
+                  type="range"
+                  min="0"
+                  max="1"
+                  step="0.01"
+                  value={isMuted ? 0 : volume}
+                  onChange={(e) => {
+                    setVolume(parseFloat(e.target.value));
+                    setIsMuted(false);
+                  }}
+                  style={{ width: 80, accentColor: '#D4AF37' }}
+                />
+              )}
+            </View>
+            <TouchableOpacity onPress={reset}>
+              <X size={20} color="#9CA3AF" />
+            </TouchableOpacity>
+          </View>
+        </View>
+      </View>
+    </View>
   );
 }

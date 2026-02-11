@@ -1,6 +1,6 @@
-'use client';
-
-import Link from 'next/link';
+import React, { useState } from 'react';
+import { View, Text, TouchableOpacity, Image, TextInput, Platform } from 'react-native';
+import { Link, useRouter } from 'expo-router';
 import { useAuth } from '@/components/providers/AuthProvider';
 import { Button } from '@/components/ui/Button';
 import { 
@@ -13,215 +13,109 @@ import {
   LayoutDashboard,
   Heart,
   ChevronDown
-} from 'lucide-react';
-import { useState } from 'react';
+} from 'lucide-react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export function Header() {
-  const { user, profile, signOut, loading } = useAuth();
+  const { user, signOut, loading } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [newsOpen, setNewsOpen] = useState(false);
+  const router = useRouter();
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 glass">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-20">
-          {/* Logo */}
-          <Link href="/" className="flex items-center gap-2 mr-8">
-            <div className="relative w-[120px] h-[40px] flex items-center justify-center">
-              <img src="/audiogenes-logo.png" alt="AudioGenes" className="w-full h-full object-contain" />
-            </div>
+    <View className="bg-dark-950/80 backdrop-blur-lg border-b border-white/10 z-50">
+      <SafeAreaView edges={['top']} className="bg-dark-950/80" />
+      <View className="max-w-7xl w-full mx-auto px-4 h-16 flex-row items-center justify-between">
+        
+        {/* Logo */}
+        <Link href="/" asChild>
+          <TouchableOpacity className="flex-row items-center mr-8">
+             <Text className="text-primary font-bold text-xl tracking-wider">AUDIO</Text>
+             <Text className="text-white font-bold text-xl tracking-wider">GENES</Text>
+          </TouchableOpacity>
+        </Link>
+
+        {/* Desktop Nav */}
+        <View className="hidden md:flex flex-row items-center gap-6">
+          <Link href="/marketplace" asChild>
+            <TouchableOpacity><Text className="text-gray-300 hover:text-white font-medium">Marketplace</Text></TouchableOpacity>
           </Link>
+          <Link href="/producers" asChild>
+            <TouchableOpacity><Text className="text-gray-300 hover:text-white font-medium">Producers</Text></TouchableOpacity>
+          </Link>
+          <Link href="/pricing" asChild>
+            <TouchableOpacity><Text className="text-gray-300 hover:text-white font-medium">Licensing</Text></TouchableOpacity>
+          </Link>
+        </View>
 
-          {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center gap-8">
-            <Link 
-              href="/marketplace" 
-              className="text-gray-300 hover:text-white transition-colors"
-            >
-              Marketplace
-            </Link>
-            <Link 
-              href="/producers" 
-              className="text-gray-300 hover:text-white transition-colors"
-            >
-              Producers
-            </Link>
-            <Link 
-              href="/pricing" 
-              className="text-gray-300 hover:text-white transition-colors"
-            >
-              Licensing
-            </Link>
+        {/* Search Bar (Hidden on mobile) */}
+        <View className="hidden lg:flex flex-1 max-w-xs mx-4 relative">
+          <View className="absolute left-3 top-3 z-10">
+            <Search size={16} color="#9CA3AF" />
+          </View>
+          <TextInput 
+            placeholder="Search beats..." 
+            placeholderTextColor="#6B7280"
+            className="w-full bg-dark-800 border border-dark-600 rounded-lg py-2 pl-9 pr-4 text-white text-sm"
+          />
+        </View>
 
-            {/* News Dropdown */}
-            <div 
-              className="relative group"
-              onMouseEnter={() => setNewsOpen(true)}
-              onMouseLeave={() => setNewsOpen(false)}
-            >
-              <button 
-                className="flex items-center gap-1 text-gray-300 hover:text-white transition-colors py-2"
-              >
-                News
-                <ChevronDown className={`w-4 h-4 transition-transform ${newsOpen ? 'rotate-180' : ''}`} />
-              </button>
-              
-              {newsOpen && (
-                <div className="absolute top-full left-0 w-48 mt-1 glass border border-white/10 rounded-xl overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
-                  <div className="py-2">
-                    <Link 
-                      href="/editorial" 
-                      className="block px-4 py-2 text-sm text-gray-300 hover:text-white hover:bg-white/5 transition-colors"
-                    >
-                      Editorial
-                    </Link>
-                    <Link 
-                      href="/charts" 
-                      className="block px-4 py-2 text-sm text-gray-300 hover:text-white hover:bg-white/5 transition-colors"
-                    >
-                      Charts
-                    </Link>
-                  </div>
-                </div>
-              )}
-            </div>
-          </nav>
-
-          {/* Search Bar */}
-          <div className="hidden lg:flex items-center flex-1 max-w-md mx-8">
-            <div className="relative w-full">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-              <input
-                type="text"
-                placeholder="Search beats..."
-                className="w-full pl-10 pr-4 py-2 bg-dark-800 border border-dark-600 rounded-lg text-sm text-foreground placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-              />
-            </div>
-          </div>
-
-          {/* Auth Buttons */}
-          <div className="hidden md:flex items-center gap-4">
-            {loading ? (
-              <div className="w-8 h-8 rounded-full bg-dark-700 animate-pulse" />
-            ) : user ? (
-              <div className="flex items-center gap-4">
-                <Link href="/dashboard/artist/favorites">
-                  <Button variant="ghost" size="sm">
-                    <Heart className="w-4 h-4" />
-                  </Button>
-                </Link>
-                <Link href="/dashboard">
-                  <Button variant="ghost" size="sm">
-                    <LayoutDashboard className="w-4 h-4 mr-2" />
-                    Dashboard
-                  </Button>
-                </Link>
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-linear-to-br from-primary to-secondary flex items-center justify-center">
-                    <span className="text-sm font-medium text-white">
-                      {profile?.display_name?.charAt(0).toUpperCase() || 'U'}
-                    </span>
-                  </div>
-                  <button 
-                    onClick={signOut}
-                    className="text-gray-400 hover:text-white transition-colors"
-                  >
-                    <LogOut className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <>
-                <Link href="/login">
-                  <Button variant="ghost" size="sm">Log In</Button>
-                </Link>
-                <Link href="/signup">
-                  <Button variant="primary" size="sm">Get Started</Button>
-                </Link>
-              </>
-            )}
-          </div>
-
-          {/* Mobile Actions */}
-          <div className="flex md:hidden items-center gap-2">
-            {!user && !loading && (
-              <Link href="/login">
-                <Button variant="ghost" size="sm" className="px-3">Log In</Button>
+        {/* Auth Buttons */}
+        <View className="hidden md:flex flex-row items-center gap-3">
+          {loading ? (
+             <View className="w-8 h-8 rounded-full bg-dark-700" />
+          ) : user ? (
+            <View className="flex-row items-center gap-3">
+               <Link href="/dashboard" asChild>
+                  <Button variant="ghost" size="sm">Dashboard</Button>
+               </Link>
+               <TouchableOpacity onPress={() => signOut()}>
+                 <LogOut size={20} color="#9CA3AF" />
+               </TouchableOpacity>
+            </View>
+          ) : (
+            <View className="flex-row items-center gap-2">
+              <Link href="/login" asChild>
+                <Button variant="ghost" size="sm">Log In</Button>
               </Link>
-            )}
-            <button
-              className="p-2 text-gray-300 hover:text-white"
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            >
-              {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-            </button>
-          </div>
-        </div>
-      </div>
+              <Link href="/signup" asChild>
+                <Button variant="primary" size="sm">Get Started</Button>
+              </Link>
+            </View>
+          )}
+        </View>
 
-      {/* Mobile Menu */}
+        {/* Mobile Menu Button */}
+        <TouchableOpacity 
+          className="md:hidden p-2"
+          onPress={() => setMobileMenuOpen(!mobileMenuOpen)}
+        >
+          {mobileMenuOpen ? <X size={24} color="#fff" /> : <Menu size={24} color="#fff" />}
+        </TouchableOpacity>
+      </View>
+
+      {/* Mobile Menu Content */}
       {mobileMenuOpen && (
-        <div className="md:hidden bg-dark-900 border-t border-dark-700 animate-fade-in">
-          <div className="px-4 py-4 space-y-4">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-              <input
-                type="text"
-                placeholder="Search beats..."
-                className="w-full pl-10 pr-4 py-2 bg-dark-800 border border-dark-600 rounded-lg text-sm"
-              />
-            </div>
-            <nav className="flex flex-col gap-2">
-              <Link 
-                href="/marketplace" 
-                className="px-4 py-2 text-gray-300 hover:text-white hover:bg-dark-800 rounded-lg"
-              >
-                Marketplace
+        <View className="md:hidden bg-dark-900 border-t border-dark-700 p-4 absolute top-16 left-0 right-0 z-50">
+           <View className="flex-col gap-4">
+              <Link href="/marketplace" asChild>
+                <TouchableOpacity className="py-2 border-b border-dark-800"><Text className="text-white text-lg">Marketplace</Text></TouchableOpacity>
               </Link>
-              <Link 
-                href="/producers" 
-                className="px-4 py-2 text-gray-300 hover:text-white hover:bg-dark-800 rounded-lg"
-              >
-                Producers
+              <Link href="/producers" asChild>
+                <TouchableOpacity className="py-2 border-b border-dark-800"><Text className="text-white text-lg">Producers</Text></TouchableOpacity>
               </Link>
-              <Link 
-                href="/pricing" 
-                className="px-4 py-2 text-gray-300 hover:text-white hover:bg-dark-800 rounded-lg"
-              >
-                Licensing
-              </Link>
-              
-              <div className="pt-2">
-                <p className="px-4 py-1 text-[10px] font-black uppercase tracking-[0.2em] text-gray-500">News</p>
-                <div className="flex flex-col gap-1 pl-4 mt-2">
-                  <Link 
-                    href="/editorial" 
-                    className="px-4 py-2 text-gray-300 hover:text-white hover:bg-dark-800 rounded-lg text-sm"
-                  >
-                    Editorial
-                  </Link>
-                  <Link 
-                    href="/charts" 
-                    className="px-4 py-2 text-gray-300 hover:text-white hover:bg-dark-800 rounded-lg text-sm"
-                  >
-                    Charts
-                  </Link>
-                </div>
-              </div>
-            </nav>
-            {!user && (
-              <div className="flex flex-col gap-2 pt-4 border-t border-dark-700">
-                <Link href="/login">
-                  <Button variant="ghost" fullWidth>Log In</Button>
-                </Link>
-                <Link href="/signup">
-                  <Button variant="primary" fullWidth>Get Started</Button>
-                </Link>
-              </div>
-            )}
-          </div>
-        </div>
+              {!user && (
+                 <View className="flex-row gap-4 mt-2">
+                    <Link href="/login" asChild>
+                       <Button variant="ghost" fullWidth className="flex-1">Log In</Button>
+                    </Link>
+                    <Link href="/signup" asChild>
+                       <Button variant="primary" fullWidth className="flex-1">Sign Up</Button>
+                    </Link>
+                 </View>
+              )}
+           </View>
+        </View>
       )}
-    </header>
+    </View>
   );
 }

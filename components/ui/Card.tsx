@@ -1,23 +1,17 @@
-import { ReactNode } from 'react';
+import { View, ViewProps } from 'react-native';
 
-interface CardProps {
-  children: ReactNode;
+interface CardProps extends ViewProps {
   className?: string;
-  hoverable?: boolean;
-  onClick?: () => void;
+  children: React.ReactNode;
 }
 
-export function Card({ children, className = '', hoverable = false, onClick }: CardProps) {
-  const hoverClass = hoverable
-    ? 'hover:scale-[1.02] hover:shadow-2xl hover:border-primary/30 cursor-pointer'
-    : '';
-
+export const Card = ({ children, className = '', ...props }: CardProps) => {
   return (
-    <div
-      className={`bg-dark-900 border border-dark-700 rounded-xl p-6 transition-all duration-300 ${hoverClass} ${className}`}
-      onClick={onClick}
+    <View 
+      className={`bg-dark-900 border border-dark-800 rounded-xl overflow-hidden ${className}`}
+      {...props}
     >
       {children}
-    </div>
+    </View>
   );
-}
+};

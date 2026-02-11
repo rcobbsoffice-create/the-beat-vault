@@ -1,5 +1,6 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { persist, createJSONStorage } from 'zustand/middleware';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 interface UIState {
   isSidebarCollapsed: boolean;
@@ -16,6 +17,7 @@ export const useUI = create<UIState>()(
     }),
     {
       name: 'ui-storage',
+      storage: createJSONStorage(() => AsyncStorage),
     }
   )
 );

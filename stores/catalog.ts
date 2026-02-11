@@ -1,6 +1,7 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
-import { supabase } from '@/lib/supabase/client';
+import { persist, createJSONStorage } from 'zustand/middleware';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { supabase } from '@/lib/supabase';
 
 export interface ProducerBeat {
   id: string;
@@ -31,38 +32,12 @@ interface CatalogState {
   error: string | null;
   setBeats: (beats: ProducerBeat[]) => void;
   fetchBeats: () => Promise<void>;
+  addBeat: (beat: ProducerBeat) => void;
   updateBeat: (id: string, updates: Partial<ProducerBeat>) => void;
   getBeat: (id: string) => ProducerBeat | undefined;
 }
 
-const INITIAL_BEATS: ProducerBeat[] = [
-  { 
-    id: '1', 
-    title: 'Future Hendrix', 
-    genre: 'Trap', 
-    bpm: 130, 
-    plays: 12500, 
-    sales: 42, 
-    earnings: '$1,250', 
-    status: 'published',
-    description: 'High energy trap beat inspired by Future.',
-    key: 'C Minor',
-    moods: ['Energetic', 'Dark']
-  },
-  { 
-    id: '2', 
-    title: 'Midnight Dreams', 
-    genre: 'Melodic', 
-    bpm: 140, 
-    plays: 8200, 
-    sales: 28, 
-    earnings: '$840', 
-    status: 'published',
-    description: 'Smooth melodic vibes for late night sessions.',
-    key: 'F# Minor',
-    moods: ['Chill', 'Melodic']
-  },
-];
+const INITIAL_BEATS: ProducerBeat[] = [];
 
 export const useCatalogStore = create<CatalogState>()(
   persist(
@@ -106,12 +81,16 @@ export const useCatalogStore = create<CatalogState>()(
             producer_id: beat.producer_id,
           }));
 
-          set({ beats: mappedBeats.length > 0 ? mappedBeats : INITIAL_BEATS, isLoading: false });
+          set({ beats: mappedBeats, isLoading: false });
         } catch (err: any) {
           console.error('Fetch beats error:', err);
           set({ error: err.message, isLoading: false });
         }
       },
+      
+      addBeat: (beat) => set((state) => ({
+        beats: [beat, ...state.beats]
+      })),
       
       updateBeat: (id, updates) => set((state) => ({
         beats: state.beats.map((b) => b.id === id ? { ...b, ...updates } : b)
@@ -121,6 +100,7 @@ export const useCatalogStore = create<CatalogState>()(
     }),
     {
       name: 'producer-catalog-storage',
+      storage: createJSONStorage(() => AsyncStorage),
       partialize: (state) => ({ beats: state.beats }),
     }
   )

@@ -1,6 +1,7 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
-import type { Database } from '@/types/supabase';
+import { persist, createJSONStorage } from 'zustand/middleware';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Database } from '@/types/supabase';
 
 type Beat = Database['public']['Tables']['beats']['Row'] & {
   producer?: Database['public']['Tables']['profiles']['Row'];
@@ -10,7 +11,6 @@ type Beat = Database['public']['Tables']['beats']['Row'] & {
   view_count?: number;
   is_sync_ready?: boolean;
 };
-
 
 interface PlayerState {
   currentBeat: Beat | null;
@@ -106,6 +106,7 @@ export const usePlayer = create<PlayerState>()(
     }),
     {
       name: 'player-storage',
+      storage: createJSONStorage(() => AsyncStorage),
       partialize: (state) => ({
         volume: state.volume,
         queue: state.queue,

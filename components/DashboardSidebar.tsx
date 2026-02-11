@@ -1,7 +1,6 @@
-'use client';
-
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import React, { useEffect, useState } from 'react';
+import { View, Text, TouchableOpacity, Image, ScrollView, Platform, useWindowDimensions } from 'react-native';
+import { Link, usePathname, useRouter } from 'expo-router';
 import { useAuth } from '@/components/providers/AuthProvider';
 import { 
   LayoutDashboard, 
@@ -13,10 +12,9 @@ import {
   Settings, 
   Store,
   Users,
-  Shield,
   ShieldCheck,
   BrainCircuit,
-  Heart,
+  Sparkles,
   ShoppingBag,
   LogOut,
   ChevronLeft,
@@ -24,41 +22,38 @@ import {
   Menu,
   X,
   Mail,
-  History,
-  Sparkles
-} from 'lucide-react';
+  History
+} from 'lucide-react-native';
 import { Button } from '@/components/ui/Button';
-import { useState, useEffect } from 'react';
 import { useUI } from '@/stores/ui';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
-interface SidebarLink {
-  name: string;
-  href: string;
-  icon: any;
-  highlight?: boolean;
-}
+/* 
+  Adaptation Note: 
+  - Using lucide-react-native
+  - Handling mobile/desktop responsive logic with useWindowDimensions
+  - Replacing web specific elements (div, button, img) with View, TouchableOpacity, Image
+*/
 
 export function DashboardSidebar() {
   const { profile, signOut } = useAuth();
   const pathname = usePathname();
-  const { isSidebarCollapsed: isCollapsed, setSidebarCollapsed: setIsCollapsed } = useUI();
+  const { isSidebarCollapsed, setSidebarCollapsed } = useUI();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const router = useRouter();
+  const { width } = useWindowDimensions();
+  const isLargeScreen = width >= 1024;
 
-  // Auto-collapse on smaller screens
+  // Auto-collapse logic for smaller screens
   useEffect(() => {
-    const handleResize = () => {
-      if (window.innerWidth < 1024) {
-        setIsCollapsed(true);
-      } else {
-        setIsCollapsed(false);
-      }
-    };
-    handleResize();
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
+    if (!isLargeScreen) {
+      setSidebarCollapsed(true);
+    } else {
+      setSidebarCollapsed(false);
+    }
+  }, [width]);
 
-  const links: { [key: string]: SidebarLink[] } = {
+  const links = {
     producer: [
       { name: 'My Catalog', href: '/dashboard/producer/beats', icon: LayoutDashboard },
       { name: 'Upload Beat', href: '/dashboard/producer/upload', icon: Upload, highlight: true },
@@ -91,102 +86,147 @@ export function DashboardSidebar() {
     ]
   };
 
-  const role = profile?.role as keyof typeof links || 'artist';
+  const role = (profile?.role as keyof typeof links) || 'artist';
+  // Fallback to artist links if role isn't recognized or links[role] is undefined
   const currentLinks = links[role] || links.artist;
+
+  const toggleSidebar = () => setSidebarCollapsed(!isSidebarCollapsed);
+
+  // If on mobile and menu is closed, show nothing (except trigger which is handled in Layout usually, 
+  // but here we might render it floating if needed, or rely on a parent layout to pass trigger)
+  // For this port, we'll include the mobile sticky toggle here or assume layout handles it.
+  // We'll mimic the web behavior: Fixed position sidebar on desktop, floating menu on mobile.
+
+  if (!isLargeScreen && !isMobileMenuOpen) {
+    return (
+      <TouchableOpacity 
+        onPress={() => setIsMobileMenuOpen(true)}
+        className="absolute bottom-6 right-6 z-50 w-14 h-14 bg-primary rounded-full shadow-2xl items-center justify-center"
+      >
+        <Menu size={24} color="#000" />
+      </TouchableOpacity>
+    );
+  }
 
   return (
     <>
-      {/* Mobile Menu Toggle */}
-      <button 
-        onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-        className="lg:hidden fixed bottom-6 right-6 z-50 w-14 h-14 bg-primary rounded-full shadow-2xl flex items-center justify-center text-black"
-      >
-        {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-      </button>
-
-      <aside className={`bg-dark-900 border-r border-white/5 flex flex-col fixed top-20 bottom-0 z-40 transition-all duration-300 ${
-        isCollapsed ? 'w-20' : 'w-64'
-      } ${
-        isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
-      }`}>
-        {/* Toggle Button (Desktop Only) */}
-        <button 
-          onClick={() => setIsCollapsed(!isCollapsed)}
-          className="hidden lg:flex absolute -right-3 top-6 w-6 h-6 bg-dark-800 border border-white/10 rounded-full items-center justify-center text-gray-400 hover:text-white z-50 transition-colors"
-        >
-          {isCollapsed ? <ChevronRight className="w-3 h-3" /> : <ChevronLeft className="w-3 h-3" />}
-        </button>
-
-        {/* User Info */}
-        <div className={`p-6 border-b border-white/5 transition-opacity ${isCollapsed ? 'opacity-0 lg:opacity-100 flex justify-center p-4' : 'opacity-100'}`}>
-          <div className="flex items-center gap-3 mb-1">
-            <div className={`rounded-full bg-dark-800 flex items-center justify-center text-black font-bold shrink-0 transition-all overflow-hidden relative ${
-              isCollapsed ? 'w-10 h-10' : 'w-10 h-10'
-            }`}>
-              {profile?.avatar_url ? (
-                <img src={profile.avatar_url ?? undefined} alt={profile.display_name ?? 'User'} className="w-full h-full object-cover" />
-              ) : (
-                <div className="w-full h-full bg-linear-to-br from-primary to-secondary flex items-center justify-center">
-                  {profile?.display_name?.charAt(0).toUpperCase() || 'U'}
-                </div>
-              )}
-            </div>
-            {!isCollapsed && (
-              <div className="overflow-hidden animate-in fade-in duration-300">
-                <h3 className="font-bold text-white truncate">{profile?.display_name || 'Loading...'}</h3>
-                <p className="text-xs text-primary uppercase tracking-wider font-bold">{profile?.role || 'Guest'}</p>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Navigation */}
-        <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
-          {currentLinks.map((link) => {
-            const isActive = pathname === link.href;
-            return (
-              <Link 
-                key={link.href} 
-                href={link.href}
-                className={`flex items-center rounded-xl transition-all duration-200 group ${
-                  isCollapsed ? 'justify-center p-3' : 'gap-3 px-4 py-3'
-                } ${
-                  isActive 
-                    ? 'bg-primary text-black font-bold shadow-lg shadow-primary/20' 
-                    : link.highlight 
-                      ? 'bg-white/5 text-white hover:bg-white/10 border border-primary/20' 
-                      : 'text-gray-400 hover:text-white hover:bg-white/5'
-                }`}
-                title={isCollapsed ? link.name : ''}
-              >
-                <link.icon className={`w-5 h-5 shrink-0 ${isActive ? 'text-black' : link.highlight ? 'text-primary' : 'text-gray-500 group-hover:text-white'}`} />
-                {!isCollapsed && <span className="truncate whitespace-nowrap">{link.name}</span>}
-              </Link>
-            );
-          })}
-        </nav>
-
-        {/* Footer Actions */}
-        <div className="p-4 border-t border-white/5 bg-dark-900/50">
-          <Button 
-            variant="ghost" 
-            fullWidth 
-            onClick={() => signOut()}
-            className={`justify-start gap-3 text-gray-400 hover:text-red-500 hover:bg-red-500/10 ${isCollapsed ? 'px-0' : ''}`}
-          >
-            <LogOut className={`w-5 h-5 shrink-0 ${isCollapsed ? 'mx-auto' : ''}`} />
-            {!isCollapsed && <span>Sign Out</span>}
-          </Button>
-        </div>
-      </aside>
-      
       {/* Mobile Overlay */}
-      {isMobileMenuOpen && (
-        <div 
-          className="lg:hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-30"
-          onClick={() => setIsMobileMenuOpen(false)}
+      {!isLargeScreen && isMobileMenuOpen && (
+        <TouchableOpacity 
+          className="absolute inset-0 bg-black/60 z-30"
+          onPress={() => setIsMobileMenuOpen(false)}
+          activeOpacity={1}
         />
       )}
+
+      <View className={`bg-dark-900 border-r border-white/5 flex-col absolute top-0 bottom-0 z-40 transition-all duration-300 ${
+        isLargeScreen 
+          ? (isSidebarCollapsed ? 'w-20' : 'w-64') 
+          : 'w-64'
+      } ${
+        !isLargeScreen && !isMobileMenuOpen ? '-left-64' : 'left-0'
+      }`}>
+        <SafeAreaView edges={['top', 'bottom']} className="flex-1">
+          {/* Toggle Button (Desktop Only) */}
+          {isLargeScreen && (
+            <TouchableOpacity 
+              onPress={toggleSidebar}
+              className="absolute -right-3 top-6 w-6 h-6 bg-dark-800 border border-white/10 rounded-full items-center justify-center z-50"
+            >
+              {isSidebarCollapsed ? <ChevronRight size={12} color="#9CA3AF" /> : <ChevronLeft size={12} color="#9CA3AF" />}
+            </TouchableOpacity>
+          )}
+
+           {/* Mobile Close Button */}
+           {!isLargeScreen && (
+            <TouchableOpacity 
+              onPress={() => setIsMobileMenuOpen(false)}
+              className="absolute right-4 top-4 p-2 z-50"
+            >
+              <X size={24} color="#fff" />
+            </TouchableOpacity>
+          )}
+
+          {/* User Info */}
+          <View className={`p-6 border-b border-white/5 ${isSidebarCollapsed && isLargeScreen ? 'items-center px-0' : ''}`}>
+            <View className={`flex-row items-center gap-3 ${isSidebarCollapsed && isLargeScreen ? 'justify-center' : ''}`}>
+              <View className="w-10 h-10 rounded-full bg-dark-800 overflow-hidden items-center justify-center border border-white/10">
+                {profile?.avatar_url ? (
+                  <Image source={{ uri: profile.avatar_url }} className="w-full h-full" />
+                ) : (
+                  <View className="w-full h-full bg-primary items-center justify-center">
+                    <Text className="font-bold text-black">{profile?.display_name?.charAt(0).toUpperCase() || 'U'}</Text>
+                  </View>
+                )}
+              </View>
+              
+              {(!isSidebarCollapsed || !isLargeScreen) && (
+                <View className="flex-1">
+                  <Text className="font-bold text-white text-sm" numberOfLines={1}>
+                    {profile?.display_name || 'Loading...'}
+                  </Text>
+                  <Text className="text-[10px] text-primary uppercase tracking-wider font-bold">
+                    {profile?.role || 'Guest'}
+                  </Text>
+                </View>
+              )}
+            </View>
+          </View>
+
+          {/* Navigation */}
+          <ScrollView className="flex-1 p-4">
+            <View className="gap-2">
+              {currentLinks.map((link) => {
+                const isActive = pathname === link.href; // Simple exact match for now, maybe use startsWith for sub-routes
+                const Icon = link.icon;
+                
+                return (
+                  <Link href={link.href as any} key={link.href} asChild>
+                    <TouchableOpacity 
+                      className={`flex-row items-center rounded-xl transition-all ${
+                        isSidebarCollapsed && isLargeScreen ? 'justify-center p-3' : 'gap-3 px-4 py-3'
+                      } ${
+                        isActive 
+                          ? 'bg-primary' 
+                          : link.highlight 
+                            ? 'bg-white/5 border border-primary/20' 
+                            : ''
+                      }`}
+                    >
+                      <Icon 
+                        size={20} 
+                        color={isActive ? '#000' : link.highlight ? '#D4AF37' : '#9CA3AF'} 
+                      />
+                      {(!isSidebarCollapsed || !isLargeScreen) && (
+                        <Text className={`font-medium ml-2 ${
+                          isActive ? 'text-black font-bold' : 'text-gray-400'
+                        }`}>
+                          {link.name}
+                        </Text>
+                      )}
+                    </TouchableOpacity>
+                  </Link>
+                );
+              })}
+            </View>
+          </ScrollView>
+
+          {/* Footer Actions */}
+          <View className="p-4 border-t border-white/5 bg-dark-900/50">
+            <TouchableOpacity 
+              onPress={() => signOut()}
+              className={`flex-row items-center rounded-xl transition-all hover:bg-red-500/10 ${
+                 isSidebarCollapsed && isLargeScreen ? 'justify-center p-3' : 'gap-3 px-4 py-3'
+              }`}
+            >
+              <LogOut size={20} color="#9CA3AF" />
+              {(!isSidebarCollapsed || !isLargeScreen) && (
+                <Text className="text-gray-400 font-medium ml-2">Sign Out</Text>
+              )}
+            </TouchableOpacity>
+          </View>
+        </SafeAreaView>
+      </View>
     </>
   );
 }

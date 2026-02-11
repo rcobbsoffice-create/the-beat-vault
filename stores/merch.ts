@@ -1,5 +1,6 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { persist, createJSONStorage } from 'zustand/middleware';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export interface MerchItem {
   id: string;
@@ -75,6 +76,7 @@ export const useMerchStore = create<MerchState>()(
     }),
     {
       name: 'producer-merch-storage',
+      storage: createJSONStorage(() => AsyncStorage),
     }
   )
 );

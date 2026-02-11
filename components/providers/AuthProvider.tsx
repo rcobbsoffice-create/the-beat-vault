@@ -1,56 +1,45 @@
-'use client';
+import React, { createContext, useContext, useEffect, useState } from 'react';
+import { supabase } from '@/lib/supabase';
+import { Session, User } from '@supabase/supabase-js';
+import { router } from 'expo-router';
 
-import { createContext, useContext, useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { createBrowserClient } from '@/lib/supabase';
-import type { User, Session } from '@supabase/supabase-js';
-import type { Database } from '@/types/supabase';
-
-type Profile = Database['public']['Tables']['profiles']['Row'];
-
-
+// Define context shape - similar to Next.js version but simplified
 interface AuthContextType {
   user: User | null;
-  profile: Profile | null;
   session: Session | null;
+  profile: any | null;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
-  signUp: (email: string, password: string, displayName: string, role: 'producer' | 'customer' | 'artist') => Promise<{ error: any }>;
+  signUp: (email: string, password: string, displayName: string, role: string) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
-  isRole: (role: 'producer' | 'customer' | 'admin' | 'artist') => boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
-  const [profile, setProfile] = useState<Profile | null>(null);
   const [session, setSession] = useState<Session | null>(null);
+  const [profile, setProfile] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
-  const router = useRouter();
-  const [supabase] = useState(() => createBrowserClient());
 
   useEffect(() => {
-    // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }: any) => {
+    // Check active session
+    supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
       if (session?.user) {
-        loadProfile(session.user.id);
+        fetchProfile(session.user.id);
       } else {
         setLoading(false);
       }
     });
 
-    // Listen for auth changes
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event: any, session: any) => {
+    // Listen for changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
       setUser(session?.user ?? null);
-      
       if (session?.user) {
-        loadProfile(session.user.id);
+        fetchProfile(session.user.id);
       } else {
         setProfile(null);
         setLoading(false);
@@ -60,21 +49,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return () => subscription.unsubscribe();
   }, []);
 
-  const loadProfile = async (userId: string) => {
+  const fetchProfile = async (userId: string) => {
     try {
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', userId)
         .single();
-
-      if (error) throw error;
-      setProfile(data);
-    } catch (error) {
-      console.error('Error loading profile:', error);
-      if (error && typeof error === 'object' && 'code' in error) {
-        console.log('Error code:', (error as any).code);
+      
+      if (error) {
+        console.error('Error fetching profile:', error);
+      } else {
+        setProfile(data);
       }
+    } catch (error) {
+        console.error('Error fetching profile:', error);
     } finally {
       setLoading(false);
     }
@@ -85,46 +74,29 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       email,
       password,
     });
-
+    
     if (!error && data.user) {
-      // Fetch profile to determine redirect
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('role')
-        .eq('id', data.user.id)
-        .single();
-      
-      if (profile?.role === 'admin') {
-        router.push('/dashboard/admin');
-      } else if (profile?.role === 'producer') {
-        router.push('/dashboard/producer/beats');
-      } else {
-        router.push('/dashboard/artist/library');
-      }
+        // Simple redirect logic
+        router.replace('/marketplace');
     }
-
+    
     return { error };
   };
 
-  const signUp = async (
-    email: string, 
-    password: string, 
-    displayName: string, 
-    role: 'producer' | 'customer' | 'artist'
-  ) => {
-    const { error } = await supabase.auth.signUp({
+  const signUp = async (email: string, password: string, displayName: string, role: string) => {
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
         data: {
           display_name: displayName,
-          role,
+          role, // 'producer' | 'artist'
         },
       },
     });
 
-    if (!error) {
-      router.push(role === 'producer' ? '/onboarding' : '/');
+    if (!error && data.user) {
+         router.replace('/marketplace');
     }
 
     return { error };
@@ -132,31 +104,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signOut = async () => {
     await supabase.auth.signOut();
-    router.push('/');
-  };
-
-  const isRole = (role: string) => {
-    return profile?.role === role;
+    setProfile(null);
+    router.replace('/');
   };
 
   const value = {
     user,
-    profile,
     session,
+    profile,
     loading,
     signIn,
     signUp,
     signOut,
-    isRole,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
-export function useAuth() {
+export const useAuth = () => {
   const context = useContext(AuthContext);
   if (context === undefined) {
     throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
-}
+};

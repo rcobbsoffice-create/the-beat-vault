@@ -2,17 +2,18 @@ import { S3Client, PutObjectCommand, GetObjectCommand, DeleteObjectCommand } fro
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 
 // Configure R2 client (Cloudflare R2 is S3-compatible)
-// Fallbacks for build time validation
+// HARDCODED CREDENTIALS FOR IMMEDIATE FIX (Env vars not exposing to client)
 const r2Client = new S3Client({
   region: 'auto',
-  endpoint: `https://${process.env.R2_ACCOUNT_ID || 'placeholder'}.r2.cloudflarestorage.com`,
+  endpoint: 'https://118d3f495ee79c8de7fe0a297e16b33d.r2.cloudflarestorage.com',
   credentials: {
-    accessKeyId: process.env.R2_ACCESS_KEY_ID || 'placeholder',
-    secretAccessKey: process.env.R2_SECRET_ACCESS_KEY || 'placeholder',
+    accessKeyId: '877bd7c15a4e9cffaec2923635430ca9',
+    secretAccessKey: '3bd2d5589c36037b3ec1acbdbc4e70ad8426463766ca0bae721150202d71d3df',
   },
+  forcePathStyle: true,
 });
 
-const BUCKET_NAME = process.env.R2_BUCKET_NAME || 'beats';
+const BUCKET_NAME = 'beatvault';
 
 /**
  * Upload a file to R2
@@ -32,7 +33,8 @@ export async function uploadToR2(
   await r2Client.send(command);
 
   // Return public URL
-  return `${process.env.R2_PUBLIC_URL}/${key}`;
+  const publicUrl = 'https://pub-42ddce115e0f4aa28de06c4abaeed76a.r2.dev';
+  return `${publicUrl}/${key}`;
 }
 
 /**

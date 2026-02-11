@@ -1,24 +1,31 @@
+import { View, Text } from 'react-native';
+
 interface BadgeProps {
   children: React.ReactNode;
-  variant?: 'default' | 'primary' | 'secondary' | 'success' | 'warning' | 'outline';
+  variant?: 'primary' | 'secondary' | 'outline';
   className?: string;
 }
 
-export function Badge({ children, variant = 'default', className = '' }: BadgeProps) {
+export const Badge = ({ children, variant = 'primary', className = '' }: BadgeProps) => {
+  const baseStyles = 'px-2 py-1 rounded-full flex-row items-center';
+  
   const variants = {
-    default: 'bg-dark-700 text-foreground',
-    primary: 'bg-primary/20 text-primary border border-primary/30',
-    secondary: 'bg-secondary/20 text-secondary border border-secondary/30',
-    success: 'bg-success/20 text-success border border-success/30',
-    warning: 'bg-warning/20 text-warning border border-warning/30',
-    outline: 'bg-transparent border border-white/10 text-gray-400',
+    primary: 'bg-primary/10 border border-primary/20',
+    secondary: 'bg-secondary/10 border border-secondary/20',
+    outline: 'bg-transparent border border-dark-700',
+  };
+
+  const textVariants = {
+    primary: 'text-primary text-xs font-medium',
+    secondary: 'text-secondary text-xs font-medium',
+    outline: 'text-gray-400 text-xs font-medium',
   };
 
   return (
-    <span
-      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${variants[variant]} ${className}`}
-    >
-      {children}
-    </span>
+    <View className={`${baseStyles} ${variants[variant]} ${className}`}>
+      <Text className={textVariants[variant]}>
+        {children}
+      </Text>
+    </View>
   );
-}
+};

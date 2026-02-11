@@ -1,6 +1,5 @@
-'use client';
-
 import React, { useEffect, useRef } from 'react';
+import { View, Platform } from 'react-native';
 
 interface LinearVisualizerProps {
   analyser: AnalyserNode | null;
@@ -21,23 +20,27 @@ export function LinearVisualizer({
   barWidth = 2,
   barGap = 2
 }: LinearVisualizerProps) {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const canvasRef = useRef<any>(null); // Use any for web canvas
   const animationRef = useRef<number>(0);
-  const containerRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<View>(null);
 
   useEffect(() => {
-    if (!canvasRef.current || !analyser || !containerRef.current) return;
+    if (Platform.OS !== 'web') return;
+    if (!canvasRef.current || !analyser) return;
 
     const canvas = canvasRef.current;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    // Handle resizing
     const resizeCanvas = () => {
-      const { width: containerWidth } = containerRef.current!.getBoundingClientRect();
-      canvas.width = containerWidth * window.devicePixelRatio;
-      canvas.height = height * window.devicePixelRatio;
-      ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+      // In RN web, the ref might be a div or a View component
+      const element = canvas.parentElement;
+      if (element) {
+        const { width: containerWidth } = element.getBoundingClientRect();
+        canvas.width = containerWidth * window.devicePixelRatio;
+        canvas.height = height * window.devicePixelRatio;
+        ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+      }
     };
 
     resizeCanvas();
@@ -58,7 +61,6 @@ export function LinearVisualizer({
       const numBars = Math.floor(displayWidth / (barWidth + barGap));
       
       for (let i = 0; i < numBars; i++) {
-        // Map bar index to frequency data (skip very high frequencies for better look)
         const index = Math.floor((i / numBars) * (bufferLength / 2.5));
         const val = dataArray[index];
         const barHeight = (val / 255) * displayHeight;
@@ -66,7 +68,6 @@ export function LinearVisualizer({
         const x = i * (barWidth + barGap);
         const y = displayHeight - barHeight;
 
-        // Create gradient
         const gradient = ctx.createLinearGradient(x, displayHeight, x, y);
         gradient.addColorStop(0, `${barColor}66`);
         gradient.addColorStop(0.5, `${barColor}CC`);
@@ -74,7 +75,6 @@ export function LinearVisualizer({
 
         ctx.fillStyle = gradient;
         
-        // Draw rounded bars
         ctx.beginPath();
         if (ctx.roundRect) {
             ctx.roundRect(x, y, barWidth, barHeight, [2, 2, 0, 0]);
@@ -109,13 +109,17 @@ export function LinearVisualizer({
     };
   }, [analyser, isPlaying, height, barColor, barWidth, barGap]);
 
+  if (Platform.OS !== 'web') {
+      return <View style={{ width, height: height * 1.5 }} />;
+  }
+
   return (
-    <div ref={containerRef} style={{ width, height: height * 1.5 }} className="relative overflow-hidden">
+    <View ref={containerRef} style={{ width, height: height * 1.5, overflow: 'hidden', position: 'relative' }}>
+        {/* @ts-ignore - canvas is not a standard RN component but works in RN Web */}
       <canvas 
         ref={canvasRef} 
-        className="block"
-        style={{ width: '100%', height: '100%' }}
+        style={{ width: '100%', height: '100%', display: 'block' }}
       />
-    </div>
+    </View>
   );
 }

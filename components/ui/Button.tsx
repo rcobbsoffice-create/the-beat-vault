@@ -1,58 +1,87 @@
-import { ButtonHTMLAttributes, forwardRef } from 'react';
-import { Loader2 } from 'lucide-react';
+import React from 'react';
+import { TouchableOpacity, Text, ActivityIndicator, View } from 'react-native';
+import { clsx, type ClassValue } from 'clsx';
+import { twMerge } from 'tailwind-merge';
 
-interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs));
+}
+
+interface ButtonProps {
+  onPress?: () => void;
+  children: React.ReactNode;
   variant?: 'primary' | 'secondary' | 'ghost' | 'outline';
   size?: 'sm' | 'md' | 'lg';
   isLoading?: boolean;
   fullWidth?: boolean;
+  className?: string;
+  disabled?: boolean;
 }
 
-export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
-  (
-    {
-      children,
-      variant = 'primary',
-      size = 'md',
-      isLoading = false,
-      fullWidth = false,
-      className = '',
-      disabled,
-      ...props
-    },
-    ref
-  ) => {
-    const baseStyles = 'inline-flex items-center justify-center font-medium rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed';
-    
-    const variants = {
-      primary: 'bg-primary hover:bg-primary-dark text-white shadow-lg shadow-primary/20',
-      secondary: 'bg-secondary hover:bg-secondary-dark text-white shadow-lg shadow-secondary/20',
-      ghost: 'bg-transparent hover:bg-dark-800 text-foreground',
-      outline: 'bg-transparent border border-dark-600 hover:border-primary text-foreground',
-    };
+export const Button = ({
+  onPress,
+  children,
+  variant = 'primary',
+  size = 'md',
+  isLoading = false,
+  fullWidth = false,
+  className = '',
+  disabled,
+}: ButtonProps) => {
+  const baseStyles = 'flex-row items-center justify-center rounded-lg';
+  
+  const variants = {
+    primary: 'bg-primary shadow-sm shadow-primary/20',
+    secondary: 'bg-secondary shadow-sm shadow-secondary/20',
+    ghost: 'bg-transparent',
+    outline: 'bg-transparent border border-dark-600',
+  };
 
-    const sizes = {
-      sm: 'px-3 py-1.5 text-sm',
-      md: 'px-4 py-2 text-base',
-      lg: 'px-6 py-3 text-lg',
-    };
+  const textVariants = {
+    primary: 'text-white font-medium',
+    secondary: 'text-white font-medium',
+    ghost: 'text-gray-300 font-medium',
+    outline: 'text-gray-300 font-medium',
+  };
 
-    const classes = `${baseStyles} ${variants[variant]} ${sizes[size]} ${
-      fullWidth ? 'w-full' : ''
-    } ${className}`;
+  const sizes = {
+    sm: 'px-3 py-2',
+    md: 'px-4 py-3',
+    lg: 'px-6 py-4',
+  };
 
-    return (
-      <button
-        ref={ref}
-        className={classes}
-        disabled={disabled || isLoading}
-        {...props}
-      >
-        {isLoading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-        {children}
-      </button>
-    );
-  }
-);
+  const textSizes = {
+    sm: 'text-sm',
+    md: 'text-base',
+    lg: 'text-lg',
+  };
 
-Button.displayName = 'Button';
+  return (
+    <TouchableOpacity
+      onPress={onPress}
+      disabled={disabled || isLoading}
+      className={cn(
+        baseStyles,
+        variants[variant],
+        sizes[size],
+        fullWidth ? 'w-full' : '',
+        disabled && 'opacity-50',
+        className
+      )}
+    >
+      {isLoading ? (
+        <ActivityIndicator color={variant === 'outline' || variant === 'ghost' ? '#fff' : '#000'} className="mr-2" />
+      ) : null}
+      {React.Children.map(children, (child) => {
+        if (typeof child === 'string') {
+          return (
+            <Text className={cn(textVariants[variant], textSizes[size])}>
+              {child}
+            </Text>
+          );
+        }
+        return child;
+      })}
+    </TouchableOpacity>
+  );
+};

@@ -1,129 +1,92 @@
-import Link from 'next/link';
-import { Music, Instagram, Twitter, Youtube } from 'lucide-react';
+import React from 'react';
+import { View, Text, TouchableOpacity, Image, Platform } from 'react-native';
+import { Link } from 'expo-router';
+import { Instagram, Twitter, Youtube } from 'lucide-react-native';
 
 export function Footer() {
   return (
-    <footer className="relative z-10 bg-dark-950 border-t border-white/10 py-16 mt-auto">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+    <View className="relative z-10 bg-dark-950 border-t border-white/10 py-12 mt-auto">
+      <View className="max-w-7xl mx-auto px-4 w-full">
+        <View className="flex-col md:flex-row flex-wrap gap-8 justify-between">
+          
           {/* Brand */}
-          <div className="space-y-4">
-            <Link href="/" className="flex items-center gap-2">
-              <div className="relative w-[250px] h-[250px] flex items-center justify-center">
-                <img src="/audiogenes-logo.png" alt="AudioGenes" className="w-full h-full object-contain" />
-              </div>
+          <View className="flex-1 min-w-[200px] space-y-4">
+            <Link href="/" asChild>
+              <TouchableOpacity className="flex-row items-center">
+                 <Text className="text-primary font-bold text-xl tracking-wider">AUDIO</Text>
+                 <Text className="text-white font-bold text-xl tracking-wider">GENES</Text>
+              </TouchableOpacity>
             </Link>
-            <p className="text-gray-400 text-sm">
+            <Text className="text-gray-400 text-sm mt-4">
               The premier marketplace for rights-locked music assets.
               Empowering creators with secure distribution and licensing solutions.
-            </p>
-            <div className="flex items-center gap-4">
-              <a href="#" className="text-gray-400 hover:text-primary transition-colors">
-                <Instagram className="w-5 h-5" />
-              </a>
-              <a href="#" className="text-gray-400 hover:text-primary transition-colors">
-                <Twitter className="w-5 h-5" />
-              </a>
-              <a href="#" className="text-gray-400 hover:text-primary transition-colors">
-                <Youtube className="w-5 h-5" />
-              </a>
-            </div>
-          </div>
+            </Text>
+            <View className="flex-row items-center gap-4 mt-4">
+              <TouchableOpacity><Instagram size={20} color="#9CA3AF" /></TouchableOpacity>
+              <TouchableOpacity><Twitter size={20} color="#9CA3AF" /></TouchableOpacity>
+              <TouchableOpacity><Youtube size={20} color="#9CA3AF" /></TouchableOpacity>
+            </View>
+          </View>
 
           {/* Marketplace */}
-          <div>
+          <View className="min-w-[150px]">
             <h4 className="font-semibold text-white mb-4">Marketplace</h4>
-            <ul className="space-y-3">
-              <li>
-                <Link href="/marketplace" className="text-gray-400 hover:text-white text-sm transition-colors">
-                  Browse Beats
-                </Link>
-              </li>
-              <li>
-                <Link href="/producers" className="text-gray-400 hover:text-white text-sm transition-colors">
-                  Find Producers
-                </Link>
-              </li>
-              <li>
-                <Link href="/pricing" className="text-gray-400 hover:text-white text-sm transition-colors">
-                  Licensing Info
-                </Link>
-              </li>
-              <li>
-                <Link href="/genres" className="text-gray-400 hover:text-white text-sm transition-colors">
-                  Explore Genres
-                </Link>
-              </li>
-            </ul>
-          </div>
+            <View className="gap-2">
+              <Link href="/marketplace" asChild>
+                <TouchableOpacity><Text className="text-gray-400 text-sm">Browse Beats</Text></TouchableOpacity>
+              </Link>
+              <Link href="/producers" asChild>
+                <TouchableOpacity><Text className="text-gray-400 text-sm">Find Producers</Text></TouchableOpacity>
+              </Link>
+              <Link href="/pricing" asChild>
+                <TouchableOpacity><Text className="text-gray-400 text-sm">Licensing Info</Text></TouchableOpacity>
+              </Link>
+            </View>
+          </View>
 
           {/* For Producers */}
-          <div>
-            <h4 className="font-semibold text-white mb-4">For Producers</h4>
-            <ul className="space-y-3">
-              <li>
-                <Link href="/sell" className="text-gray-400 hover:text-white text-sm transition-colors">
-                  Sell Your Beats
-                </Link>
-              </li>
-              <li>
-                <Link href="/signup?role=producer" className="text-gray-400 hover:text-white text-sm transition-colors">
-                  Become a Seller
-                </Link>
-              </li>
-              <li>
-                <Link href="/resources" className="text-gray-400 hover:text-white text-sm transition-colors">
-                  Producer Resources
-                </Link>
-              </li>
-              <li>
-                <Link href="/support" className="text-gray-400 hover:text-white text-sm transition-colors">
-                  Help Center
-                </Link>
-              </li>
-            </ul>
-          </div>
+          <View className="min-w-[150px]">
+             <h4 className="font-semibold text-white mb-4">For Producers</h4>
+             <View className="gap-2">
+               <Link href="/sell" asChild>
+                 <TouchableOpacity><Text className="text-gray-400 text-sm">Sell Your Beats</Text></TouchableOpacity>
+               </Link>
+               <Link href="/signup?role=producer" asChild>
+                 <TouchableOpacity><Text className="text-gray-400 text-sm">Become a Seller</Text></TouchableOpacity>
+               </Link>
+               <Link href="/support" asChild>
+                 <TouchableOpacity><Text className="text-gray-400 text-sm">Help Center</Text></TouchableOpacity>
+               </Link>
+             </View>
+          </View>
 
           {/* Company */}
-          <div>
-            <h4 className="font-semibold text-white mb-4">Company</h4>
-            <ul className="space-y-3">
-              <li>
-                <Link href="/about" className="text-gray-400 hover:text-white text-sm transition-colors">
-                  About Us
-                </Link>
-              </li>
-              <li>
-                <Link href="/terms" className="text-gray-400 hover:text-white text-sm transition-colors">
-                  Terms of Service
-                </Link>
-              </li>
-              <li>
-                <Link href="/privacy" className="text-gray-400 hover:text-white text-sm transition-colors">
-                  Privacy Policy
-                </Link>
-              </li>
-              <li>
-                <Link href="/contact" className="text-gray-400 hover:text-white text-sm transition-colors">
-                  Contact
-                </Link>
-              </li>
-            </ul>
-          </div>
-        </div>
+          <View className="min-w-[150px]">
+             <h4 className="font-semibold text-white mb-4">Company</h4>
+             <View className="gap-2">
+               <Link href="/about" asChild>
+                 <TouchableOpacity><Text className="text-gray-400 text-sm">About Us</Text></TouchableOpacity>
+               </Link>
+               <Link href="/terms" asChild>
+                 <TouchableOpacity><Text className="text-gray-400 text-sm">Terms of Service</Text></TouchableOpacity>
+               </Link>
+               <Link href="/privacy" asChild>
+                 <TouchableOpacity><Text className="text-gray-400 text-sm">Privacy Policy</Text></TouchableOpacity>
+               </Link>
+             </View>
+          </View>
+        </View>
 
         {/* Bottom */}
-        <div className="mt-12 pt-8 border-t border-dark-800 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p className="text-gray-500 text-sm">
+        <View className="mt-12 pt-8 border-t border-white/5 flex-col md:flex-row items-center justify-between gap-4">
+          <Text className="text-gray-500 text-xs">
             © {new Date().getFullYear()} AudioGenes. All rights reserved.
-          </p>
-          <div className="flex items-center gap-6">
-            <span className="text-gray-500 text-sm">
-              Made with 💜 for music creators
-            </span>
-          </div>
-        </div>
-      </div>
-    </footer>
+          </Text>
+          <Text className="text-gray-500 text-xs">
+            Made with 💜 for music creators
+          </Text>
+        </View>
+      </View>
+    </View>
   );
 }

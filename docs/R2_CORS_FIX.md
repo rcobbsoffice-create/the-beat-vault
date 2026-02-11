@@ -13,7 +13,21 @@ My diagnostic tests show an **Access Denied** error from Cloudflare even before 
 
 ---
 
-## Step 1: Configure CORS Policy
+## Step 1: Use a Custom Domain (CRITICAL for CORS)
+
+Cloudflare **does not support CORS** on the default `pub-xxx.r2.dev` subdomains. To allow your web app (`localhost:8081`) to fetch audio files, you **must** connect a custom domain to your bucket.
+
+1.  In the Cloudflare Dashboard, go to your bucket > **Settings**.
+2.  Find **Public Access** > **Custom Domains**.
+3.  Click **Connect Domain** and follow the steps to add a subdomain (e.g., `assets.yourdomain.com`).
+4.  Once the domain is active, update your `.env.local`:
+    ```bash
+    EXPO_PUBLIC_R2_PUBLIC_URL=https://assets.yourdomain.com
+    ```
+
+---
+
+## Step 2: Configure CORS Policy
 
 Once your tokens are correct, you still need the CORS policy to allow the browser to talk to R2.
 
@@ -34,7 +48,7 @@ Once your tokens are correct, you still need the CORS policy to allow the browse
     ],
     "AllowedMethods": ["GET", "PUT", "POST", "DELETE", "HEAD"],
     "AllowedOrigins": [
-      "http://localhost:3000",
+      "http://localhost:8081",
       "https://your-production-domain.com"
     ],
     "ExposeHeaders": ["ETag"],

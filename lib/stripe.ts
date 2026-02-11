@@ -1,14 +1,13 @@
 import Stripe from 'stripe';
 
-// Fallback for build time is not needed if we use lazy init, but good to have
-const STRIPE_KEY = process.env.STRIPE_SECRET_KEY || 'dummy_key_to_pass_build';
+const STRIPE_KEY = process.env.STRIPE_SECRET_KEY || process.env.EXPO_PUBLIC_STRIPE_SECRET_KEY || 'dummy_key';
 
 let stripeInstance: Stripe;
 
 export const getStripe = () => {
   if (!stripeInstance) {
-    stripeInstance = new Stripe(process.env.STRIPE_SECRET_KEY || STRIPE_KEY, {
-      apiVersion: '2025-12-15.clover',
+    stripeInstance = new Stripe(STRIPE_KEY, {
+      apiVersion: '2025-12-15.clover' as any,
       typescript: true,
     });
   }

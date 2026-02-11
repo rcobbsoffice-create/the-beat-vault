@@ -1,30 +1,45 @@
-import { InputHTMLAttributes, forwardRef } from 'react';
+import React, { forwardRef } from 'react';
+import { TextInput, View, Text, TextInputProps } from 'react-native';
 
-interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
+interface InputProps extends TextInputProps {
   label?: string;
   error?: string;
+  icon?: React.ReactNode;
 }
 
-export const Input = forwardRef<HTMLInputElement, InputProps>(
-  ({ label, error, className = '', ...props }, ref) => {
+export const Input = forwardRef<TextInput, InputProps>(
+  ({ label, error, icon, className = '', ...props }, ref) => {
     return (
-      <div className="w-full">
+      <View className="mb-4 w-full">
         {label && (
-          <label className="block text-sm font-medium text-foreground mb-2">
+          <Text className="text-gray-400 text-sm font-medium mb-2 ml-1">
             {label}
-          </label>
+          </Text>
         )}
-        <input
-          ref={ref}
-          className={`w-full px-4 py-2 bg-dark-800 border ${
-            error ? 'border-error' : 'border-dark-600'
-          } rounded-lg text-foreground placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all ${className}`}
-          {...props}
-        />
-        {error && <p className="mt-1 text-sm text-error">{error}</p>}
-      </div>
+        <View className="relative w-full">
+          <View className={`
+            flex-row items-center
+            bg-dark-900 border border-dark-700 rounded-lg
+            px-3 py-3
+            focus:border-primary
+            ${error ? 'border-red-500' : ''}
+            ${className}
+          `}>
+             {icon && <View className="mr-2 opacity-50">{icon}</View>}
+             <TextInput
+               ref={ref}
+               className="flex-1 text-white text-base font-medium h-full placeholder:text-dark-400"
+               placeholderTextColor="#666"
+               {...props}
+             />
+          </View>
+        </View>
+        {error && (
+          <Text className="text-red-500 text-xs mt-1 ml-1">
+            {error}
+          </Text>
+        )}
+      </View>
     );
   }
 );
-
-Input.displayName = 'Input';
