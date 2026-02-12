@@ -78,7 +78,7 @@ export default function ArtistLibraryPage() {
       {/* Grid */}
       <View className="gap-4">
         {loading ? (
-          <ActivityIndicator size="large" color="#D4AF37" />
+          <ActivityIndicator size="large" color="#005CB9" />
         ) : purchases.length === 0 ? (
           <View className="items-center py-12">
             <Music size={48} color="#374151" />
@@ -92,7 +92,7 @@ export default function ArtistLibraryPage() {
                 {purchase.beat?.artwork_url ? (
                   <Image source={{ uri: purchase.beat.artwork_url }} className="w-full h-full" resizeMode="cover" />
                 ) : (
-                  <Music size={24} color="#D4AF37" />
+                  <Music size={24} color="#005CB9" />
                 )}
               </View>
 

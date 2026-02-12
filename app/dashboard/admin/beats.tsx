@@ -334,7 +334,7 @@ export default function AdminBeatsPage() {
       <View className="mb-8 flex-row justify-between items-end">
         <View>
           <Text className="text-3xl font-black uppercase tracking-tighter italic text-white flex-row items-center gap-3">
-             <Music size={28} color="#D4AF37" /> Beat Library
+             <Music size={28} color="#005CB9" /> Beat Library
           </Text>
           <Text className="text-gray-500 mt-2 font-bold uppercase tracking-widest text-xs italic">
             Global Catalog Management
@@ -361,7 +361,7 @@ export default function AdminBeatsPage() {
 
       {loading ? (
          <View className="py-20 items-center">
-           <ActivityIndicator size="large" color="#D4AF37" />
+           <ActivityIndicator size="large" color="#005CB9" />
          </View>
       ) : (
         <View className="gap-4 pb-20">
@@ -536,7 +536,7 @@ export default function AdminBeatsPage() {
                           {audioFile || form.audio_url ? (
                              <View className="flex-row items-center gap-2 bg-dark-950 p-2 rounded-xl border border-white/10">
                                 <View className="w-10 h-10 bg-primary/20 rounded-lg items-center justify-center">
-                                   <FileAudio size={20} color="#D4AF37" />
+                                   <FileAudio size={20} color="#005CB9" />
                                 </View>
                                 <View className="flex-1">
                                    <Text className="text-white text-xs font-bold" numberOfLines={1}>

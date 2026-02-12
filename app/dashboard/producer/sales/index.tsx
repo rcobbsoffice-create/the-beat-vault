@@ -110,7 +110,7 @@ export default function ProducerSalesPage() {
         <View className="flex-row gap-3">
           <Button variant="outline" onPress={handleFilter}>
             <View className="flex-row items-center gap-2">
-                <Calendar size={16} color="#D4AF37" />
+                <Calendar size={16} color="#005CB9" />
                 <Text className="text-white font-bold text-xs uppercase tracking-widest">Last 30 Days</Text>
             </View>
           </Button>
@@ -136,7 +136,7 @@ export default function ProducerSalesPage() {
         <Card className="flex-1 min-w-[200px] p-6 border-white/5 bg-dark-900/50">
           <View className="flex-row items-center gap-3 mb-4">
             <View className="p-2 rounded-lg bg-primary/10 items-center justify-center">
-              <ShoppingBag size={20} color="#D4AF37" />
+              <ShoppingBag size={20} color="#005CB9" />
             </View>
             <Text className="text-sm text-gray-400 font-medium">Total Sales</Text>
           </View>
@@ -170,7 +170,7 @@ export default function ProducerSalesPage() {
       {/* Split Transparency Section */}
       <View className="space-y-4 mb-8">
         <View className="flex-row items-center gap-2">
-           <Zap size={20} color="#D4AF37" />
+           <Zap size={20} color="#005CB9" />
            <Text className="text-xl font-bold text-white">Revenue Split Transparency</Text>
         </View>
         <Card className="p-8 bg-dark-900/30 border-white/5">

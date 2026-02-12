@@ -16,7 +16,7 @@ export function LinearVisualizer({
   isPlaying, 
   width = '100%', 
   height = 40,
-  barColor = '#D4AF37',
+  barColor = '#005CB9',
   barWidth = 2,
   barGap = 2
 }: LinearVisualizerProps) {

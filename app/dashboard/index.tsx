@@ -109,7 +109,7 @@ export default function DashboardPage() {
   if (authLoading || (profile?.role === 'producer' && isStatsLoading)) {
     return (
       <View className="flex-1 bg-dark-950 items-center justify-center">
-        <ActivityIndicator color="#D4AF37" />
+        <ActivityIndicator color="#005CB9" />
       </View>
     );
   }
@@ -140,7 +140,7 @@ export default function DashboardPage() {
                   <Text className="text-xl font-bold text-white">{stat.value}</Text>
                 </View>
                 <View className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
-                  <stat.icon size={16} color="#D4AF37" />
+                  <stat.icon size={16} color="#005CB9" />
                 </View>
               </View>
             </Card>
@@ -156,7 +156,7 @@ export default function DashboardPage() {
             <TouchableOpacity>
               <Card className="p-5 flex-row items-center gap-4 bg-dark-900 border-white/5">
                 <View className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
-                  <link.icon size={24} color="#D4AF37" />
+                  <link.icon size={24} color="#005CB9" />
                 </View>
                 <View className="flex-1">
                   <Text className="font-bold text-white text-lg">{link.name}</Text>

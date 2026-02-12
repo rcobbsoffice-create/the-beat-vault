@@ -29,8 +29,11 @@ export function Header() {
         {/* Logo */}
         <Link href="/" asChild>
           <TouchableOpacity className="flex-row items-center mr-8">
-             <Text className="text-primary font-bold text-xl tracking-wider">AUDIO</Text>
-             <Text className="text-white font-bold text-xl tracking-wider">GENES</Text>
+             <Image 
+               source={require('@/assets/logo.png')} 
+               style={{ width: 150, height: 35 }} 
+               resizeMode="contain"
+             />
           </TouchableOpacity>
         </Link>
 

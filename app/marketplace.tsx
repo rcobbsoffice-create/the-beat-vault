@@ -64,7 +64,7 @@ export default function Marketplace() {
                         style={{ width: '100%', height: '100%' }}
                      />
                    ) : (
-                     <Play size={24} color="#D4AF37" />
+                     <Play size={24} color="#005CB9" />
                    )}
                 </TouchableOpacity>
                 

@@ -116,7 +116,7 @@ export default function ProducerProfile() {
   if (loading) {
     return (
       <View className="flex-1 bg-dark-950 items-center justify-center">
-        <ActivityIndicator color="#D4AF37" />
+        <ActivityIndicator color="#005CB9" />
         <Text className="text-gray-400 mt-4">Loading Producer Profile...</Text>
       </View>
     );
@@ -170,7 +170,7 @@ export default function ProducerProfile() {
                   <Badge variant="primary">Verified</Badge>
                 </View>
                 <View className="flex-row items-center gap-2">
-                  <MapPin size={14} color="#D4AF37" />
+                  <MapPin size={14} color="#005CB9" />
                   <Text className="text-gray-400 text-sm">
                     {producer.location || 'Professional Producer'} | <Text className="text-white font-medium capitalize">{producer.role}</Text>
                   </Text>
@@ -201,7 +201,7 @@ export default function ProducerProfile() {
             {featuredBeat && (
               <View className="mb-12">
                 <View className="flex-row items-center gap-2 mb-6">
-                  <Star size={20} color="#D4AF37" fill="#D4AF37" />
+                  <Star size={20} color="#005CB9" fill="#005CB9" />
                   <Text className="text-xl font-bold text-white">Featured Track</Text>
                 </View>
                 
@@ -218,9 +218,9 @@ export default function ProducerProfile() {
                       )}
                       <View className="absolute inset-0 bg-black/40 items-center justify-center">
                          {currentBeat?.id === featuredBeat.id && isPlaying ? (
-                           <Pause size={24} color="#D4AF37" fill="#D4AF37" />
+                           <Pause size={24} color="#005CB9" fill="#005CB9" />
                          ) : (
-                           <Play size={24} color="#D4AF37" fill="#D4AF37" />
+                           <Play size={24} color="#005CB9" fill="#005CB9" />
                          )}
                       </View>
                     </TouchableOpacity>
@@ -303,15 +303,15 @@ export default function ProducerProfile() {
               <Text className="font-bold text-white text-sm mb-3">Service Includes</Text>
               <View className="gap-2 mb-6">
                 <View className="flex-row items-center gap-2">
-                  <Check size={14} color="#D4AF37" />
+                  <Check size={14} color="#005CB9" />
                   <Text className="text-xs text-gray-400">High Quality WAVs</Text>
                 </View>
                 <View className="flex-row items-center gap-2">
-                  <Check size={14} color="#D4AF37" />
+                  <Check size={14} color="#005CB9" />
                   <Text className="text-xs text-gray-400">Trackout Stems</Text>
                 </View>
                 <View className="flex-row items-center gap-2">
-                  <Check size={14} color="#D4AF37" />
+                  <Check size={14} color="#005CB9" />
                   <Text className="text-xs text-gray-400">Unlimited License Rights</Text>
                 </View>
               </View>

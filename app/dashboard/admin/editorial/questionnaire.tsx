@@ -110,7 +110,7 @@ Look out for ${responses.upcoming_projects} as ${artistName} continues to redefi
   if (loading && submissions.length === 0) {
     return (
       <View className="flex-1 bg-dark-950 items-center justify-center p-6 gap-4">
-        <ActivityIndicator size="large" color="#D4AF37" />
+        <ActivityIndicator size="large" color="#005CB9" />
         <Text className="text-gray-500 font-bold uppercase tracking-widest text-xs italic">Syncing Editorial Mind...</Text>
       </View>
     );

@@ -237,7 +237,7 @@ export default function BeatUploadPage() {
               className="items-center justify-center w-full"
             >
               <View className={`w-20 h-20 rounded-full items-center justify-center mb-4 ${audioFile ? 'bg-primary/20' : 'bg-white/5'}`}>
-                <Music size={32} color={audioFile ? '#D4AF37' : '#374151'} />
+                <Music size={32} color={audioFile ? '#005CB9' : '#374151'} />
               </View>
               <Text className="text-white font-bold text-lg">
                 {audioFile ? audioFile.name : 'Select Audio File'}

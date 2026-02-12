@@ -35,7 +35,7 @@ export default function ProducersPage() {
   if (loading) {
     return (
       <View className="flex-1 bg-dark-950 items-center justify-center">
-        <ActivityIndicator color="#D4AF37" />
+        <ActivityIndicator color="#005CB9" />
         <Text className="text-gray-400 mt-4">Loading Producers...</Text>
       </View>
     );
@@ -94,7 +94,7 @@ export default function ProducersPage() {
                         {producer.display_name || 'Anonymous Producer'}
                       </Text>
                       <View className="flex-row items-center gap-2 mb-4">
-                        <MapPin size={14} color="#D4AF37" />
+                        <MapPin size={14} color="#005CB9" />
                         <Text className="text-xs text-gray-500">Platform Artist</Text>
                       </View>
                       
@@ -110,7 +110,7 @@ export default function ProducersPage() {
                         <View className="items-end">
                            <Text className="text-[10px] text-gray-500 uppercase tracking-widest mb-1">Rating</Text>
                            <View className="flex-row items-center gap-1">
-                            <Star size={12} color="#D4AF37" fill="#D4AF37" />
+                            <Star size={12} color="#005CB9" fill="#005CB9" />
                             <Text className="font-bold text-white">5.0</Text>
                           </View>
                         </View>

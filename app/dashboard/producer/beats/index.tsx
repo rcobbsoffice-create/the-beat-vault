@@ -30,7 +30,7 @@ export default function ProducerBeatsPage() {
   if (isLoading && beats.length === 0) {
     return (
       <View className="flex-1 items-center justify-center min-h-[400px]">
-        <Activity size={32} color="#D4AF37" className="animate-spin" />
+        <Activity size={32} color="#005CB9" className="animate-spin" />
         <Text className="text-gray-400 mt-4">Loading your catalog...</Text>
       </View>
     );
@@ -172,7 +172,7 @@ export default function ProducerBeatsPage() {
                   onPress={() => handleEdit(beat)}
                 >
                    <View className="flex-row items-center gap-2">
-                      <Edit2 size={14} color="#D4AF37" />
+                      <Edit2 size={14} color="#005CB9" />
                       <Text className="text-primary text-xs font-bold">Edit</Text>
                    </View>
                 </Button>

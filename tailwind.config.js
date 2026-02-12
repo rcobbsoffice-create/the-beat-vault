@@ -7,8 +7,8 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        primary: "#D4AF37", // Gold
-        secondary: "#C0B283", // Muted Gold
+        primary: "#005CB9", // AudioGenes Blue
+        secondary: "#003E7E", // Darker Blue
         dark: {
           950: "#0A0A0A", // Background
           900: "#121212", // Surface

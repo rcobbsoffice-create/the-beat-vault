@@ -6,7 +6,7 @@ import { Card } from '@/components/ui/Card';
 
 export default function AdminDashboardPage() {
   const stats = [
-    { label: 'Total Users', value: '1,234', icon: Users, color: '#D4AF37' },
+    { label: 'Total Users', value: '1,234', icon: Users, color: '#005CB9' },
     { label: 'Total Beats', value: '567', icon: Music, color: '#3B82F6' },
     { label: 'Revenue', value: '$12.5k', icon: DollarSign, color: '#10B981' },
     { label: 'Active Sessions', value: '89', icon: Activity, color: '#F59E0B' },
@@ -35,7 +35,7 @@ export default function AdminDashboardPage() {
       <View className="gap-3">
         <Link href="/dashboard/admin/users" asChild>
           <TouchableOpacity className="p-4 bg-dark-900 rounded-xl border border-white/5 flex-row items-center gap-4">
-            <Users size={24} color="#D4AF37" />
+            <Users size={24} color="#005CB9" />
             <View>
               <Text className="text-white font-bold">Manage Users</Text>
               <Text className="text-gray-400 text-sm">View and edit user profiles and roles</Text>
@@ -44,7 +44,7 @@ export default function AdminDashboardPage() {
         </Link>
         <Link href="/dashboard/admin/beats" asChild>
           <TouchableOpacity className="p-4 bg-dark-900 rounded-xl border border-white/5 flex-row items-center gap-4">
-            <Music size={24} color="#D4AF37" />
+            <Music size={24} color="#005CB9" />
             <View>
               <Text className="text-white font-bold">Manage Beats</Text>
               <Text className="text-gray-400 text-sm">Review uploaded content and metadata</Text>
@@ -53,7 +53,7 @@ export default function AdminDashboardPage() {
         </Link>
          <Link href="/dashboard/admin/editorial" asChild>
           <TouchableOpacity className="p-4 bg-dark-900 rounded-xl border border-white/5 flex-row items-center gap-4">
-            <FileText size={24} color="#D4AF37" />
+            <FileText size={24} color="#005CB9" />
             <View>
               <Text className="text-white font-bold">Editorial Content</Text>
               <Text className="text-gray-400 text-sm">Manage blog posts and newsletters</Text>

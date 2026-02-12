@@ -64,14 +64,14 @@ export default function AdminArtistsPage() {
           <Text className="text-gray-400 text-xs font-bold uppercase tracking-widest">Verify and manage artist profiles</Text>
         </View>
         <Badge variant="outline" className="flex-row gap-2 bg-primary/10 border-primary/20">
-            <ShieldCheck size={14} color="#D4AF37" />
+            <ShieldCheck size={14} color="#005CB9" />
             <Text className="text-primary font-bold text-xs uppercase">Queue: {submissions.length}</Text>
         </Badge>
       </View>
 
       {loading ? (
         <View className="py-20 items-center">
-           <ActivityIndicator size="large" color="#D4AF37" />
+           <ActivityIndicator size="large" color="#005CB9" />
            <Text className="text-gray-500 mt-4 text-xs font-black uppercase tracking-widest">Loading Queue...</Text>
         </View>
       ) : (

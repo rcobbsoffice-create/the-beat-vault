@@ -131,7 +131,7 @@ export default function AdminEditorialPage() {
   if (authLoading) {
     return (
       <View className="flex-1 bg-dark-950 items-center justify-center">
-        <ActivityIndicator size="large" color="#D4AF37" />
+        <ActivityIndicator size="large" color="#005CB9" />
       </View>
     );
   }
@@ -162,7 +162,7 @@ export default function AdminEditorialPage() {
 
           {loading ? (
              <View className="py-20 items-center">
-               <ActivityIndicator size="large" color="#D4AF37" />
+               <ActivityIndicator size="large" color="#005CB9" />
                <Text className="text-gray-500 mt-4 font-bold uppercase tracking-widest text-xs">Syncing contents...</Text>
              </View>
           ) : (

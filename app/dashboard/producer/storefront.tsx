@@ -23,7 +23,7 @@ export default function ProducerStorefrontPage() {
   const [settings, setSettings] = useState({
     displayName: profile?.display_name || 'Producer Storefront',
     tagline: 'atlanta, ga • trap producer',
-    accentColor: '#D4AF37', // Gold
+    accentColor: '#005CB9', // Gold
     theme: 'midnight-onyx',
     layout: 'grid' as 'grid' | 'list',
     showMerch: true,
@@ -106,7 +106,7 @@ export default function ProducerStorefrontPage() {
            {/* Section: Branding */}
            <Card className="p-6 bg-dark-900/50 border-white/5 space-y-4">
               <Text className="font-bold text-white mb-2 flex-row items-center gap-2">
-                 <Type size={16} color="#D4AF37" /> Branding
+                 <Type size={16} color="#005CB9" /> Branding
               </Text>
               <Input 
                 label="Display Name" 
@@ -123,7 +123,7 @@ export default function ProducerStorefrontPage() {
            {/* Section: Visuals */}
            <Card className="p-6 bg-dark-900/50 border-white/5">
               <Text className="font-bold text-white mb-6 flex-row items-center gap-2">
-                 <Palette size={16} color="#D4AF37" /> Theme & Colors
+                 <Palette size={16} color="#005CB9" /> Theme & Colors
               </Text>
               
               <View className="gap-4">
@@ -146,7 +146,7 @@ export default function ProducerStorefrontPage() {
                          </Text>
                          {theme.premium && <Text className="text-[10px] text-primary font-bold uppercase">Premium Only</Text>}
                       </View>
-                      {settings.theme === theme.id && <Check size={20} color="#D4AF37" />}
+                      {settings.theme === theme.id && <Check size={20} color="#005CB9" />}
                     </TouchableOpacity>
                   ))}
               </View>
@@ -155,7 +155,7 @@ export default function ProducerStorefrontPage() {
             {/* Section: Layout */}
             <Card className="p-6 bg-dark-900/50 border-white/5">
                <Text className="font-bold text-white mb-6 flex-row items-center gap-2">
-                  <Layout size={16} color="#D4AF37" /> Catalog Layout
+                  <Layout size={16} color="#005CB9" /> Catalog Layout
                </Text>
                <View className="flex-row gap-4">
                   <TouchableOpacity 
@@ -164,7 +164,7 @@ export default function ProducerStorefrontPage() {
                      settings.layout === 'grid' ? 'border-primary bg-primary/5' : 'border-dark-700'
                    }`}
                   >
-                     <GridIcon size={24} color={settings.layout === 'grid' ? '#D4AF37' : '#6B7280'} />
+                     <GridIcon size={24} color={settings.layout === 'grid' ? '#005CB9' : '#6B7280'} />
                      <Text className={`text-xs font-bold uppercase ${settings.layout === 'grid' ? 'text-primary' : 'text-gray-500'}`}>Grid</Text>
                   </TouchableOpacity>
                   <TouchableOpacity 
@@ -173,7 +173,7 @@ export default function ProducerStorefrontPage() {
                      settings.layout === 'list' ? 'border-primary bg-primary/5' : 'border-dark-700'
                    }`}
                   >
-                     <ListIcon size={24} color={settings.layout === 'list' ? '#D4AF37' : '#6B7280'} />
+                     <ListIcon size={24} color={settings.layout === 'list' ? '#005CB9' : '#6B7280'} />
                      <Text className={`text-xs font-bold uppercase ${settings.layout === 'list' ? 'text-primary' : 'text-gray-500'}`}>List</Text>
                   </TouchableOpacity>
                </View>
@@ -183,7 +183,7 @@ export default function ProducerStorefrontPage() {
             <Card className="p-6 bg-dark-900/50 border-white/5 gap-6">
                <View className="flex-row items-center justify-between">
                  <Text className="font-bold text-white flex-row items-center gap-2">
-                    <Shirt size={16} color="#D4AF37" /> Merchandise
+                    <Shirt size={16} color="#005CB9" /> Merchandise
                  </Text>
                  <TouchableOpacity 
                    onPress={() => setSettings(s => ({ ...s, showMerch: !s.showMerch }))}
@@ -227,11 +227,11 @@ export default function ProducerStorefrontPage() {
                   <ScrollView className="flex-1 bg-black">
                      {/* Mock Header */}
                      <View className="h-48 bg-dark-900 justify-end p-6 border-b border-white/10">
-                        <View className="w-20 h-20 rounded-full items-center justify-center bg-[#D4AF37] mb-4">
+                        <View className="w-20 h-20 rounded-full items-center justify-center bg-[#005CB9] mb-4">
                            <Text className="text-3xl font-black text-black">{settings.displayName.charAt(0)}</Text>
                         </View>
                         <Text className="text-2xl font-black text-white">{settings.displayName}</Text>
-                        <Text className="text-sm font-medium text-[#D4AF37] opacity-80">{settings.tagline}</Text>
+                        <Text className="text-sm font-medium text-[#005CB9] opacity-80">{settings.tagline}</Text>
                      </View>
 
                      {/* Mock Tabs */}

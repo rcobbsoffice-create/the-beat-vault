@@ -34,7 +34,7 @@ export default function AdminUsersPage() {
   if (loading) {
     return (
       <View className="flex-1 bg-dark-950 items-center justify-center">
-        <ActivityIndicator color="#D4AF37" />
+        <ActivityIndicator color="#005CB9" />
       </View>
     );
   }

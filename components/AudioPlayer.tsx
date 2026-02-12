@@ -59,7 +59,7 @@ export function AudioPlayer() {
       media: audioRef.current,
       waveColor: 'rgba(255, 255, 255, 0.05)',
       progressColor: 'rgba(212, 175, 55, 0.1)',
-      cursorColor: '#D4AF37',
+      cursorColor: '#005CB9',
       barWidth: 2,
       barRadius: 2,
       cursorWidth: 1,
@@ -281,7 +281,7 @@ export function AudioPlayer() {
                     setVolume(parseFloat(e.target.value));
                     setIsMuted(false);
                   }}
-                  style={{ width: 80, accentColor: '#D4AF37' }}
+                  style={{ width: 80, accentColor: '#005CB9' }}
                 />
               )}
             </View>

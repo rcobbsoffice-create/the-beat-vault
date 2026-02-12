@@ -42,7 +42,7 @@ export default function DistributionPage() {
   const statusIcons: Record<string, any> = {
     draft: <Clock size={14} color="#9CA3AF" />,
     pending: <Clock size={14} color="#F59E0B" />,
-    processing: <Globe size={14} color="#D4AF37" />,
+    processing: <Globe size={14} color="#005CB9" />,
     live: <CheckCircle size={14} color="#10B981" />,
     rejected: <AlertCircle size={14} color="#EF4444" />
   };

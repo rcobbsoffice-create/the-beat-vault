@@ -55,14 +55,14 @@ export default function AdminRevenuePage() {
         <Card className="p-8 bg-dark-900 border-white/5">
           <View className="flex-row items-center justify-between mb-4">
             <View className="p-3 rounded-2xl bg-primary/10">
-              <Activity size={24} color="#D4AF37" />
+              <Activity size={24} color="#005CB9" />
             </View>
             <Badge variant="outline" className="bg-primary/20"><Text className="text-primary font-bold text-xs">15% Fee</Text></Badge>
           </View>
           <Text className="text-sm text-gray-500 uppercase tracking-wider font-bold">Platform Earnings</Text>
           <Text className="text-4xl font-black text-white mt-1">$64,342.56</Text>
           <View className="mt-4 flex-row items-center gap-2">
-            <ArrowUpRight size={12} color="#D4AF37" />
+            <ArrowUpRight size={12} color="#005CB9" />
             <Text className="text-xs text-gray-400">Net profit after processing</Text>
           </View>
         </Card>

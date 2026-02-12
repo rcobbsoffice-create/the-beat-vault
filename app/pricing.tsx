@@ -94,7 +94,7 @@ export default function PricingPage() {
                   {license.features.map((feature, i) => (
                     <View key={i} className="flex-row items-start gap-3">
                       <View className={`p-1 rounded-full shrink-0 ${license.recommended ? 'bg-primary/20' : 'bg-white/5'}`}>
-                        <Check size={12} color={license.recommended ? '#D4AF37' : '#9CA3AF'} />
+                        <Check size={12} color={license.recommended ? '#005CB9' : '#9CA3AF'} />
                       </View>
                       <Text className="text-gray-300 text-sm flex-1">{feature}</Text>
                     </View>
@@ -118,7 +118,7 @@ export default function PricingPage() {
           <View className="mt-20 items-center">
             <View className="flex-col sm:flex-row items-center gap-6 p-6 rounded-2xl bg-white/5 border border-white/5 max-w-3xl w-full">
               <View className="p-3 bg-primary/10 rounded-full">
-                 <Info size={32} color="#D4AF37" />
+                 <Info size={32} color="#005CB9" />
               </View>
               <View className="flex-1">
                 <Text className="font-bold text-white text-lg mb-1">How Licensing Works</Text>

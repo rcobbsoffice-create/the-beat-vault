@@ -75,7 +75,7 @@ export default function AdvancedAnalyticsPage() {
       {/* Hero Stats */}
       <View className="flex-row flex-wrap gap-4 mb-8">
          {[
-           { label: 'Global Streams', value: totalStreams.toLocaleString(), sub: '+12% vs last month', Icon: Activity, color: '#D4AF37' },
+           { label: 'Global Streams', value: totalStreams.toLocaleString(), sub: '+12% vs last month', Icon: Activity, color: '#005CB9' },
            { label: 'Platform Revenue', value: `$${totalRevenue.toLocaleString()}`, sub: 'Estimated Real-time', Icon: DollarSign, color: '#10B981' },
            { label: 'Active DSPs', value: '18', sub: 'Worldwide Distribution', Icon: Globe, color: '#60A5FA' },
            { label: 'Conversion Rate', value: '3.4%', sub: 'Streams to Purchases', Icon: Target, color: '#A78BFA' },
@@ -126,7 +126,7 @@ export default function AdvancedAnalyticsPage() {
         <View className="flex-col md:flex-row gap-4">
            <Card className="p-6 border-primary/20 bg-primary/5 flex-1">
               <Text className="text-sm font-black uppercase italic tracking-widest text-primary mb-2 flex-row items-center gap-2">
-                <Zap size={16} color="#D4AF37" /> Optimization Insight
+                <Zap size={16} color="#005CB9" /> Optimization Insight
               </Text>
               <Text className="text-xs text-gray-400 font-medium leading-relaxed">
                 Your tracks are trending in <Text className="text-white font-bold">Brazil</Text> and <Text className="text-white font-bold">Nigeria</Text>. Consider increasing marketing spend in these regions.

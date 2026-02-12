@@ -96,7 +96,7 @@ export default function DashboardSettingsPage() {
   if (authLoading) {
     return (
       <View className="flex-1 bg-dark-950 items-center justify-center">
-        <Loader2 size={32} color="#D4AF37" />
+        <Loader2 size={32} color="#005CB9" />
       </View>
     );
   }
@@ -161,7 +161,7 @@ export default function DashboardSettingsPage() {
         {/* Account Details */}
         <Card className="p-6 bg-dark-900/50 border-white/5">
            <Text className="font-bold text-white mb-6 text-lg flex-row items-center gap-2">
-              <Mail size={20} color="#D4AF37" /> Account Verification
+              <Mail size={20} color="#005CB9" /> Account Verification
            </Text>
            <View className="gap-6">
               <View>
@@ -186,7 +186,7 @@ export default function DashboardSettingsPage() {
         {/* Security / Password */}
         <Card className="p-6 bg-dark-900/50 border-white/5">
            <Text className="font-bold text-white mb-6 text-lg flex-row items-center gap-2">
-              <Lock size={20} color="#D4AF37" /> Security & Password
+              <Lock size={20} color="#005CB9" /> Security & Password
            </Text>
            <View className="gap-6">
                <Input 

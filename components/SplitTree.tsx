@@ -49,7 +49,7 @@ export function SplitTree({ totalAmount, parties }: SplitTreeProps) {
             <Card className="p-4 bg-dark-900 border-white/5 w-full overflow-hidden">
                <View className="flex-row items-center gap-3 mb-3">
                  <View className="w-10 h-10 rounded-full bg-white/5 items-center justify-center border border-white/5">
-                    <User size={20} color="#D4AF37" />
+                    <User size={20} color="#005CB9" />
                  </View>
                  <View className="flex-1">
                     <Text className="font-bold text-white text-sm" numberOfLines={1}>{party.name}</Text>
@@ -77,15 +77,15 @@ export function SplitTree({ totalAmount, parties }: SplitTreeProps) {
       {/* Workflow Legend */}
       <View className="flex-row flex-wrap justify-center gap-8 pt-8 border-t border-white/5">
          <View className="flex-row items-center gap-2">
-            <ShieldCheck size={12} color="#D4AF37" />
+            <ShieldCheck size={12} color="#005CB9" />
             <Text className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Rights Protected</Text>
          </View>
          <View className="flex-row items-center gap-2">
-            <Zap size={12} color="#D4AF37" />
+            <Zap size={12} color="#005CB9" />
             <Text className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Automated Split</Text>
          </View>
          <View className="flex-row items-center gap-2">
-            <TrendingUp size={12} color="#D4AF37" />
+            <TrendingUp size={12} color="#005CB9" />
             <Text className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Real-time Settlement</Text>
          </View>
       </View>

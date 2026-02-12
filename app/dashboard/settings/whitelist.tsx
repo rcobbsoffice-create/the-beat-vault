@@ -60,7 +60,7 @@ export default function WhitelistPage() {
       {/* Header */}
       <View className="flex-row items-center gap-4 bg-primary/10 border border-primary/20 p-6 rounded-3xl mb-8">
         <View className="w-16 h-16 rounded-2xl bg-primary/20 items-center justify-center border border-primary/30">
-          <ShieldCheck size={32} color="#D4AF37" />
+          <ShieldCheck size={32} color="#005CB9" />
         </View>
         <View className="flex-1">
           <Text className="text-2xl font-bold text-white mb-1">Content ID Shield</Text>
@@ -71,7 +71,7 @@ export default function WhitelistPage() {
       {/* Add New */}
       <Card className="p-6 bg-dark-900/40 border-white/5 mb-8">
         <Text className="font-bold text-white mb-4 flex-row items-center gap-2">
-          <Plus size={16} color="#D4AF37" /> Add Protection
+          <Plus size={16} color="#005CB9" /> Add Protection
         </Text>
         <View className="gap-4">
             {/* Platform Selector */}

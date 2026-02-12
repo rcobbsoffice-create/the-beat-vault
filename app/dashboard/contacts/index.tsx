@@ -183,7 +183,7 @@ export default function ContactsPage() {
             onPress={handleImportCSV}
           >
             <View className="flex-row items-center gap-2">
-              <Upload size={16} color="#D4AF37" />
+              <Upload size={16} color="#005CB9" />
               <Text className="text-primary font-bold text-xs uppercase">Import CSV</Text>
             </View>
           </Button>

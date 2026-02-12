@@ -195,7 +195,7 @@ export function DashboardSidebar() {
                     >
                       <Icon 
                         size={20} 
-                        color={isActive ? '#000' : link.highlight ? '#D4AF37' : '#9CA3AF'} 
+                        color={isActive ? '#000' : link.highlight ? '#005CB9' : '#9CA3AF'} 
                       />
                       {(!isSidebarCollapsed || !isLargeScreen) && (
                         <Text className={`font-medium ml-2 ${

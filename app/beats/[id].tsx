@@ -157,7 +157,7 @@ const handleCheckout = async (license: any) => {
                   analyser={isCurrentBeat ? analyser : null} 
                   isPlaying={isCurrentBeat && isPlaying}
                   height={150}
-                  barColor="#D4AF37"
+                  barColor="#005CB9"
                 />
              </View>
           </View>
@@ -207,7 +207,7 @@ const handleCheckout = async (license: any) => {
                     {isCurrentBeat && isPlaying ? 'Pause' : 'Play'}
                  </Button>
                  <Button variant="outline" size="sm" className="w-16 h-16">
-                    <Heart size={24} color="#D4AF37" />
+                    <Heart size={24} color="#005CB9" />
                  </Button>
                  <Button variant="outline" size="sm" className="w-16 h-16">
                     <Share2 size={24} color="#fff" />
@@ -268,7 +268,7 @@ const handleCheckout = async (license: any) => {
                       onPress={() => handleCheckout(basicLicense)}
                       disabled={loading}
                      >
-                       {loading ? <ActivityIndicator size="small" color="#D4AF37" /> : 'Add to Cart'}
+                       {loading ? <ActivityIndicator size="small" color="#005CB9" /> : 'Add to Cart'}
                      </Button>
                   </Card>
 

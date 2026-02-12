@@ -28,7 +28,7 @@ export default function ArtistInsightsPage() {
         {/* Decorative elements behind could go here with absolute positioning if needed */}
         <View className="flex-row items-center gap-4">
           <View className="w-16 h-16 rounded-2xl bg-primary/20 items-center justify-center border border-primary/30 shrink-0">
-            <Target size={32} color="#D4AF37" />
+            <Target size={32} color="#005CB9" />
           </View>
           <View className="flex-1">
             <Text className="text-2xl font-bold text-white mb-1">Artist Insights</Text>
@@ -41,14 +41,14 @@ export default function ArtistInsightsPage() {
         {/* Recommended for You */}
         <View className="flex-1 gap-4">
            <Text className="text-lg font-bold text-white flex-row items-center gap-2">
-             <Zap size={20} color="#D4AF37" /> Top AI Matches
+             <Zap size={20} color="#005CB9" /> Top AI Matches
            </Text>
            <View className="gap-4">
               {recommendations.map((rec, i) => (
                 <Card key={i} className="p-5 bg-dark-900/50 border-white/5 flex-row items-center justify-between">
                    <View className="flex-row items-center gap-4 flex-1">
                       <View className="w-12 h-12 rounded-xl bg-dark-800 items-center justify-center border border-white/5">
-                         <Music size={24} color="#D4AF37" />
+                         <Music size={24} color="#005CB9" />
                       </View>
                       <View>
                          <View className="flex-row items-center gap-2">
@@ -59,7 +59,7 @@ export default function ArtistInsightsPage() {
                       </View>
                    </View>
                    <TouchableOpacity className="p-2">
-                      <ArrowRight size={20} color="#D4AF37" />
+                      <ArrowRight size={20} color="#005CB9" />
                    </TouchableOpacity>
                 </Card>
               ))}
@@ -68,7 +68,7 @@ export default function ArtistInsightsPage() {
            {/* Trend Discovery */}
            <View className="pt-4">
               <Text className="text-lg font-bold text-white flex-row items-center gap-2 mb-4">
-                <Search size={20} color="#D4AF37" /> Market Shift Prediction
+                <Search size={20} color="#005CB9" /> Market Shift Prediction
               </Text>
               <Card className="p-6 bg-black/40 border-white/5">
                  <View className="flex-row justify-between flex-wrap gap-4">
@@ -118,7 +118,7 @@ export default function ArtistInsightsPage() {
 
            <Card className="p-6 bg-dark-900 border-white/10">
               <View className="flex-row items-center gap-2 mb-2">
-                  <TrendingUp size={24} color="#D4AF37" />
+                  <TrendingUp size={24} color="#005CB9" />
                   <Text className="font-bold text-white">Growth Opportunity</Text>
               </View>
               <Text className="text-xs text-gray-400 leading-relaxed">

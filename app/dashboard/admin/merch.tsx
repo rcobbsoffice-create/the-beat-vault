@@ -185,7 +185,7 @@ export default function AdminMerchPage() {
          <View className="gap-6">
             <Card className="p-6 bg-dark-900 border-white/5 gap-6">
                <Text className="text-xl font-black uppercase italic tracking-tighter flex-row items-center gap-3 text-white">
-                  <Truck size={20} color="#D4AF37" /> Fulfillment Stats
+                  <Truck size={20} color="#005CB9" /> Fulfillment Stats
                </Text>
                
                <View className="gap-4">
@@ -216,7 +216,7 @@ export default function AdminMerchPage() {
          <View className="gap-6">
             <View className="flex-row items-center justify-between">
                <Text className="text-2xl font-black uppercase italic tracking-tighter flex-row items-center gap-3 text-white">
-                 <Store size={24} color="#D4AF37" /> Partner Stores
+                 <Store size={24} color="#005CB9" /> Partner Stores
                </Text>
                <Badge variant="outline" className="font-bold border-white/10"><Text className="text-white">{stores.length} Accounts</Text></Badge>
             </View>
@@ -226,7 +226,7 @@ export default function AdminMerchPage() {
                   <Card key={store.id} className="p-4 bg-dark-900/30 border-white/5 flex-row items-center justify-between">
                      <View className="flex-row items-center gap-4 flex-1">
                         <View className="w-12 h-12 rounded-xl bg-primary/10 items-center justify-center">
-                           <Users size={24} color="#D4AF37" />
+                           <Users size={24} color="#005CB9" />
                         </View>
                         <View>
                            <Text className="font-black italic uppercase tracking-tighter text-white">{store.profiles?.display_name}</Text>
@@ -262,7 +262,7 @@ export default function AdminMerchPage() {
          <View className="gap-6">
             <View className="flex-row items-center justify-between">
                <Text className="text-2xl font-black uppercase italic tracking-tighter flex-row items-center gap-3 text-white">
-                 <Package size={24} color="#D4AF37" /> Product Catalog
+                 <Package size={24} color="#005CB9" /> Product Catalog
                </Text>
                <Button 
                  variant="outline" 

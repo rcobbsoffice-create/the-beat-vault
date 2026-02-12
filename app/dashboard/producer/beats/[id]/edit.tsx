@@ -148,7 +148,7 @@ export default function BeatEditPage() {
   if (!beat && loading) {
     return (
       <View className="flex-1 items-center justify-center bg-dark-950">
-        <ActivityIndicator color="#D4AF37" size="large" />
+        <ActivityIndicator color="#005CB9" size="large" />
       </View>
     );
   }

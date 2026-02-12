@@ -115,7 +115,7 @@ export default function ProducerAnalyticsPage() {
   if (loading) {
     return (
       <View className="flex-1 items-center justify-center min-h-[400px]">
-      <ActivityIndicator size="large" color="#D4AF37" />
+      <ActivityIndicator size="large" color="#005CB9" />
       </View>
     );
   }
@@ -133,7 +133,7 @@ export default function ProducerAnalyticsPage() {
       <View className="flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
         <View className="flex-row items-center gap-4">
           <View className="w-12 h-12 rounded-2xl bg-primary/20 items-center justify-center border border-primary/30">
-            <BrainCircuit size={24} color="#D4AF37" />
+            <BrainCircuit size={24} color="#005CB9" />
           </View>
           <View>
             <Text className="text-3xl font-bold text-white mb-1">AI Intelligence</Text>
@@ -148,9 +148,9 @@ export default function ProducerAnalyticsPage() {
         >
           <View className="flex-row items-center gap-2">
             {forecasting ? (
-              <ActivityIndicator size="small" color="#D4AF37" />
+              <ActivityIndicator size="small" color="#005CB9" />
             ) : (
-              <Zap size={16} color="#D4AF37" />
+              <Zap size={16} color="#005CB9" />
             )}
             <Text className="text-white font-bold">{forecasting ? 'Analyzing...' : 'Run AI Forecast'}</Text>
           </View>
@@ -168,7 +168,7 @@ export default function ProducerAnalyticsPage() {
              <Card className="p-6 bg-primary/5 border border-primary/20">
                <View className="flex-row items-center justify-between mb-4">
                  <View className="flex-row items-center gap-2">
-                   <BrainCircuit size={20} color="#D4AF37" />
+                   <BrainCircuit size={20} color="#005CB9" />
                    <Text className="text-lg font-bold text-white">7-Day Forecast</Text>
                  </View>
                  <Badge variant="outline" className="bg-primary/10 border-primary/30">
@@ -197,7 +197,7 @@ export default function ProducerAnalyticsPage() {
            <View className="flex-col md:flex-row gap-6">
               <Card className="flex-1 p-6 bg-dark-900 border-white/5">
                 <View className="flex-row items-center gap-2 mb-4">
-                   <TrendingUp size={16} color="#D4AF37" />
+                   <TrendingUp size={16} color="#005CB9" />
                    <Text className="text-sm font-bold text-gray-500 uppercase tracking-widest">Conversion Funnel</Text>
                 </View>
                 <View className="space-y-4">
@@ -225,7 +225,7 @@ export default function ProducerAnalyticsPage() {
 
               <Card className="flex-1 p-6 bg-dark-900 border-white/5">
                 <View className="flex-row items-center gap-2 mb-4">
-                   <Clock size={16} color="#D4AF37" />
+                   <Clock size={16} color="#005CB9" />
                    <Text className="text-sm font-bold text-gray-500 uppercase tracking-widest">Retaining Power</Text>
                 </View>
                 <View className="flex-1 items-center justify-center py-6">
@@ -244,7 +244,7 @@ export default function ProducerAnalyticsPage() {
         <View className="w-full lg:w-80 space-y-8">
            <Card className="p-6 bg-dark-950 border-white/5">
               <View className="flex-row items-center gap-2 mb-6">
-                 <Globe size={16} color="#D4AF37" />
+                 <Globe size={16} color="#005CB9" />
                  <Text className="text-sm font-bold text-gray-500 uppercase tracking-widest">Hot Zones</Text>
               </View>
               <View className="space-y-6">
@@ -271,7 +271,7 @@ export default function ProducerAnalyticsPage() {
            </Card>
 
            <Card className="p-6 bg-primary/10 border border-primary/20 relative overflow-hidden">
-              <Zap size={48} color="#D4AF37" className="absolute top-4 right-4 opacity-10" />
+              <Zap size={48} color="#005CB9" className="absolute top-4 right-4 opacity-10" />
               <Text className="text-sm font-bold text-primary uppercase tracking-widest mb-4">AI Trend Alert</Text>
               <Text className="text-xs text-white leading-relaxed mb-4">
                 "Afrobeats" and "Lo-Fi" influence is rising in your target demographics. Your track <Text className="text-primary font-bold">"Neon Glow"</Text> matches 89% of current search velocity.

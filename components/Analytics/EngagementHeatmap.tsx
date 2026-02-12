@@ -135,7 +135,7 @@ export function EngagementHeatmap({ title, data, duration }: EngagementHeatmapPr
           <Text className="text-xs text-gray-400 mt-1">Granular listening density across track duration.</Text>
         </View>
         <View className="flex-row items-center gap-1.5 px-3 py-1 bg-primary/10 border border-primary/20 rounded-full">
-          <TrendingUp size={12} color="#D4AF37" />
+          <TrendingUp size={12} color="#005CB9" />
           <Text className="text-[10px] text-primary font-bold">92% Retention</Text>
         </View>
       </View>
@@ -201,7 +201,7 @@ export function EngagementHeatmap({ title, data, duration }: EngagementHeatmapPr
       </View>
 
       <View className="mt-6 pt-4 border-t border-white/5 flex-row items-start gap-3">
-         <Zap size={16} color="#D4AF37" className="shrink-0 mt-0.5" />
+         <Zap size={16} color="#005CB9" className="shrink-0 mt-0.5" />
          <Text className="text-[11px] text-gray-400 leading-relaxed flex-1">
            <Text className="text-white font-bold">AI Suggestion: </Text>
            Users are dropping off slightly before the first chorus bridge. Consider shortening the intro by 4 bars or adding an automation sweep at 00:45 to maintain tension.

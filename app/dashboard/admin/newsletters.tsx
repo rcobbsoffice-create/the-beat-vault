@@ -201,7 +201,7 @@ The AudioGenes Editorial Team
 
               <View className="flex-row justify-between items-center">
                  <Button variant="outline" onPress={handleAiGenerate} disabled={aiLoading} className="flex-row gap-2 border-white/10">
-                    {aiLoading ? <ActivityIndicator size="small" color="#fff" /> : <BrainCircuit size={16} color="#D4AF37" />}
+                    {aiLoading ? <ActivityIndicator size="small" color="#fff" /> : <BrainCircuit size={16} color="#005CB9" />}
                     <Text className="text-white font-bold text-xs uppercase">AI Draft</Text>
                  </Button>
               </View>
@@ -221,7 +221,7 @@ The AudioGenes Editorial Team
         <View className="gap-6">
            <Card className="p-6 bg-dark-900 border-white/5">
                <View className="flex-row items-center gap-3 mb-6">
-                 <History size={20} color="#D4AF37" />
+                 <History size={20} color="#005CB9" />
                  <Text className="text-xl font-black uppercase italic tracking-tighter text-white">Active Broadcasts</Text>
                </View>
                
@@ -269,7 +269,7 @@ The AudioGenes Editorial Team
                     filteredContacts.map(c => (
                       <View key={c.id} className="p-4 bg-white/5 rounded-xl flex-row items-center justify-between">
                          <View className="flex-row items-center gap-3">
-                            <UserCircle size={24} color="#D4AF37" />
+                            <UserCircle size={24} color="#005CB9" />
                             <View>
                                <Text className="text-white font-bold">{c.first_name} {c.last_name}</Text>
                                <Text className="text-gray-500 text-xs">{c.email}</Text>
