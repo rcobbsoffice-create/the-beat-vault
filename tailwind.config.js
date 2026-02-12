@@ -7,12 +7,13 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        primary: "#005CB9", // AudioGenes Blue
-        secondary: "#003E7E", // Darker Blue
+        primary: "#0066cc", // AudioGenes Blue (Match Next.js)
+        secondary: "#2563eb", // Vibrant Secondary Blue (Match Next.js)
         dark: {
-          950: "#0A0A0A", // Background
-          900: "#121212", // Surface
-          800: "#1E1E1E", // Card
+          950: "#000000", // Onyx
+          900: "#050505", // Matte
+          800: "#0a0a0a", // Surface
+          700: "#111111", // Elevation
         },
       },
       fontFamily: {

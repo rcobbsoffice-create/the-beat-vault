@@ -23,6 +23,8 @@ export interface ProducerBeat {
   isrc?: string;
   upc?: string;
   artwork_url?: string;
+  audio_url?: string;
+  preview_url?: string;
   producer_id?: string;
 }
 
@@ -78,6 +80,8 @@ export const useCatalogStore = create<CatalogState>()(
             key: beat.key,
             moods: beat.mood_tags,
             artwork_url: beat.artwork_url,
+            audio_url: beat.audio_url,
+            preview_url: beat.preview_url,
             producer_id: beat.producer_id,
           }));
 

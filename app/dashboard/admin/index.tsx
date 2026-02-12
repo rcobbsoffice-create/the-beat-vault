@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
 import { Link } from 'expo-router';
-import { LayoutDashboard, Users, Music, DollarSign, Activity, FileText } from 'lucide-react-native';
+import { LayoutDashboard, Users, Music, DollarSign, Activity, FileText, Tag } from 'lucide-react-native';
 import { Card } from '@/components/ui/Card';
 
 export default function AdminDashboardPage() {
@@ -57,6 +57,15 @@ export default function AdminDashboardPage() {
             <View>
               <Text className="text-white font-bold">Editorial Content</Text>
               <Text className="text-gray-400 text-sm">Manage blog posts and newsletters</Text>
+            </View>
+          </TouchableOpacity>
+        </Link>
+        <Link href="/dashboard/admin/genres" asChild>
+          <TouchableOpacity className="p-4 bg-dark-900 rounded-xl border border-white/5 flex-row items-center gap-4">
+            <Tag size={24} color="#005CB9" />
+            <View>
+              <Text className="text-white font-bold">Genre Management</Text>
+              <Text className="text-gray-400 text-sm">Review proposals and manage DNA labels</Text>
             </View>
           </TouchableOpacity>
         </Link>

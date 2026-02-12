@@ -12,18 +12,26 @@ import {
   LogOut,
   LayoutDashboard,
   Heart,
-  ChevronDown
+  ChevronDown,
+  Sun,
+  Moon
 } from 'lucide-react-native';
+import { useColorScheme } from 'nativewind';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export function Header() {
   const { user, signOut, loading } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const router = useRouter();
+  const { colorScheme, setColorScheme } = useColorScheme();
+
+  const toggleTheme = () => {
+    setColorScheme(colorScheme === 'dark' ? 'light' : 'dark');
+  };
 
   return (
-    <View className="bg-dark-950/80 backdrop-blur-lg border-b border-white/10 z-50">
-      <SafeAreaView edges={['top']} className="bg-dark-950/80" />
+    <View className="bg-white/80 dark:bg-dark-950/80 backdrop-blur-lg border-b border-slate-200 dark:border-white/10 z-50">
+      <SafeAreaView edges={['top']} className="bg-white/80 dark:bg-dark-950/80" />
       <View className="max-w-7xl w-full mx-auto px-4 h-16 flex-row items-center justify-between">
         
         {/* Logo */}
@@ -40,13 +48,13 @@ export function Header() {
         {/* Desktop Nav */}
         <View className="hidden md:flex flex-row items-center gap-6">
           <Link href="/marketplace" asChild>
-            <TouchableOpacity><Text className="text-gray-300 hover:text-white font-medium">Marketplace</Text></TouchableOpacity>
+            <TouchableOpacity><Text className="text-slate-600 dark:text-gray-300 hover:text-black dark:hover:text-white font-medium">Marketplace</Text></TouchableOpacity>
           </Link>
           <Link href="/producers" asChild>
-            <TouchableOpacity><Text className="text-gray-300 hover:text-white font-medium">Producers</Text></TouchableOpacity>
+            <TouchableOpacity><Text className="text-slate-600 dark:text-gray-300 hover:text-black dark:hover:text-white font-medium">Producers</Text></TouchableOpacity>
           </Link>
           <Link href="/pricing" asChild>
-            <TouchableOpacity><Text className="text-gray-300 hover:text-white font-medium">Licensing</Text></TouchableOpacity>
+            <TouchableOpacity><Text className="text-slate-600 dark:text-gray-300 hover:text-black dark:hover:text-white font-medium">Licensing</Text></TouchableOpacity>
           </Link>
         </View>
 
@@ -57,22 +65,34 @@ export function Header() {
           </View>
           <TextInput 
             placeholder="Search beats..." 
-            placeholderTextColor="#6B7280"
-            className="w-full bg-dark-800 border border-dark-600 rounded-lg py-2 pl-9 pr-4 text-white text-sm"
+            placeholderTextColor="#94a3b8"
+            className="w-full bg-slate-100 dark:bg-dark-800 border border-slate-200 dark:border-dark-600 rounded-lg py-2 pl-9 pr-4 text-slate-900 dark:text-white text-sm"
           />
         </View>
 
         {/* Auth Buttons */}
         <View className="hidden md:flex flex-row items-center gap-3">
+          {/* Theme Toggle */}
+          <TouchableOpacity 
+            onPress={toggleTheme}
+            className="p-2 bg-slate-100 dark:bg-dark-800 rounded-lg border border-slate-200 dark:border-dark-600"
+          >
+            {colorScheme === 'dark' ? (
+              <Sun size={18} color="#9CA3AF" />
+            ) : (
+              <Moon size={18} color="#475569" />
+            )}
+          </TouchableOpacity>
+
           {loading ? (
-             <View className="w-8 h-8 rounded-full bg-dark-700" />
+             <View className="w-8 h-8 rounded-full bg-slate-200 dark:bg-dark-700" />
           ) : user ? (
             <View className="flex-row items-center gap-3">
                <Link href="/dashboard" asChild>
                   <Button variant="ghost" size="sm">Dashboard</Button>
                </Link>
                <TouchableOpacity onPress={() => signOut()}>
-                 <LogOut size={20} color="#9CA3AF" />
+                 <LogOut size={20} color={colorScheme === 'dark' ? '#9CA3AF' : '#64748b'} />
                </TouchableOpacity>
             </View>
           ) : (
@@ -92,7 +112,11 @@ export function Header() {
           className="md:hidden p-2"
           onPress={() => setMobileMenuOpen(!mobileMenuOpen)}
         >
-          {mobileMenuOpen ? <X size={24} color="#fff" /> : <Menu size={24} color="#fff" />}
+          {mobileMenuOpen ? (
+            <X size={24} color={colorScheme === 'dark' ? '#fff' : '#000'} />
+          ) : (
+            <Menu size={24} color={colorScheme === 'dark' ? '#fff' : '#000'} />
+          )}
         </TouchableOpacity>
       </View>
 

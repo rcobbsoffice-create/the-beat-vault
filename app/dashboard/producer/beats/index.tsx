@@ -144,7 +144,7 @@ export default function ProducerBeatsPage() {
                   </Badge>
                 </View>
                 <Text className="text-sm text-gray-400">
-                  {beat.genre} • {beat.bpm} BPM • 44.1kHz WAV
+                  {(beat.genres && beat.genres.length > 0 ? beat.genres : [beat.genre]).join(' / ')} • {beat.bpm} BPM • 44.1kHz WAV
                 </Text>
               </View>
 

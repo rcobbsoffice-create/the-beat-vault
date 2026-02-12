@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, Image, Platform, ActivityIndicator, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Card } from '@/components/ui/Card';
@@ -13,13 +13,15 @@ import {
   ChevronLeft,
   CheckCircle2,
   AlertCircle,
-  Layers
+  Layers,
+  User as UserIcon,
+  Search
 } from 'lucide-react-native';
 import * as DocumentPicker from 'expo-document-picker';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/components/providers/AuthProvider';
-import { useCatalogStore } from '@/stores/catalog';
 import { uploadToR2, getBeatFilePaths } from '@/lib/r2';
+import { Picker } from '@react-native-picker/picker';
 
 const MUSICAL_KEYS = [
   'C Major', 'C Minor', 'C# Major', 'C# Minor',
@@ -33,15 +35,19 @@ const MUSICAL_KEYS = [
 
 const FALLBACK_GENRES = ['Trap', 'Drill', 'Hip Hop', 'R&B', 'Pop', 'Afrobeats', 'Reggaeton', 'Lo-fi', 'Cinematic', 'Soul'];
 
-export default function BeatUploadPage() {
+export default function AdminBeatUploadPage() {
   const router = useRouter();
   const { profile } = useAuth();
-  const { addBeat } = useCatalogStore();
   
   const [loading, setLoading] = useState(false);
   const [step, setStep] = useState(1);
   const [availableGenres, setAvailableGenres] = useState<string[]>([]);
   
+  // Producer State
+  const [producers, setProducers] = useState<any[]>([]);
+  const [selectedProducerId, setSelectedProducerId] = useState('');
+  const [loadingProducers, setLoadingProducers] = useState(true);
+
   // File States
   const [audioFile, setAudioFile] = useState<any>(null);
   const [artworkFile, setArtworkFile] = useState<any>(null);
@@ -60,7 +66,8 @@ export default function BeatUploadPage() {
   const [priceBasic, setPriceBasic] = useState('29.99');
   const [priceExclusive, setPriceExclusive] = useState('499.99');
 
-  React.useEffect(() => {
+  useEffect(() => {
+    fetchProducers();
     fetchGenres();
   }, []);
 
@@ -81,6 +88,24 @@ export default function BeatUploadPage() {
     }
   }
 
+  async function fetchProducers() {
+    setLoadingProducers(true);
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('id, display_name')
+        .in('role', ['producer', 'artist', 'admin'])
+        .order('display_name');
+
+      if (error) throw error;
+      setProducers(data || []);
+    } catch (err: any) {
+      console.error('Error fetching producers:', err);
+    } finally {
+      setLoadingProducers(false);
+    }
+  }
+
   const pickAudio = async () => {
     try {
       const result = await DocumentPicker.getDocumentAsync({
@@ -90,7 +115,6 @@ export default function BeatUploadPage() {
 
       if (!result.canceled) {
         setAudioFile(result.assets[0]);
-        // Auto-set title from filename if empty
         if (!title) {
           const fileName = result.assets[0].name.replace(/\.[^/.]+$/, "");
           setTitle(fileName);
@@ -117,75 +141,25 @@ export default function BeatUploadPage() {
     }
   };
 
-  const handleAIAnalysis = async (beatId: string) => {
-    try {
-      const { data, error } = await supabase.functions.invoke('analyze-audio', {
-        body: { beat_id: beatId }
-      });
-      if (error) throw error;
-      return data;
-    } catch (err) {
-      console.error('AI Analysis Error:', err);
-      return null;
-    }
-  };
-
   const handleSubmit = async () => {
-    if (!audioFile || !title) {
-      Alert.alert('Missing Info', 'Please provide at least a title and an audio file.');
+    if (!audioFile || !title || !selectedProducerId) {
+      Alert.alert('Missing Info', 'Please provide a producer, title, and an audio file.');
       return;
     }
 
     setLoading(true);
     try {
-      if (!profile?.id) throw new Error('Not authenticated');
-
-      // 1. Create Beat in DB first to get UUID
-      const { data: beat, error: beatError } = await supabase
-        .from('beats')
-        .insert({
-          producer_id: profile.id,
-          title,
-          genre: primaryGenre || 'Unknown',
-          genres: [primaryGenre, secondaryGenre].filter(Boolean),
-          bpm: parseInt(bpm) || null,
-          key,
-          description,
-          mood_tags: tags.split(',').map(t => t.trim()).filter(Boolean),
-          status: 'draft',
-          // Temporary placeholder for audio/artwork to be updated after upload
-          audio_url: 'pending',
-          preview_url: 'pending'
-        })
-        .select()
-        .single();
-
-      if (beatError) throw beatError;
-
-      // 1.5 Propose Genre if custom
-      if (customGenre && !availableGenres.includes(customGenre)) {
-        await supabase
-          .from('genre_settings')
-          .insert({
-            name: customGenre,
-            status: 'proposed',
-            created_by: profile.id
-          });
-      }
-
-      // 2. Prepare R2 Paths
-      const paths = getBeatFilePaths(beat.id);
+      // 1. Prepare UUID for R2 consistency
+      const tempBeatId = crypto.randomUUID();
+      const paths = getBeatFilePaths(tempBeatId);
       
-      // 3. Upload Audio
-      // We need to convert URI to something uploadable
+      // 2. Upload Audio
       const response = await fetch(audioFile.uri);
       const blob = await response.blob();
       const arrayBuffer = await new Response(blob).arrayBuffer();
-      const uint8Array = new Uint8Array(arrayBuffer);
+      const audioUrl = await uploadToR2(paths.original, new Uint8Array(arrayBuffer) as any, audioFile.mimeType || 'audio/wav');
 
-      const audioUrl = await uploadToR2(paths.original, uint8Array as any, audioFile.mimeType || 'audio/wav');
-
-      // 4. Upload Artwork if present
+      // 3. Upload Artwork if present
       let artworkUrl = null;
       if (artworkFile) {
         const artResponse = await fetch(artworkFile.uri);
@@ -194,60 +168,68 @@ export default function BeatUploadPage() {
         artworkUrl = await uploadToR2(paths.artwork, new Uint8Array(artBuffer) as any, artworkFile.mimeType || 'image/jpeg');
       }
 
-      // 5. Update Beat with real URLs
-      const { error: updateError } = await supabase
-        .from('beats')
-        .update({
-          audio_url: audioUrl,
-          preview_url: audioUrl, // placeholder for preview
-          artwork_url: artworkUrl,
-          status: 'published'
-        })
-        .eq('id', beat.id);
-
-      if (updateError) throw updateError;
-
-      // 5.5 Create Licenses
-      const { error: licenseError } = await supabase
-        .from('licenses')
-        .insert([
-          { 
-            beat_id: beat.id, 
-            type: 'basic', 
-            price: Math.round(parseFloat(priceBasic) * 100),
-            is_active: true,
-            files_included: ['MP3']
-          },
-          { 
-            beat_id: beat.id, 
-            type: 'exclusive', 
-            price: Math.round(parseFloat(priceExclusive) * 100),
-            is_active: true,
-            files_included: ['WAV', 'Stems']
-          }
-        ]);
-      
-      if (licenseError) throw licenseError;
-
-      // 6. Trigger AI Analysis (async, don't block UI too long)
-      handleAIAnalysis(beat.id);
-
-      // 7. Update Store & Navigate
-      addBeat({
-        id: beat.id,
+      // 4. Prepare Beat Data
+      const beatData = {
         title,
+        producer_id: selectedProducerId,
         genre: primaryGenre || 'Unknown',
-        bpm: parseInt(bpm) || 0,
-        plays: 0,
-        sales: 0,
-        earnings: '$0',
-        status: 'published',
-        artwork_url: artworkUrl || undefined,
+        genres: [primaryGenre, secondaryGenre].filter(Boolean),
+        bpm: parseInt(bpm) || null,
+        key,
+        description,
+        mood_tags: tags.split(',').map(t => t.trim()).filter(Boolean),
         audio_url: audioUrl,
-        preview_url: audioUrl // placeholder for preview
+        preview_url: audioUrl,
+        artwork_url: artworkUrl,
+        status: 'published'
+      };
+
+      // 4.1 Add Genre if new (Directly as Approved for Admin)
+      if (customGenre && !availableGenres.includes(customGenre)) {
+        await supabase
+          .from('genre_settings')
+          .insert({
+            name: customGenre,
+            status: 'approved',
+            created_by: profile.id
+          });
+      }
+
+      // 5. Call Edge Function to Save (Admin Bypass)
+      const { error: saveError } = await supabase.functions.invoke('create-beat-as-admin', {
+        body: {
+          action: 'create',
+          beatId: tempBeatId,
+          beatData
+        }
       });
 
-      setStep(3); // Success step
+      if (saveError) throw saveError;
+
+      // 6. Create Licenses
+      await supabase.from('licenses').insert([
+        { 
+          beat_id: tempBeatId, 
+          type: 'basic', 
+          price: Math.round(parseFloat(priceBasic) * 100),
+          is_active: true,
+          files_included: ['MP3']
+        },
+        { 
+          beat_id: tempBeatId, 
+          type: 'exclusive', 
+          price: Math.round(parseFloat(priceExclusive) * 100),
+          is_active: true,
+          files_included: ['WAV', 'Stems']
+        }
+      ]);
+
+      // 7. Trigger AI Analysis
+      supabase.functions.invoke('analyze-audio', {
+        body: { beat_id: tempBeatId }
+      }).catch(err => console.error('AI Analysis Trigger Failed:', err));
+
+      setStep(4); // Success step (different indexing for admin due to producer selection)
     } catch (err: any) {
       console.error('Upload failed:', err);
       Alert.alert('Upload Error', err.message || 'Failed to upload beat. Please try again.');
@@ -258,10 +240,10 @@ export default function BeatUploadPage() {
 
   return (
     <ScrollView className="flex-1 bg-dark-950 px-4 py-8">
-      {/* Cinematic Header with Gradient Overlay */}
+      {/* Cinematic Header */}
       <View className="mb-10 relative overflow-hidden rounded-[40px] p-8 border border-white/5">
-        <View className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-secondary/5" />
-        <View className="absolute -top-24 -right-24 w-64 h-64 bg-primary/20 rounded-full blur-[80px]" />
+        <View className="absolute inset-0 bg-gradient-to-br from-secondary/10 via-transparent to-primary/5" />
+        <View className="absolute -top-24 -left-24 w-64 h-64 bg-secondary/20 rounded-full blur-[80px]" />
         
         <View className="relative z-10">
           <TouchableOpacity 
@@ -271,20 +253,20 @@ export default function BeatUploadPage() {
             <View className="w-8 h-8 rounded-full bg-white/5 items-center justify-center">
               <ChevronLeft size={18} color="#9CA3AF" />
             </View>
-            <Text className="text-gray-400 font-black uppercase text-[10px] tracking-widest">Back to Catalog</Text>
+            <Text className="text-gray-400 font-black uppercase text-[10px] tracking-widest">Back to Library</Text>
           </TouchableOpacity>
           
           <View className="flex-row items-start justify-between">
             <View className="flex-1">
-              <Text className="text-5xl font-black text-white mb-2 italic tracking-tighter uppercase">Upload <Text className="text-primary italic">New Beat</Text></Text>
-              <Text className="text-gray-500 font-medium text-sm max-w-md">Release your next high-fidelity production for the global artist marketplace.</Text>
+              <Text className="text-5xl font-black text-white mb-2 italic tracking-tighter uppercase">Admin <Text className="text-secondary italic">Upload</Text></Text>
+              <Text className="text-gray-500 font-medium text-sm max-w-md">Executive deployment of high-fidelity assets on behalf of platform producers.</Text>
             </View>
             <TouchableOpacity 
-              onPress={() => router.push('/dashboard/producer/bulk-upload')}
+              onPress={() => router.push('/dashboard/admin/bulk-upload')}
               className="px-6 py-3 bg-white/5 border border-white/10 rounded-2xl flex-row items-center gap-3 backdrop-blur-md"
             >
               <Layers size={18} color="#005CB9" />
-              <Text className="text-gray-300 font-black text-[10px] uppercase tracking-[0.2em]">Switch <Text className="text-primary">Bulk</Text></Text>
+              <Text className="text-gray-300 font-black text-[10px] uppercase tracking-[0.2em]">Switch <Text className="text-secondary">Bulk</Text></Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -292,11 +274,11 @@ export default function BeatUploadPage() {
 
       {/* Modern Progress Stepper */}
       <View className="flex-row gap-4 mb-12 px-2">
-        {[1, 2, 3].map((s) => (
+        {[1, 2, 3, 4].map((s) => (
           <View key={s} className="flex-1">
-            <View className={`h-1.5 rounded-full ${step >= s ? 'bg-primary' : 'bg-white/5'} ${step === s ? 'shadow-[0_0_15px_rgba(0,92,185,0.6)]' : ''}`} />
-            <Text className={`text-[9px] font-black uppercase tracking-widest mt-2 ${step >= s ? 'text-primary' : 'text-gray-600'}`}>
-              Step 0{s} {s === 1 ? 'Audio' : s === 2 ? 'Details' : 'Success'}
+            <View className={`h-1.5 rounded-full ${step >= s ? 'bg-secondary' : 'bg-white/5'} ${step === s ? 'shadow-[0_0_15px_rgba(0,92,185,0.6)]' : ''}`} />
+            <Text className={`text-[9px] font-black uppercase tracking-widest mt-2 ${step >= s ? 'text-secondary' : 'text-gray-600'}`}>
+              Step 0{s} {s === 1 ? 'Owner' : s === 2 ? 'Audio' : s === 3 ? 'Details' : 'Live'}
             </Text>
           </View>
         ))}
@@ -304,21 +286,78 @@ export default function BeatUploadPage() {
 
       {step === 1 && (
         <View className="space-y-8">
-          {/* Visual Drop Zone for Audio */}
+           <View className="p-10 rounded-[40px] bg-dark-900/40 border border-white/10">
+              <View className="flex-row items-center gap-3 mb-8">
+                 <UserIcon size={24} color="#005CB9" />
+                 <Text className="text-white font-black text-2xl uppercase italic tracking-tighter">Assign <Text className="text-secondary">Producer</Text></Text>
+              </View>
+              
+              {loadingProducers ? (
+                 <ActivityIndicator color="#005CB9" size="large" className="py-10" />
+              ) : (
+                <View className="space-y-6">
+                  <View className="bg-dark-950 border border-white/5 rounded-3xl overflow-hidden">
+                    <Picker
+                      selectedValue={selectedProducerId}
+                      onValueChange={(v) => setSelectedProducerId(v)}
+                      dropdownIconColor="#fff"
+                      style={{ 
+                        color: '#fff', 
+                        height: 60,
+                        backgroundColor: '#0a0a0a',
+                      }}
+                    >
+                      <Picker.Item label="SEARCH & SELECT PRODUCER..." value="" color="#6B7280" />
+                      {producers.map(p => (
+                        <Picker.Item key={p.id} label={p.display_name?.toUpperCase()} value={p.id} color="#fff" />
+                      ))}
+                    </Picker>
+                  </View>
+                  
+                  {selectedProducerId && (
+                    <View className="flex-row items-center gap-4 p-6 bg-secondary/5 rounded-[30px] border border-secondary/10">
+                        <View className="w-12 h-12 rounded-full bg-secondary/20 items-center justify-center">
+                           <CheckCircle2 size={24} color="#005CB9" />
+                        </View>
+                        <View>
+                          <Text className="text-gray-500 font-black uppercase text-[10px] tracking-widest">Selected Account</Text>
+                          <Text className="text-white font-bold text-lg">{producers.find(p => p.id === selectedProducerId)?.display_name}</Text>
+                        </View>
+                    </View>
+                  )}
+                </View>
+              )}
+           </View>
+
+           <Button 
+            onPress={() => setStep(2)} 
+            disabled={!selectedProducerId}
+            className="w-full py-6 bg-secondary rounded-[30px] shadow-[0_0_30px_rgba(0,92,185,0.4)]"
+          >
+            <View className="flex-row items-center gap-3">
+              <Text className="text-black font-black uppercase tracking-[0.2em] text-lg italic">Continue to Assets</Text>
+              <Sparkles size={24} color="#000" />
+            </View>
+          </Button>
+        </View>
+      )}
+
+      {step === 2 && (
+        <View className="space-y-8">
           <TouchableOpacity 
             onPress={pickAudio}
             activeOpacity={0.7}
-            className={`p-10 rounded-[40px] border-2 border-dashed items-center justify-center bg-dark-900/40 relative overflow-hidden ${audioFile ? 'border-primary' : 'border-white/10'}`}
+            className={`p-10 rounded-[40px] border-2 border-dashed items-center justify-center bg-dark-900/40 relative overflow-hidden ${audioFile ? 'border-secondary' : 'border-white/10'}`}
           >
-            {audioFile && <View className="absolute inset-0 bg-primary/5" />}
+            {audioFile && <View className="absolute inset-0 bg-secondary/5" />}
             
-            <View className={`w-24 h-24 rounded-full items-center justify-center mb-6 ${audioFile ? 'bg-primary shadow-[0_0_25px_rgba(0,92,185,0.4)]' : 'bg-white/5'}`}>
+            <View className={`w-24 h-24 rounded-full items-center justify-center mb-6 ${audioFile ? 'bg-secondary' : 'bg-white/5'}`}>
               <Music size={36} color={audioFile ? '#000' : '#4B5563'} strokeWidth={3} />
             </View>
             
             <Text className="text-white font-black text-2xl uppercase italic tracking-tighter text-center">
               {audioFile ? audioFile.name : (
-                <>SELECT <Text className="text-primary">MASTER</Text> TRACK</>
+                <>SELECT <Text className="text-secondary">MASTER</Text> TRACK</>
               )}
             </Text>
             
@@ -340,25 +379,19 @@ export default function BeatUploadPage() {
           </TouchableOpacity>
 
           <View className="flex-col lg:flex-row gap-8">
-             {/* Artwork Picker - Improved */}
              <TouchableOpacity 
               onPress={pickArtwork}
               activeOpacity={0.7}
-              className="w-full lg:w-64 aspect-square rounded-[40px] bg-dark-900/50 border border-white/10 overflow-hidden items-center justify-center relative shadow-2xl"
+              className="w-full lg:w-64 aspect-square rounded-[40px] bg-dark-900/50 border border-white/10 overflow-hidden items-center justify-center relative"
              >
                 {artworkPreview ? (
                   <Image source={{ uri: artworkPreview }} className="w-full h-full object-cover" />
                 ) : (
                   <View className="items-center">
-                    <View className="w-16 h-16 rounded-3xl bg-white/5 items-center justify-center mb-4 border border-white/5">
+                    <View className="w-16 h-16 rounded-3xl bg-white/5 items-center justify-center mb-4">
                       <ImageIcon size={28} color="#4B5563" />
                     </View>
                     <Text className="text-gray-400 font-black text-[10px] uppercase tracking-widest">Cover Artwork</Text>
-                  </View>
-                )}
-                {artworkPreview && (
-                  <View className="absolute bottom-4 right-4 bg-black/60 backdrop-blur-md w-10 h-10 rounded-full items-center justify-center border border-white/10">
-                     <Sparkles size={18} color="#005CB9" />
                   </View>
                 )}
              </TouchableOpacity>
@@ -375,7 +408,7 @@ export default function BeatUploadPage() {
                 </View>
 
                 <View>
-                  <Text className="text-gray-500 font-black uppercase text-[10px] tracking-[0.3em] mb-4 italic">Select Primary DNA <Text className="text-primary">(Genre 1)</Text></Text>
+                  <Text className="text-gray-500 font-black uppercase text-[10px] tracking-[0.3em] mb-4 italic">Select Primary DNA <Text className="text-secondary">(Genre 1)</Text></Text>
                   <View className="flex-row flex-wrap gap-2 mb-8">
                     {availableGenres.map((g) => (
                       <TouchableOpacity
@@ -383,7 +416,7 @@ export default function BeatUploadPage() {
                         onPress={() => setPrimaryGenre(g)}
                         className={`px-5 py-2.5 rounded-xl border transition-all ${
                           primaryGenre === g 
-                            ? 'bg-primary border-primary shadow-[0_0_15px_rgba(0,92,185,0.4)]' 
+                            ? 'bg-secondary border-secondary shadow-[0_0_15px_rgba(0,102,204,0.4)]' 
                             : 'bg-dark-900/80 border-white/5'
                         }`}
                       >
@@ -419,7 +452,7 @@ export default function BeatUploadPage() {
                       onPress={() => setShowCustomGenre(true)}
                       className={`px-5 py-2.5 rounded-xl border ${
                         showCustomGenre 
-                          ? 'bg-primary border-primary shadow-[0_0_20px_rgba(0,102,204,0.4)]' 
+                          ? 'bg-secondary border-secondary shadow-[0_0_15px_rgba(0,102,204,0.4)]' 
                           : 'bg-dark-900/80 border-white/5'
                       }`}
                     >
@@ -432,12 +465,12 @@ export default function BeatUploadPage() {
                   {showCustomGenre && (
                     <View className="gap-3">
                       <Input 
-                        placeholder="PROPOSE NEW GENRE..." 
+                        placeholder="ADD NEW GENRE..." 
                         value={customGenre} 
                         onChangeText={setCustomGenre}
                         className="bg-dark-900 border-none font-bold uppercase tracking-widest italic"
                       />
-                      <Text className="text-[10px] text-gray-500 italic px-2">Proposed genres will be reviewed by administrators for platform-wide visibility.</Text>
+                      <Text className="text-[10px] text-gray-500 italic px-2">Administrators can add genres directly as approved tags.</Text>
                     </View>
                   )}
                 </View>
@@ -445,9 +478,9 @@ export default function BeatUploadPage() {
           </View>
 
           <Button 
-            onPress={() => setStep(2)} 
+            onPress={() => setStep(3)} 
             disabled={!audioFile || !title}
-            className="w-full py-6 bg-primary rounded-[30px] shadow-[0_0_30px_rgba(0,92,185,0.4)]"
+            className="w-full py-6 bg-secondary rounded-[30px] shadow-[0_0_30px_rgba(0,92,185,0.4)]"
           >
             <View className="flex-row items-center gap-3">
               <Text className="text-black font-black uppercase tracking-[0.2em] text-lg italic">Continue to Metadata</Text>
@@ -457,7 +490,7 @@ export default function BeatUploadPage() {
         </View>
       )}
 
-      {step === 2 && (
+      {step === 3 && (
         <View className="space-y-8">
           <View className="relative p-10 bg-dark-900/60 rounded-[40px] border border-white/5 overflow-hidden">
              <View className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-50" />
@@ -485,7 +518,7 @@ export default function BeatUploadPage() {
                             onPress={() => setKey(k)}
                             className={`px-4 py-2 rounded-xl border transition-all ${
                               isSelected 
-                                ? 'bg-primary border-primary shadow-[0_0_15px_rgba(0,92,185,0.4)]' 
+                                ? 'bg-secondary border-secondary shadow-[0_0_15px_rgba(0,102,204,0.4)]' 
                                 : 'bg-dark-900/80 border-white/5'
                             }`}
                           >
@@ -549,7 +582,7 @@ export default function BeatUploadPage() {
           <View className="flex-row gap-6">
             <Button 
               variant="outline" 
-              onPress={() => setStep(1)} 
+              onPress={() => setStep(2)} 
               disabled={loading}
               className="flex-1 py-5 rounded-[25px] border-white/10"
             >
@@ -558,7 +591,7 @@ export default function BeatUploadPage() {
             <Button 
               onPress={handleSubmit} 
               disabled={loading}
-              className="flex-[2] py-5 bg-primary rounded-[25px] shadow-[0_0_30px_rgba(0,92,185,0.4)]"
+              className="flex-[2] py-5 bg-secondary rounded-[25px] shadow-[0_0_30px_rgba(0,92,185,0.4)]"
             >
               {loading ? (
                 <ActivityIndicator color="#000" size="small" />
@@ -573,22 +606,22 @@ export default function BeatUploadPage() {
         </View>
       )}
 
-      {step === 3 && (
+      {step === 4 && (
         <View className="items-center py-16 px-4">
-            <View className="w-40 h-40 rounded-[60px] bg-primary/10 items-center justify-center mb-10 shadow-[0_0_50px_rgba(0,92,185,0.2)]">
-                <View className="w-24 h-24 rounded-[40px] bg-primary items-center justify-center">
+            <View className="w-40 h-40 rounded-[60px] bg-secondary/10 items-center justify-center mb-10 shadow-[0_0_50px_rgba(0,92,185,0.2)]">
+                <View className="w-24 h-24 rounded-[40px] bg-secondary items-center justify-center">
                    <CheckCircle2 size={56} color="#000" strokeWidth={3} />
                 </View>
             </View>
-            <Text className="text-5xl font-black text-white mb-4 italic tracking-tighter uppercase text-center">Beat <Text className="text-primary italic">Live</Text></Text>
+            <Text className="text-5xl font-black text-white mb-4 italic tracking-tighter uppercase text-center">Beat <Text className="text-secondary italic">Deployed</Text></Text>
             <Text className="text-gray-400 text-center font-medium italic mb-10 text-lg leading-7">
-              Your production <Text className="text-white font-bold">"{title}"</Text> has been deployed to the global engine. AI analysis is currently scanning frequency data for optimal engagement.
+              Executive deployment successful. <Text className="text-white font-bold">"{title}"</Text> is now live for <Text className="text-secondary font-bold">{producers.find(p => p.id === selectedProducerId)?.display_name}</Text>.
             </Text>
             <Button 
-              onPress={() => router.push('/dashboard/producer/beats')}
-              className="w-full bg-primary py-6 rounded-[30px] shadow-[0_0_30px_rgba(0,92,185,0.4)]"
+              onPress={() => router.push('/dashboard/admin/beats')}
+              className="w-full bg-secondary py-6 rounded-[30px] shadow-[0_0_30px_rgba(0,92,185,0.4)]"
             >
-              <Text className="text-black font-black uppercase tracking-[0.2em] text-lg italic">View My Catalog</Text>
+              <Text className="text-black font-black uppercase tracking-[0.2em] text-lg italic">Back to Library</Text>
             </Button>
         </View>
       )}

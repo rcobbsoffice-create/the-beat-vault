@@ -353,13 +353,17 @@ export default function AdminMerchPage() {
                      <Picker
                         selectedValue={newProduct.category}
                         onValueChange={(itemValue) => setNewProduct({...newProduct, category: itemValue})}
-                        style={{ color: 'white' }}
+                        style={{ 
+                          color: 'white',
+                          backgroundColor: '#0a0a0a',
+                          height: 50
+                        }}
                         dropdownIconColor="white"
                       >
-                        <Picker.Item label="Apparel" value="Apparel" />
-                        <Picker.Item label="Audio" value="Audio" />
-                        <Picker.Item label="Accessories" value="Accessories" />
-                        <Picker.Item label="Digital" value="Digital" />
+                        <Picker.Item label="Apparel" value="Apparel" color="#fff" />
+                        <Picker.Item label="Audio" value="Audio" color="#fff" />
+                        <Picker.Item label="Accessories" value="Accessories" color="#fff" />
+                        <Picker.Item label="Digital" value="Digital" color="#fff" />
                      </Picker>
                   </View>
                 </View>

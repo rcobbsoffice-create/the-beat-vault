@@ -34,14 +34,14 @@ export const Button = ({
     primary: 'bg-primary shadow-sm shadow-primary/20',
     secondary: 'bg-secondary shadow-sm shadow-secondary/20',
     ghost: 'bg-transparent',
-    outline: 'bg-transparent border border-dark-600',
+    outline: 'bg-transparent border border-slate-200 dark:border-dark-600',
   };
 
   const textVariants = {
     primary: 'text-white font-medium',
     secondary: 'text-white font-medium',
-    ghost: 'text-gray-300 font-medium',
-    outline: 'text-gray-300 font-medium',
+    ghost: 'text-slate-600 dark:text-gray-300 font-medium',
+    outline: 'text-slate-600 dark:text-gray-300 font-medium',
   };
 
   const sizes = {
@@ -70,7 +70,7 @@ export const Button = ({
       )}
     >
       {isLoading ? (
-        <ActivityIndicator color={variant === 'outline' || variant === 'ghost' ? '#fff' : '#000'} className="mr-2" />
+        <ActivityIndicator color={variant === 'outline' || variant === 'ghost' ? '#64748b' : '#000'} className="mr-2" />
       ) : null}
       {React.Children.map(children, (child) => {
         if (typeof child === 'string') {

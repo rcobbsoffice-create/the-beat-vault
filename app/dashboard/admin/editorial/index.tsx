@@ -256,14 +256,18 @@ export default function AdminEditorialPage() {
                    <Picker
                       selectedValue={form.category}
                       onValueChange={(itemValue) => setForm({...form, category: itemValue})}
-                      style={{ color: 'white' }}
+                      style={{ 
+                        color: 'white',
+                        backgroundColor: '#0a0a0a',
+                        height: 50
+                      }}
                       dropdownIconColor="white"
                     >
-                      <Picker.Item label="Production" value="Production" />
-                      <Picker.Item label="Interviews" value="Interviews" />
-                      <Picker.Item label="Reviews" value="Reviews" />
-                      <Picker.Item label="Technology" value="Technology" />
-                      <Picker.Item label="Culture" value="Culture" />
+                      <Picker.Item label="Production" value="Production" color="#fff" />
+                      <Picker.Item label="Interviews" value="Interviews" color="#fff" />
+                      <Picker.Item label="Reviews" value="Reviews" color="#fff" />
+                      <Picker.Item label="Technology" value="Technology" color="#fff" />
+                      <Picker.Item label="Culture" value="Culture" color="#fff" />
                    </Picker>
                 </View>
               </View>

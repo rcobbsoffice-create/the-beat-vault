@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, Image, Modal, TextInput, Alert, Platform } from 'react-native';
+import { useRouter } from 'expo-router';
 import { supabase } from '@/lib/supabase';
 import { 
   Music, 
@@ -12,7 +13,8 @@ import {
   Upload,
   FileAudio,
   Image as ImageIcon,
-  FolderArchive
+  FolderArchive,
+  Tag
 } from 'lucide-react-native';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
@@ -24,16 +26,28 @@ import { usePlayer } from '@/stores/player';
 import { Play, Pause } from 'lucide-react-native';
 
 const GENRES = ['Hip Hop', 'Trap', 'R&B', 'Pop', 'Lo-Fi', 'Drill', 'Afrobeat', 'Dance', 'Electronic', 'Rock'];
-const KEYS = ['C Major', 'C Minor', 'D Major', 'D Minor', 'E Major', 'E Minor', 'F Major', 'F Minor', 'G Major', 'G Minor', 'A Major', 'A Minor', 'B Major', 'B Minor'];
+const KEYS = [
+  'C Major', 'C Minor', 'C# Major', 'C# Minor',
+  'D Major', 'D Minor', 'D# Major', 'D# Minor',
+  'E Major', 'E Minor',
+  'F Major', 'F Minor', 'F# Major', 'F# Minor',
+  'G Major', 'G Minor', 'G# Major', 'G# Minor',
+  'A Major', 'A Minor', 'A# Major', 'A# Minor',
+  'B Major', 'B Minor'
+];
 
 export default function AdminBeatsPage() {
   const [beats, setBeats] = useState<any[]>([]);
   const [producers, setProducers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const router = useRouter();
   const [searchQuery, setSearchQuery] = useState('');
   
   // Player State
   const { setCurrentBeat, togglePlayPause, currentBeat, isPlaying } = usePlayer();
+  
+  // Genres Logic
+  const [availableGenres, setAvailableGenres] = useState<string[]>(GENRES);
   
   // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -51,6 +65,7 @@ export default function AdminBeatsPage() {
     bpm: '',
     key: '',
     genre: 'Hip Hop',
+    genres: [] as string[],
     mood_tags: [] as string[],
     price: '29.99',
     audio_url: '',
@@ -104,6 +119,27 @@ export default function AdminBeatsPage() {
     }
   }
 
+  async function fetchAvailableGenres() {
+    try {
+      const { data, error } = await supabase
+        .from('genre_settings')
+        .select('name')
+        .eq('status', 'approved')
+        .order('name');
+      
+      if (error) throw error;
+      if (data && data.length > 0) {
+        setAvailableGenres(data.map(g => g.name));
+      }
+    } catch (err) {
+      console.error('Error fetching genres:', err);
+    }
+  }
+
+  useEffect(() => {
+    fetchAvailableGenres();
+  }, []);
+
   const handleEdit = (beat: any) => {
     setEditingId(beat.id);
     setAudioFile(null);
@@ -115,6 +151,7 @@ export default function AdminBeatsPage() {
       bpm: beat.bpm?.toString() || '',
       key: beat.key || '',
       genre: beat.genre || 'Hip Hop',
+      genres: beat.genres || (beat.genre ? [beat.genre] : []),
       mood_tags: beat.mood_tags || [],
       price: beat.price?.toString() || '29.99',
       audio_url: beat.audio_url || '',
@@ -137,6 +174,7 @@ export default function AdminBeatsPage() {
       bpm: '',
       key: '',
       genre: 'Hip Hop',
+      genres: [],
       mood_tags: [],
       price: '29.99',
       audio_url: '',
@@ -277,7 +315,8 @@ export default function AdminBeatsPage() {
         producer_id: form.producer_id,
         bpm: parseInt(form.bpm) || 0,
         key: form.key,
-        genre: form.genre,
+        genre: form.genres[0] || form.genre,
+        genres: form.genres,
         mood_tags: form.mood_tags,
         price: parseFloat(form.price) || 29.99,
         audio_url: uploadedAudioUrl || 'pending',
@@ -340,10 +379,29 @@ export default function AdminBeatsPage() {
             Global Catalog Management
           </Text>
         </View>
-        <Button onPress={handleAddNew} className="bg-primary flex-row gap-2">
-          <Plus size={16} color="#000" />
-          <Text className="text-black font-black uppercase tracking-widest text-xs">Add Beat</Text>
-        </Button>
+        <View className="flex-row items-center gap-3">
+          <Button 
+            onPress={() => router.push('/dashboard/admin/genres')}
+            className="bg-white/5 border border-white/10 flex-row gap-2"
+          >
+            <Tag size={16} color="#005CB9" />
+            <Text className="text-gray-400 font-bold uppercase tracking-widest text-xs">Manage Genres</Text>
+          </Button>
+          <Button 
+            onPress={() => router.push('/dashboard/admin/bulk-upload')}
+            className="bg-white/5 border border-white/10 flex-row gap-2"
+          >
+            <FolderArchive size={16} color="#9CA3AF" />
+            <Text className="text-gray-400 font-bold uppercase tracking-widest text-xs">Bulk Upload</Text>
+          </Button>
+          <Button 
+            onPress={() => router.push('/dashboard/admin/upload')} 
+            className="bg-secondary flex-row gap-2 shadow-lg shadow-secondary/20 transition-all active:scale-95"
+          >
+            <Plus size={16} color="#000" strokeWidth={3} />
+            <Text className="text-black font-black uppercase tracking-widest text-xs">Deploy Asset</Text>
+          </Button>
+        </View>
       </View>
 
       <View className="mb-6 flex-row gap-4">
@@ -467,12 +525,15 @@ export default function AdminBeatsPage() {
                             selectedValue={form.producer_id}
                             onValueChange={(v) => setForm({...form, producer_id: v})}
                             dropdownIconColor="white"
-                            style={{ color: 'white', backgroundColor: '#0A0A0A' }}
-                            itemStyle={{ color: 'white', backgroundColor: '#0A0A0A' }}
+                            style={{ 
+                              color: 'white', 
+                              backgroundColor: '#0a0a0a',
+                              height: 50
+                            }}
                           >
                              <Picker.Item label="Select Producer..." value="" color="#6B7280" />
                              {producers.map(p => (
-                               <Picker.Item key={p.id} label={p.display_name} value={p.id} color="white" />
+                               <Picker.Item key={p.id} label={p.display_name} value={p.id} color="#fff" />
                              ))}
                           </Picker>
                        </View>
@@ -511,17 +572,26 @@ export default function AdminBeatsPage() {
                        </View>
 
                        <View className="gap-2">
-                          <Text className="text-xs text-gray-400 font-bold">Genre</Text>
+                          <Text className="text-[10px] text-gray-500 font-black uppercase tracking-widest italic">Primary DNA <Text className="text-primary">(Genre 1)</Text></Text>
                           <ScrollView horizontal showsHorizontalScrollIndicator={false} className="gap-2 pb-2">
-                             {GENRES.map(g => (
-                               <TouchableOpacity 
-                                 key={g} 
-                                 onPress={() => setForm({...form, genre: g})}
-                                 className={`px-4 py-2 rounded-lg border ${form.genre === g ? 'bg-primary border-primary' : 'bg-dark-950 border-white/10'}`}
-                               >
-                                  <Text className={`text-xs font-black uppercase ${form.genre === g ? 'text-black' : 'text-gray-400'}`}>{g}</Text>
-                               </TouchableOpacity>
-                             ))}
+                             {GENRES.map(g => {
+                               const isSelected = form.genres.includes(g);
+                               return (
+                                 <TouchableOpacity 
+                                   key={g} 
+                                   onPress={() => {
+                                     if (isSelected) {
+                                       setForm({...form, genres: form.genres.filter(item => item !== g)});
+                                     } else {
+                                       setForm({...form, genres: [...form.genres, g]});
+                                     }
+                                   }}
+                                   className={`px-4 py-2 rounded-lg border ${isSelected ? 'bg-primary border-primary' : 'bg-dark-950 border-white/10'}`}
+                                 >
+                                    <Text className={`text-xs font-black uppercase ${isSelected ? 'text-black' : 'text-gray-400'}`}>{g}</Text>
+                                 </TouchableOpacity>
+                               );
+                             })}
                           </ScrollView>
                        </View>
                     </View>

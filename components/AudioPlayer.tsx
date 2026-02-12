@@ -173,13 +173,20 @@ export function AudioPlayer() {
   const audioSrc = currentBeat.preview_url || currentBeat.audio_url;
   const artworkSrc = currentBeat.artwork_url || null;
 
+  // Explicitly trigger load when src changes to avoid stale audio on some browsers
+  useEffect(() => {
+    if (audioRef.current && audioSrc) {
+      audioRef.current.load();
+    }
+  }, [audioSrc]);
+
   return (
     <View className="fixed bottom-0 left-0 right-0 z-50 bg-dark-950/90 border-t border-white/10" style={{ position: 'fixed' as any, bottom: 0, left: 0, right: 0 }}>
       {/* Hidden Audio Element */}
       {Platform.OS === 'web' && (
           <audio 
             ref={audioRef} 
-            src={audioSrc}
+            src={audioSrc || ''}
             crossOrigin="anonymous" 
           />
       )}
