@@ -12,7 +12,8 @@ import {
   Repeat,
   Shuffle,
   ListMusic,
-  Activity
+  Activity,
+  Headphones
 } from 'lucide-react-native';
 import { usePlayer } from '@/stores/player';
 import { LinearVisualizer } from './LinearVisualizer';
@@ -310,7 +311,7 @@ export function AudioPlayer() {
               </Text>
               <View className="flex-1 relative h-12 justify-center">
                 {/* Visualizer Background */}
-                <View className="absolute inset-0 opacity-50">
+                <View className="absolute inset-0">
                   <LinearVisualizer 
                      analyser={analyser} 
                      isPlaying={isPlaying} 
@@ -330,12 +331,17 @@ export function AudioPlayer() {
           <View className="hidden md:flex flex-row items-center gap-4 w-48 justify-end">
             <TouchableOpacity><ListMusic size={20} color="#9CA3AF" /></TouchableOpacity>
             <View className="flex-row items-center gap-2">
-              <TouchableOpacity onPress={toggleMute}>
-                {isMuted || volume === 0 ? (
-                  <VolumeX size={20} color="#9CA3AF" />
-                ) : (
-                  <Volume2 size={20} color="#9CA3AF" />
-                )}
+              <TouchableOpacity onPress={toggleMute} className="relative items-center justify-center">
+                <View className="opacity-40">
+                  <Headphones size={32} color="#0066cc" />
+                </View>
+                <View className="absolute inset-0 items-center justify-center">
+                  {isMuted || volume === 0 ? (
+                    <VolumeX size={16} color="#fff" />
+                  ) : (
+                    <Volume2 size={16} color="#fff" />
+                  )}
+                </View>
               </TouchableOpacity>
               {/* Note: Standard HTML range input for now on web */}
               {Platform.OS === 'web' && (

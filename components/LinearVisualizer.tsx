@@ -16,13 +16,14 @@ export function LinearVisualizer({
   isPlaying, 
   width = '100%', 
   height = 40,
-  barColor = '#005CB9',
-  barWidth = 2,
+  barColor = '#0066cc', // Premium Blue
+  barWidth = 3,
   barGap = 2
 }: LinearVisualizerProps) {
   const canvasRef = useRef<any>(null); // Use any for web canvas
   const animationRef = useRef<number>(0);
   const containerRef = useRef<View>(null);
+  const bgBarColor = '#ff0033'; // Vibrant Red
 
   useEffect(() => {
     if (Platform.OS !== 'web') return;
@@ -33,7 +34,6 @@ export function LinearVisualizer({
     if (!ctx) return;
 
     const resizeCanvas = () => {
-      // In RN web, the ref might be a div or a View component
       const element = canvas.parentElement;
       if (element) {
         const { width: containerWidth } = element.getBoundingClientRect();
@@ -66,14 +66,35 @@ export function LinearVisualizer({
         const barHeight = (val / 255) * displayHeight;
 
         const x = i * (barWidth + barGap);
-        const y = displayHeight - barHeight;
+        
+        // 1. Draw Background Red "3D" Layer (slightly offset and blurred)
+        ctx.save();
+        ctx.shadowBlur = 8;
+        ctx.shadowColor = bgBarColor;
+        ctx.fillStyle = `${bgBarColor}33`; // Faint red background
+        
+        const bgY = displayHeight - (barHeight * 1.1); // Slightly taller
+        const bgX = x + 1; // Slight horizontal offset for 3D effect
+        
+        ctx.beginPath();
+        if (ctx.roundRect) {
+            ctx.roundRect(bgX, bgY, barWidth, barHeight * 1.1, [2, 2, 0, 0]);
+        } else {
+            ctx.rect(bgX, bgY, barWidth, barHeight * 1.1);
+        }
+        ctx.fill();
+        ctx.restore();
 
+        // 2. Draw Main Blue Foreground Layer
+        const y = displayHeight - barHeight;
         const gradient = ctx.createLinearGradient(x, displayHeight, x, y);
-        gradient.addColorStop(0, `${barColor}66`);
-        gradient.addColorStop(0.5, `${barColor}CC`);
-        gradient.addColorStop(1, barColor);
+        gradient.addColorStop(0, '#001122'); // Dark base
+        gradient.addColorStop(0.5, '#005CB9');
+        gradient.addColorStop(1, '#60A5FA'); // Bright top
 
         ctx.fillStyle = gradient;
+        ctx.shadowBlur = 4;
+        ctx.shadowColor = '#60A5FA';
         
         ctx.beginPath();
         if (ctx.roundRect) {
@@ -83,11 +104,11 @@ export function LinearVisualizer({
         }
         ctx.fill();
         
-        // Symmetrical reflection (bottom)
-        const reflectionHeight = barHeight * 0.4;
+        // Symmetrical reflection (bottom) - muted
+        const reflectionHeight = barHeight * 0.3;
         const ry = displayHeight;
         const rGradient = ctx.createLinearGradient(x, ry, x, ry + reflectionHeight);
-        rGradient.addColorStop(0, `${barColor}33`);
+        rGradient.addColorStop(0, '#005CB933');
         rGradient.addColorStop(1, 'transparent');
         ctx.fillStyle = rGradient;
         
