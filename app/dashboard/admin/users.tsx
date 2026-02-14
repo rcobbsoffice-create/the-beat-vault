@@ -50,7 +50,7 @@ export default function AdminUsersPage() {
 
       <View className="gap-4">
         {users.map((u) => (
-          <View key={u.id} className="bg-dark-900 border border-white/5 p-4 rounded-xl flex-row items-center justify-between">
+          <View key={u.id} className="bg-dark-900/80 border border-white/5 p-4 rounded-xl flex-row items-center justify-between">
             <View className="flex-row items-center gap-4">
               <View className="w-10 h-10 rounded-full bg-dark-800 items-center justify-center">
                 <Users size={20} color="#6B7280" />

@@ -7,9 +7,9 @@ import { Card } from '@/components/ui/Card';
 export default function AdminDashboardPage() {
   const stats = [
     { label: 'Total Users', value: '1,234', icon: Users, color: '#005CB9' },
-    { label: 'Total Beats', value: '567', icon: Music, color: '#3B82F6' },
-    { label: 'Revenue', value: '$12.5k', icon: DollarSign, color: '#10B981' },
-    { label: 'Active Sessions', value: '89', icon: Activity, color: '#F59E0B' },
+    { label: 'Total Beats', value: '567', icon: Music, color: '#60A5FA' },
+    { label: 'Revenue', value: '$12.5k', icon: DollarSign, color: '#93C5FD' },
+    { label: 'Active Sessions', value: '89', icon: Activity, color: '#9CA3AF' },
   ];
 
   return (
@@ -21,7 +21,7 @@ export default function AdminDashboardPage() {
 
       <View className="flex-row flex-wrap gap-4 mb-8">
         {stats.map((stat, i) => (
-          <Card key={i} className="p-4 bg-dark-900 border-white/5 flex-1 min-w-[150px]">
+          <Card key={i} className="p-4 bg-dark-900/80 border-white/5 flex-1 min-w-[150px]">
             <View className="flex-row items-center gap-3 mb-2">
               <stat.icon size={20} color={stat.color} />
               <Text className="text-gray-400 text-xs font-bold uppercase">{stat.label}</Text>
@@ -34,7 +34,7 @@ export default function AdminDashboardPage() {
       <Text className="text-xl font-bold text-white mb-4">Quick Actions</Text>
       <View className="gap-3">
         <Link href="/dashboard/admin/users" asChild>
-          <TouchableOpacity className="p-4 bg-dark-900 rounded-xl border border-white/5 flex-row items-center gap-4">
+          <TouchableOpacity className="p-4 bg-dark-900/80 rounded-xl border border-white/5 flex-row items-center gap-4">
             <Users size={24} color="#005CB9" />
             <View>
               <Text className="text-white font-bold">Manage Users</Text>
@@ -43,7 +43,7 @@ export default function AdminDashboardPage() {
           </TouchableOpacity>
         </Link>
         <Link href="/dashboard/admin/beats" asChild>
-          <TouchableOpacity className="p-4 bg-dark-900 rounded-xl border border-white/5 flex-row items-center gap-4">
+          <TouchableOpacity className="p-4 bg-dark-900/80 rounded-xl border border-white/5 flex-row items-center gap-4">
             <Music size={24} color="#005CB9" />
             <View>
               <Text className="text-white font-bold">Manage Beats</Text>
@@ -52,7 +52,7 @@ export default function AdminDashboardPage() {
           </TouchableOpacity>
         </Link>
          <Link href="/dashboard/admin/editorial" asChild>
-          <TouchableOpacity className="p-4 bg-dark-900 rounded-xl border border-white/5 flex-row items-center gap-4">
+          <TouchableOpacity className="p-4 bg-dark-900/80 rounded-xl border border-white/5 flex-row items-center gap-4">
             <FileText size={24} color="#005CB9" />
             <View>
               <Text className="text-white font-bold">Editorial Content</Text>
@@ -61,7 +61,7 @@ export default function AdminDashboardPage() {
           </TouchableOpacity>
         </Link>
         <Link href="/dashboard/admin/genres" asChild>
-          <TouchableOpacity className="p-4 bg-dark-900 rounded-xl border border-white/5 flex-row items-center gap-4">
+          <TouchableOpacity className="p-4 bg-dark-900/80 rounded-xl border border-white/5 flex-row items-center gap-4">
             <Tag size={24} color="#005CB9" />
             <View>
               <Text className="text-white font-bold">Genre Management</Text>

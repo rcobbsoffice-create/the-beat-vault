@@ -405,7 +405,7 @@ export default function AdminBeatsPage() {
       </View>
 
       <View className="mb-6 flex-row gap-4">
-        <View className="flex-1 bg-dark-900 border border-white/10 rounded-xl px-4 py-3 flex-row items-center gap-3">
+        <View className="flex-1 bg-dark-900/80 border border-white/10 rounded-xl px-4 py-3 flex-row items-center gap-3">
            <Search size={18} color="#6B7280" />
            <TextInput 
              placeholder="Search title, producer..." 
@@ -428,7 +428,7 @@ export default function AdminBeatsPage() {
             const isActive = isPlayingBeat && isPlaying;
 
             return (
-            <Card key={beat.id} className={`p-4 bg-dark-900 border-white/5 flex-row items-center gap-4 transition-all ${isActive ? 'border-primary/50 bg-primary/5' : 'hover:border-white/10'}`}>
+            <Card key={beat.id} className={`p-4 bg-dark-900/80 border-white/5 flex-row items-center gap-4 transition-all ${isActive ? 'border-primary/50 bg-primary/5' : 'hover:border-white/10'}`}>
               <TouchableOpacity 
                 onPress={() => {
                   if (isPlayingBeat) {

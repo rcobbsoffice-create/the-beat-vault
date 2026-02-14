@@ -22,7 +22,8 @@ import {
   Menu,
   X,
   Mail,
-  History
+  History,
+  Activity
 } from 'lucide-react-native';
 import { Button } from '@/components/ui/Button';
 import { useUI } from '@/stores/ui';
@@ -78,6 +79,7 @@ export function DashboardSidebar() {
       { name: 'Campaigns', href: '/dashboard/admin/newsletters', icon: Mail },
       { name: 'Merch Hub', href: '/dashboard/admin/merch', icon: ShoppingBag },
       { name: 'Analytics', href: '/dashboard/admin/analytics', icon: BarChart3 },
+      { name: 'Fingerprinting', href: '/dashboard/admin/fingerprinting', icon: Activity },
       { name: 'Artists', href: '/dashboard/admin/artists', icon: ShieldCheck },
       { name: 'Beats', href: '/dashboard/admin/beats', icon: Music },
       { name: 'Users', href: '/dashboard/admin/users', icon: Users },

@@ -101,20 +101,57 @@ export function AudioPlayer() {
   // AudioContext setup for visualizer
   const audioContextRef = useRef<AudioContext | null>(null);
   const sourceNodeRef = useRef<MediaElementAudioSourceNode | null>(null);
+  const [audioUnlocked, setAudioUnlocked] = useState(false);
+
+  // Unlock audio on first user interaction (mobile requirement)
+  useEffect(() => {
+    if (Platform.OS !== 'web' || audioUnlocked) return;
+
+    const unlockAudio = async () => {
+      try {
+        if (audioContextRef.current?.state === 'suspended') {
+          await audioContextRef.current.resume();
+        }
+        if (audioRef.current) {
+          const playPromise = audioRef.current.play();
+          if (playPromise !== undefined) {
+            playPromise.then(() => {
+              audioRef.current?.pause();
+              setAudioUnlocked(true);
+            }).catch(() => {
+              // Autoplay blocked, will work on next user interaction
+            });
+          }
+        }
+      } catch (err) {
+        console.log('Audio unlock attempted:', err);
+      }
+    };
+
+    // Listen for first user interaction
+    document.addEventListener('touchstart', unlockAudio, { once: true });
+    document.addEventListener('click', unlockAudio, { once: true });
+
+    return () => {
+      document.removeEventListener('touchstart', unlockAudio);
+      document.removeEventListener('click', unlockAudio);
+    };
+  }, [audioUnlocked]);
 
   useEffect(() => {
     if (Platform.OS !== 'web') return;
     if (!audioRef.current || !isPlaying || analyser) return;
 
-    const setupAnalyser = () => {
+    const setupAnalyser = async () => {
       try {
         if (!audioContextRef.current) {
           audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
         }
         
         const audioContext = audioContextRef.current;
+        // Always try to resume on mobile
         if (audioContext.state === 'suspended') {
-          audioContext.resume();
+          await audioContext.resume();
         }
 
         if (!sourceNodeRef.current) {
@@ -139,11 +176,23 @@ export function AudioPlayer() {
     if (Platform.OS !== 'web') return;
     if (!wavesurferRef.current || !isReady) return;
 
-    if (isPlaying) {
-      wavesurferRef.current.play().catch(e => console.warn('Play failed:', e));
-    } else {
-      wavesurferRef.current.pause();
-    }
+    const handlePlayback = async () => {
+      if (isPlaying) {
+        // Resume AudioContext if suspended (critical for mobile)
+        if (audioContextRef.current?.state === 'suspended') {
+          try {
+            await audioContextRef.current.resume();
+          } catch (err) {
+            console.warn('Failed to resume AudioContext:', err);
+          }
+        }
+        wavesurferRef.current.play().catch(e => console.warn('Play failed:', e));
+      } else {
+        wavesurferRef.current.pause();
+      }
+    };
+
+    handlePlayback();
   }, [isPlaying, isReady]);
 
   // Sync volume
@@ -168,17 +217,17 @@ export function AudioPlayer() {
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
-  if (!currentBeat) return null;
+  const audioSrc = currentBeat?.preview_url || currentBeat?.audio_url;
+  const artworkSrc = currentBeat?.artwork_url || null;
 
-  const audioSrc = currentBeat.preview_url || currentBeat.audio_url;
-  const artworkSrc = currentBeat.artwork_url || null;
-
-  // Explicitly trigger load when src changes to avoid stale audio on some browsers
+  // Sync play/pause state when src changes
   useEffect(() => {
     if (audioRef.current && audioSrc) {
       audioRef.current.load();
     }
   }, [audioSrc]);
+
+  if (!currentBeat) return null;
 
   return (
     <View className="fixed bottom-0 left-0 right-0 z-50 bg-dark-950/90 border-t border-white/10" style={{ position: 'fixed' as any, bottom: 0, left: 0, right: 0 }}>
@@ -187,7 +236,9 @@ export function AudioPlayer() {
           <audio 
             ref={audioRef} 
             src={audioSrc || ''}
-            crossOrigin="anonymous" 
+            crossOrigin="anonymous"
+            playsInline
+            preload="metadata"
           />
       )}
       
@@ -229,7 +280,17 @@ export function AudioPlayer() {
               <TouchableOpacity onPress={playPrevious}><SkipBack size={20} color="#9CA3AF" /></TouchableOpacity>
               
               <TouchableOpacity
-                onPress={() => isPlaying ? pause() : play()}
+                onPress={async () => {
+                  // Critical for mobile: resume AudioContext on user interaction
+                  if (audioContextRef.current?.state === 'suspended') {
+                    try {
+                      await audioContextRef.current.resume();
+                    } catch (err) {
+                      console.warn('AudioContext resume failed:', err);
+                    }
+                  }
+                  isPlaying ? pause() : play();
+                }}
                 className="w-10 h-10 rounded-full bg-white items-center justify-center"
               >
                 {isPlaying ? (

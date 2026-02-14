@@ -11,7 +11,9 @@ import {
   Pause,
   Edit2,
   Trash2,
-  Activity
+  Activity,
+  Radio,
+  BarChart3
 } from 'lucide-react-native';
 import { usePlayer } from '@/stores/player';
 import { useCatalogStore } from '@/stores/catalog';
@@ -95,14 +97,24 @@ export default function ProducerBeatsPage() {
           <Text className="text-3xl font-bold text-white mb-2">My Catalog</Text>
           <Text className="text-gray-400">Manage your tracks, track performance, and edit listings</Text>
         </View>
-        <Link href="/dashboard/producer/upload" asChild>
-          <Button className="bg-primary px-6">
-            <View className="flex-row items-center gap-2">
-                <Plus size={16} color="#000" />
-                <Text className="text-black font-bold">Upload New Beat</Text>
-            </View>
-          </Button>
-        </Link>
+        <View className="flex-row items-center gap-3">
+          <Link href="/dashboard/producer/track-monitoring" asChild>
+            <Button variant="outline" className="px-4">
+              <View className="flex-row items-center gap-2">
+                  <BarChart3 size={16} color="#005CB9" />
+                  <Text className="text-primary font-bold">Track Monitoring</Text>
+              </View>
+            </Button>
+          </Link>
+          <Link href="/dashboard/producer/upload" asChild>
+            <Button className="bg-primary px-6">
+              <View className="flex-row items-center gap-2">
+                  <Plus size={16} color="#000" />
+                  <Text className="text-black font-bold">Upload New Beat</Text>
+              </View>
+            </Button>
+          </Link>
+        </View>
       </View>
 
       {/* Catalog List */}
@@ -142,9 +154,18 @@ export default function ProducerBeatsPage() {
                   <Badge variant={beat.status === 'published' ? 'secondary' : 'outline'}>
                     <Text className="text-[10px] uppercase">{beat.status}</Text>
                   </Badge>
+                  {beat.monitoring_enabled && (
+                    <Badge variant="secondary">
+                      <View className="flex-row items-center gap-1">
+                        <Radio size={10} color="#10B981" />
+                        <Text className="text-[10px] uppercase text-emerald-500">Tracked</Text>
+                      </View>
+                    </Badge>
+                  )}
                 </View>
                 <Text className="text-sm text-gray-400">
-                  {(beat.genres && beat.genres.length > 0 ? beat.genres : [beat.genre]).join(' / ')} • {beat.bpm} BPM • 44.1kHz WAV
+                  {(beat.genres && beat.genres.length > 0 ? beat.genres : [beat.genre]).join(' / ')} • {beat.bpm} BPM
+                  {beat.detection_count > 0 && ` • ${beat.detection_count} detection${beat.detection_count !== 1 ? 's' : ''}`}
                 </Text>
               </View>
 

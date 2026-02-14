@@ -232,6 +232,21 @@ export default function BeatUploadPage() {
       // 6. Trigger AI Analysis (async, don't block UI too long)
       handleAIAnalysis(beat.id);
 
+      // 6.5 Trigger Audio Fingerprinting (async)
+      // This will generate ACRCloud fingerprint for track monitoring
+      try {
+        await supabase.functions.invoke('process-fingerprint', {
+          body: {
+            beatId: beat.id,
+            enableMonitoring: false, // Producer can enable later from dashboard
+            platforms: ['youtube', 'spotify', 'soundcloud', 'tiktok']
+          }
+        });
+      } catch (fpError) {
+        // Log error but don't block the upload
+        console.error('Fingerprinting error (non-blocking):', fpError);
+      }
+
       // 7. Update Store & Navigate
       addBeat({
         id: beat.id,
