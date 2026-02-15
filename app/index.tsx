@@ -246,7 +246,7 @@ export default function Home() {
             <View className="flex-1 space-y-6">
               <View className="w-12 h-12 rounded-2xl bg-secondary/10 items-center justify-center">
                 <ShieldCheck size={24} color="#005CB9" />
-              </Text>
+              </View>
               <Text className="text-xl font-black text-white uppercase italic tracking-widest">The Community</Text>
               <Text className="text-gray-400 text-lg leading-relaxed">
                 We are more than a marketplace—we are a vault. A secure, high-performance environment where the next generation of multi-platinum producers build their catalogs and protect their legacies.
