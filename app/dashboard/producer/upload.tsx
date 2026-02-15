@@ -57,8 +57,8 @@ export default function BeatUploadPage() {
   const [key, setKey] = useState('');
   const [description, setDescription] = useState('');
   const [tags, setTags] = useState('');
-  const [priceBasic, setPriceBasic] = useState('29.99');
-  const [priceExclusive, setPriceExclusive] = useState('499.99');
+  const [priceBasic, setPriceBasic] = useState('49.99');
+  const [priceExclusive, setPriceExclusive] = useState('899.99');
 
   React.useEffect(() => {
     fetchGenres();

@@ -46,8 +46,8 @@ export default function BulkUploadPage() {
   
   const [beats, setBeats] = useState<BulkBeatItem[]>([]);
   const [isUploading, setIsUploading] = useState(false);
-  const [globalPriceBasic, setGlobalPriceBasic] = useState('29.99');
-  const [globalPriceExclusive, setGlobalPriceExclusive] = useState('499.99');
+  const [globalPriceBasic, setGlobalPriceBasic] = useState('49.99');
+  const [globalPriceExclusive, setGlobalPriceExclusive] = useState('899.99');
 
   const pickBeats = async () => {
     try {

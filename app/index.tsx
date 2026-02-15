@@ -211,6 +211,51 @@ export default function Home() {
         )}
       </View>
 
+      {/* NEW SECTION: ABOUT US / PHILOSOPHY */}
+      <View className="py-24 md:py-32 px-6 md:px-12 lg:px-20 bg-dark-900/30 border-y border-white/5">
+        <View className="max-w-7xl mx-auto w-full">
+          <View className="mb-20">
+            <Text className="text-secondary text-xs md:text-sm font-black uppercase tracking-[0.4em] mb-6">Behind the Genes</Text>
+            <Text className="text-4xl md:text-6xl font-black text-white italic tracking-tighter uppercase max-w-4xl">
+              CURATING THE FUTURE OF {'\n'}
+              <Text className="text-secondary">SONIC ARCHITECTURE</Text>
+            </Text>
+          </View>
+
+          <View className="flex-col md:flex-row gap-12 lg:gap-20">
+            <View className="flex-1 space-y-6">
+              <View className="w-12 h-12 rounded-2xl bg-secondary/10 items-center justify-center">
+                <Sparkles size={24} color="#005CB9" />
+              </View>
+              <Text className="text-xl font-black text-white uppercase italic tracking-widest">Our Vision</Text>
+              <Text className="text-gray-400 text-lg leading-relaxed">
+                AudioGenes was born from a simple belief: that music is data, and every sound carries a unique genetic code. We've built the world's first platform that treats audio as a living, evolving ecosystem.
+              </Text>
+            </View>
+
+            <View className="flex-1 space-y-6">
+              <View className="w-12 h-12 rounded-2xl bg-secondary/10 items-center justify-center">
+                <Cpu size={24} color="#005CB9" />
+              </View>
+              <Text className="text-xl font-black text-white uppercase italic tracking-widest">The Technology</Text>
+              <Text className="text-gray-400 text-lg leading-relaxed">
+                By integrating ACRCloud fingerprinting and proprietary AI analysis, we provide producers with a level of transparency and protection never before seen in the independent beat market.
+              </Text>
+            </View>
+
+            <View className="flex-1 space-y-6">
+              <View className="w-12 h-12 rounded-2xl bg-secondary/10 items-center justify-center">
+                <ShieldCheck size={24} color="#005CB9" />
+              </Text>
+              <Text className="text-xl font-black text-white uppercase italic tracking-widest">The Community</Text>
+              <Text className="text-gray-400 text-lg leading-relaxed">
+                We are more than a marketplace—we are a vault. A secure, high-performance environment where the next generation of multi-platinum producers build their catalogs and protect their legacies.
+              </Text>
+            </View>
+          </View>
+        </View>
+      </View>
+
       {/* FINAL CTA */}
       <View className="py-32 md:py-48 bg-gradient-to-b from-black via-dark-900 to-black justify-center relative overflow-hidden">
         <View className="absolute inset-0 bg-primary/5 rounded-full blur-[180px] scale-150" />

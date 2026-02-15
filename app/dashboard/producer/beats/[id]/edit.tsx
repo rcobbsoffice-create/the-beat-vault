@@ -29,8 +29,8 @@ export default function BeatEditPage() {
   const [description, setDescription] = useState('');
   const [tags, setTags] = useState('');
   const [status, setStatus] = useState<'published' | 'unpublished'>('published');
-  const [priceBasic, setPriceBasic] = useState('29.99');
-  const [priceExclusive, setPriceExclusive] = useState('499.99');
+  const [priceBasic, setPriceBasic] = useState('49.99');
+  const [priceExclusive, setPriceExclusive] = useState('899.99');
   const [basicLicenseId, setBasicLicenseId] = useState<string | null>(null);
   const [exclusiveLicenseId, setExclusiveLicenseId] = useState<string | null>(null);
 

@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/Button';
 const LICENSES = [
   {
     name: 'Basic License',
-    price: 29.99,
+    price: 49.99,
     description: 'Perfect for demos and non-profit projects.',
     features: [
       'MP3 (320kbps) file',
@@ -20,7 +20,7 @@ const LICENSES = [
   },
   {
     name: 'Premium License',
-    price: 79.99,
+    price: 119.99,
     description: 'Standard for professional artists and streaming.',
     features: [
       'WAV + MP3 files',
@@ -33,7 +33,7 @@ const LICENSES = [
   },
   {
     name: 'Exclusive Rights',
-    price: 499.99,
+    price: 899.99,
     description: 'Full ownership and unlimited rights.',
     features: [
       'All File Formats (WAV, MP3, Stems)',

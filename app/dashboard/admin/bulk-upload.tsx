@@ -50,8 +50,8 @@ export default function AdminBulkUploadPage() {
   const [isUploading, setIsUploading] = useState(false);
   const [loadingProducers, setLoadingProducers] = useState(true);
   
-  const [globalPriceBasic, setGlobalPriceBasic] = useState('29.99');
-  const [globalPriceExclusive, setGlobalPriceExclusive] = useState('499.99');
+  const [globalPriceBasic, setGlobalPriceBasic] = useState('49.99');
+  const [globalPriceExclusive, setGlobalPriceExclusive] = useState('899.99');
 
   useEffect(() => {
     fetchProducers();
