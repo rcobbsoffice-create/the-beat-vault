@@ -1,0 +1,23 @@
+# node.js
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# expo
+.expo/
+dist/
+web-build/
+
+# native
+ios/
+android/
+
+# env
+.env
+.env.local
+.env.*.local
+
+# misc
+.DS_Store
+*.swp
+*.log
