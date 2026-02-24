@@ -83,7 +83,7 @@ Run the schema in Supabase SQL Editor:
 ## Project Structure
 
 ```
-the-beat-vault/
+audiogenes/
 ├── app/                    # Next.js App Router pages
 │   ├── api/               # API routes
 │   │   └── stripe/        # Stripe Connect, Checkout, Webhooks

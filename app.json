@@ -1,8 +1,8 @@
 {
   "expo": {
-    "name": "The Beat Vault",
-    "slug": "the-beat-vault",
-    "scheme": "thebeatvault",
+    "name": "AudioGenes",
+    "slug": "audiogenes",
+    "scheme": "audiogenes",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",

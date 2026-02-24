@@ -10,8 +10,8 @@ const corsHeaders = {
 const EMAIL_PROVIDER = Deno.env.get('EMAIL_PROVIDER') || 'resend' // 'resend' | 'sendgrid' | 'smtp'
 const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY') || ''
 const SENDGRID_API_KEY = Deno.env.get('SENDGRID_API_KEY') || ''
-const FROM_EMAIL = Deno.env.get('FROM_EMAIL') || 'noreply@beatvault.com'
-const FROM_NAME = Deno.env.get('FROM_NAME') || 'The Beat Vault'
+const FROM_EMAIL = Deno.env.get('FROM_EMAIL') || 'noreply@audiogenes.com'
+const FROM_NAME = Deno.env.get('FROM_NAME') || 'AudioGenes'
 
 interface EmailPayload {
   to: string | string[]

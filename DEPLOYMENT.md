@@ -1,8 +1,9 @@
-# The Beat Vault - Deployment Guide
+# AudioGenes - Deployment Guide
 
-Complete guide to deploying The Beat Vault backend and frontend.
+Complete guide to deploying AudioGenes backend and frontend.
 
 ## Table of Contents
+
 1. [Prerequisites](#prerequisites)
 2. [Supabase Setup](#supabase-setup)
 3. [Database Setup](#database-setup)
@@ -19,6 +20,7 @@ Complete guide to deploying The Beat Vault backend and frontend.
 ## Prerequisites
 
 Before you begin, ensure you have:
+
 - [ ] Node.js 18+ installed
 - [ ] npm or yarn package manager
 - [ ] Supabase account (https://supabase.com)
@@ -36,7 +38,7 @@ Before you begin, ensure you have:
 1. Go to https://app.supabase.com
 2. Click "New Project"
 3. Enter project details:
-   - Name: `the-beat-vault`
+   - Name: `audiogenes`
    - Database Password: (save this securely)
    - Region: Choose closest to your users
 4. Wait for project to be provisioned (~2 minutes)
@@ -85,9 +87,10 @@ supabase db push
 ### Verification
 
 Check that all tables exist:
+
 ```sql
-SELECT tablename FROM pg_tables 
-WHERE schemaname = 'public' 
+SELECT tablename FROM pg_tables
+WHERE schemaname = 'public'
 ORDER BY tablename;
 ```
 
@@ -303,11 +306,13 @@ npm run android
 ### Web Deployment (Vercel)
 
 1. Install Vercel CLI:
+
 ```bash
 npm install -g vercel
 ```
 
 2. Deploy:
+
 ```bash
 npm run build
 vercel --prod
@@ -384,13 +389,15 @@ stripe listen --forward-to https://YOUR_PROJECT_REF.supabase.co/functions/v1/str
 ### Database Issues
 
 **Problem**: Tables not created
-**Solution**: 
+**Solution**:
+
 - Check SQL Editor for errors
 - Run schema files one at a time
 - Check Supabase logs: Dashboard > Logs
 
 **Problem**: RLS prevents access
 **Solution**:
+
 - Verify user is authenticated
 - Check RLS policies match your use case
 - Temporarily disable RLS for testing (not recommended for production)
@@ -399,6 +406,7 @@ stripe listen --forward-to https://YOUR_PROJECT_REF.supabase.co/functions/v1/str
 
 **Problem**: Function fails to deploy
 **Solution**:
+
 ```bash
 # Check function logs
 supabase functions logs FUNCTION_NAME
@@ -409,6 +417,7 @@ deno check supabase/functions/FUNCTION_NAME/index.ts
 
 **Problem**: Function returns 401 Unauthorized
 **Solution**:
+
 - Verify Authorization header is being sent
 - Check if JWT verification is required
 - Use `--no-verify-jwt` flag for testing only
@@ -417,12 +426,14 @@ deno check supabase/functions/FUNCTION_NAME/index.ts
 
 **Problem**: Webhook not receiving events
 **Solution**:
+
 - Verify webhook endpoint URL is correct
 - Check Stripe Dashboard > Webhooks > Events
 - Verify webhook secret matches
 
 **Problem**: Connect account creation fails
 **Solution**:
+
 - Verify Stripe Connect is enabled
 - Check that user email is valid
 - Review Stripe logs
@@ -431,12 +442,14 @@ deno check supabase/functions/FUNCTION_NAME/index.ts
 
 **Problem**: Upload fails with authentication error
 **Solution**:
+
 - Verify R2 credentials are correct
 - Check that API token has write permissions
 - Verify bucket name matches
 
 **Problem**: CORS errors
 **Solution**:
+
 - Verify CORS policy is set on bucket
 - Check allowed origins include your domain
 - Clear browser cache
@@ -445,12 +458,14 @@ deno check supabase/functions/FUNCTION_NAME/index.ts
 
 **Problem**: Can't connect to Supabase
 **Solution**:
+
 - Verify `.env` file exists and has correct values
 - Restart Expo dev server
 - Check network tab for actual API calls
 
 **Problem**: Stripe checkout doesn't work
 **Solution**:
+
 - Verify Stripe publishable key is set
 - Check browser console for errors
 - Verify producer has completed Stripe onboarding

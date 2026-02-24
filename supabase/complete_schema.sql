@@ -1,5 +1,5 @@
 -- =====================================================
--- THE BEAT VAULT - COMPLETE DATABASE SCHEMA
+-- AUDIOGENES - COMPLETE DATABASE SCHEMA
 -- =====================================================
 -- This file contains all tables needed for the platform
 -- Execute this in Supabase SQL Editor to set up the database
@@ -7,7 +7,9 @@
 
 -- Enable necessary extensions
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
-CREATE EXTENSION IF NOT EXISTS "pg_trgm"; -- For fuzzy text search
+
+CREATE EXTENSION IF NOT EXISTS "pg_trgm";
+-- For fuzzy text search
 
 -- =====================================================
 -- 1. CORE AUTHENTICATION & PROFILES
@@ -45,6 +47,7 @@ END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
+
 CREATE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
   FOR EACH ROW EXECUTE PROCEDURE public.handle_new_user();
@@ -97,20 +100,20 @@ CREATE TABLE IF NOT EXISTS genre_settings (
 );
 
 -- Insert default genres
-INSERT INTO genre_settings (name, status) VALUES
-  ('Trap', 'approved'),
-  ('Drill', 'approved'),
-  ('Hip Hop', 'approved'),
-  ('R&B', 'approved'),
-  ('Pop', 'approved'),
-  ('Afrobeats', 'approved'),
-  ('Reggaeton', 'approved'),
-  ('Lo-fi', 'approved'),
-  ('Cinematic', 'approved'),
-  ('Soul', 'approved'),
-  ('Electronic', 'approved'),
-  ('Jazz', 'approved')
-ON CONFLICT (name) DO NOTHING;
+INSERT INTO
+    genre_settings (name, status)
+VALUES ('Trap', 'approved'),
+    ('Drill', 'approved'),
+    ('Hip Hop', 'approved'),
+    ('R&B', 'approved'),
+    ('Pop', 'approved'),
+    ('Afrobeats', 'approved'),
+    ('Reggaeton', 'approved'),
+    ('Lo-fi', 'approved'),
+    ('Cinematic', 'approved'),
+    ('Soul', 'approved'),
+    ('Electronic', 'approved'),
+    ('Jazz', 'approved') ON CONFLICT (name) DO NOTHING;
 
 -- =====================================================
 -- 4. BEATS & LICENSING
@@ -126,26 +129,33 @@ CREATE TABLE IF NOT EXISTS beats (
   bpm INTEGER,
   key TEXT,
   mood_tags TEXT[] DEFAULT ARRAY[]::TEXT[],
-  
-  -- File URLs
-  audio_url TEXT NOT NULL,
-  preview_url TEXT,
-  artwork_url TEXT,
-  stems_url TEXT,
-  
-  -- Metadata
-  status TEXT DEFAULT 'draft' CHECK (status IN ('draft', 'published', 'archived', 'pending_review')),
-  duration_seconds INTEGER,
-  file_size_bytes BIGINT,
-  
-  -- Analytics
-  play_count BIGINT DEFAULT 0,
-  view_count BIGINT DEFAULT 0,
-  favorite_count BIGINT DEFAULT 0,
-  purchase_count BIGINT DEFAULT 0,
-  
-  -- Timestamps
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
+
+-- File URLs
+audio_url TEXT NOT NULL,
+preview_url TEXT,
+artwork_url TEXT,
+stems_url TEXT,
+
+-- Metadata
+status TEXT DEFAULT 'draft' CHECK (
+    status IN (
+        'draft',
+        'published',
+        'archived',
+        'pending_review'
+    )
+),
+duration_seconds INTEGER,
+file_size_bytes BIGINT,
+
+-- Analytics
+play_count BIGINT DEFAULT 0,
+view_count BIGINT DEFAULT 0,
+favorite_count BIGINT DEFAULT 0,
+purchase_count BIGINT DEFAULT 0,
+
+-- Timestamps
+created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
   published_at TIMESTAMP WITH TIME ZONE
 );
@@ -158,17 +168,17 @@ CREATE TABLE IF NOT EXISTS licenses (
   name TEXT,
   price INTEGER NOT NULL, -- in cents
   is_active BOOLEAN DEFAULT true,
-  
-  -- License terms
-  files_included TEXT[] DEFAULT ARRAY[]::TEXT[], -- ['MP3', 'WAV', 'Stems']
+
+-- License terms
+files_included TEXT[] DEFAULT ARRAY[]::TEXT[], -- ['MP3', 'WAV', 'Stems']
   distribution_copies INTEGER, -- NULL = unlimited
   streaming_limit INTEGER, -- NULL = unlimited
   music_videos INTEGER DEFAULT 1,
   radio_stations INTEGER DEFAULT 0,
   audio_streams INTEGER, -- NULL = unlimited
-  
-  -- Royalties
-  producer_royalty_percentage INTEGER DEFAULT 100,
+
+-- Royalties
+producer_royalty_percentage INTEGER DEFAULT 100,
   contract_file_url TEXT,
   
   created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
@@ -196,24 +206,29 @@ CREATE TABLE IF NOT EXISTS purchases (
   license_id UUID REFERENCES licenses(id) ON DELETE SET NULL,
   buyer_id UUID REFERENCES profiles(id) ON DELETE SET NULL,
   producer_id UUID REFERENCES profiles(id) ON DELETE SET NULL,
-  
-  -- Transaction details
-  amount_total INTEGER NOT NULL, -- Total in cents
-  amount_producer INTEGER NOT NULL, -- Producer's cut in cents
-  amount_platform INTEGER NOT NULL, -- Platform fee in cents
-  currency TEXT DEFAULT 'usd',
-  
-  -- Stripe references
-  payment_intent_id TEXT UNIQUE,
-  charge_id TEXT,
-  transfer_id TEXT,
-  
-  -- Purchase metadata
-  buyer_email TEXT NOT NULL,
-  status TEXT DEFAULT 'pending' CHECK (status IN ('pending', 'completed', 'refunded', 'failed')),
-  
-  -- Files delivered
-  download_urls JSONB DEFAULT '{}'::jsonb,
+
+-- Transaction details
+amount_total INTEGER NOT NULL, -- Total in cents
+amount_producer INTEGER NOT NULL, -- Producer's cut in cents
+amount_platform INTEGER NOT NULL, -- Platform fee in cents
+currency TEXT DEFAULT 'usd',
+
+-- Stripe references
+payment_intent_id TEXT UNIQUE, charge_id TEXT, transfer_id TEXT,
+
+-- Purchase metadata
+buyer_email TEXT NOT NULL,
+status TEXT DEFAULT 'pending' CHECK (
+    status IN (
+        'pending',
+        'completed',
+        'refunded',
+        'failed'
+    )
+),
+
+-- Files delivered
+download_urls JSONB DEFAULT '{}'::jsonb,
   downloads_remaining INTEGER DEFAULT 3,
   
   created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
@@ -234,9 +249,9 @@ CREATE TABLE IF NOT EXISTS merch_products (
   image_url TEXT,
   category TEXT DEFAULT 'Apparel',
   inventory INTEGER DEFAULT 0,
-  
-  -- Printful integration
-  source TEXT DEFAULT 'Manual',
+
+-- Printful integration
+source TEXT DEFAULT 'Manual',
   supplier_product_id TEXT UNIQUE,
   variant_ids JSONB DEFAULT '[]'::jsonb,
   
@@ -251,20 +266,35 @@ CREATE TABLE IF NOT EXISTS orders (
   customer_email TEXT NOT NULL,
   customer_name TEXT,
   shipping_address JSONB,
-  
-  -- Order details
-  items JSONB NOT NULL DEFAULT '[]'::jsonb,
+
+-- Order details
+items JSONB NOT NULL DEFAULT '[]'::jsonb,
   total_amount DECIMAL(10, 2) NOT NULL,
   subtotal DECIMAL(10, 2) NOT NULL,
   shipping_cost DECIMAL(10, 2) DEFAULT 0,
   tax_amount DECIMAL(10, 2) DEFAULT 0,
-  
-  -- Status tracking
-  payment_status TEXT DEFAULT 'pending' CHECK (payment_status IN ('pending', 'paid', 'failed', 'refunded')),
-  fulfillment_status TEXT DEFAULT 'pending' CHECK (fulfillment_status IN ('pending', 'processing', 'shipped', 'delivered', 'cancelled')),
-  
-  -- Stripe & Printful references
-  payment_intent_id TEXT,
+
+-- Status tracking
+payment_status TEXT DEFAULT 'pending' CHECK (
+    payment_status IN (
+        'pending',
+        'paid',
+        'failed',
+        'refunded'
+    )
+),
+fulfillment_status TEXT DEFAULT 'pending' CHECK (
+    fulfillment_status IN (
+        'pending',
+        'processing',
+        'shipped',
+        'delivered',
+        'cancelled'
+    )
+),
+
+-- Stripe & Printful references
+payment_intent_id TEXT,
   printful_order_id TEXT,
   tracking_number TEXT,
   tracking_url TEXT,
@@ -334,17 +364,16 @@ CREATE TABLE IF NOT EXISTS distribution_data (
   asset_id UUID, -- References beats or releases
   artist_id UUID REFERENCES profiles(id) ON DELETE CASCADE,
   dsp TEXT NOT NULL, -- Spotify, Apple Music, YouTube, etc.
-  
-  -- Metrics
-  stream_count BIGINT DEFAULT 0,
-  revenue_usd DECIMAL(12, 4) DEFAULT 0,
-  
-  -- Geographic data
-  country_code TEXT,
-  city TEXT,
-  
-  -- Time period
-  period_start DATE,
+
+-- Metrics
+stream_count BIGINT DEFAULT 0,
+revenue_usd DECIMAL(12, 4) DEFAULT 0,
+
+-- Geographic data
+country_code TEXT, city TEXT,
+
+-- Time period
+period_start DATE,
   period_end DATE,
   
   created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
@@ -398,9 +427,9 @@ CREATE TABLE IF NOT EXISTS newsletters (
   html_content TEXT,
   audience TEXT NOT NULL DEFAULT 'all' CHECK (audience IN ('all', 'producers', 'artists', 'customers', 'subscribers')),
   status TEXT DEFAULT 'draft' CHECK (status IN ('draft', 'scheduled', 'sent', 'archived')),
-  
-  -- Sending metadata
-  scheduled_for TIMESTAMP WITH TIME ZONE,
+
+-- Sending metadata
+scheduled_for TIMESTAMP WITH TIME ZONE,
   sent_at TIMESTAMP WITH TIME ZONE,
   sent_count INTEGER DEFAULT 0,
   open_count INTEGER DEFAULT 0,
@@ -443,25 +472,37 @@ CREATE TABLE IF NOT EXISTS track_detections (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   beat_id UUID REFERENCES beats(id) ON DELETE CASCADE,
   fingerprint_id UUID REFERENCES audio_fingerprints(id) ON DELETE CASCADE,
-  
-  -- Detection details
-  platform TEXT NOT NULL,
-  platform_url TEXT,
-  detected_at TIMESTAMP WITH TIME ZONE NOT NULL,
-  confidence_score DECIMAL(5, 2),
-  
-  -- Content metadata
-  channel_name TEXT,
-  video_title TEXT,
-  upload_date TIMESTAMP WITH TIME ZONE,
-  view_count BIGINT DEFAULT 0,
-  
-  -- Status
-  status TEXT DEFAULT 'detected' CHECK (status IN ('detected', 'claimed', 'disputed', 'resolved', 'ignored')),
-  claim_status TEXT,
-  
-  -- Revenue
-  estimated_revenue DECIMAL(10, 2) DEFAULT 0,
+
+-- Detection details
+platform TEXT NOT NULL,
+platform_url TEXT,
+detected_at TIMESTAMP
+WITH
+    TIME ZONE NOT NULL,
+    confidence_score DECIMAL(5, 2),
+
+-- Content metadata
+channel_name TEXT,
+video_title TEXT,
+upload_date TIMESTAMP
+WITH
+    TIME ZONE,
+    view_count BIGINT DEFAULT 0,
+
+-- Status
+status TEXT DEFAULT 'detected' CHECK (
+    status IN (
+        'detected',
+        'claimed',
+        'disputed',
+        'resolved',
+        'ignored'
+    )
+),
+claim_status TEXT,
+
+-- Revenue
+estimated_revenue DECIMAL(10, 2) DEFAULT 0,
   
   created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
@@ -493,9 +534,11 @@ CREATE TABLE IF NOT EXISTS analytics_events (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
-CREATE INDEX idx_analytics_events_type ON analytics_events(event_type);
-CREATE INDEX idx_analytics_events_beat_id ON analytics_events(beat_id);
-CREATE INDEX idx_analytics_events_created_at ON analytics_events(created_at);
+CREATE INDEX idx_analytics_events_type ON analytics_events (event_type);
+
+CREATE INDEX idx_analytics_events_beat_id ON analytics_events (beat_id);
+
+CREATE INDEX idx_analytics_events_created_at ON analytics_events (created_at);
 
 -- Admin analytics views
 CREATE TABLE IF NOT EXISTS admin_fingerprint_global_stats (
@@ -539,24 +582,32 @@ CREATE TABLE IF NOT EXISTS pulse_data (
 -- =====================================================
 
 -- Beats indexes
-CREATE INDEX IF NOT EXISTS idx_beats_producer_id ON beats(producer_id);
-CREATE INDEX IF NOT EXISTS idx_beats_status ON beats(status);
-CREATE INDEX IF NOT EXISTS idx_beats_genre ON beats(genre);
-CREATE INDEX IF NOT EXISTS idx_beats_created_at ON beats(created_at DESC);
-CREATE INDEX IF NOT EXISTS idx_beats_play_count ON beats(play_count DESC);
+CREATE INDEX IF NOT EXISTS idx_beats_producer_id ON beats (producer_id);
+
+CREATE INDEX IF NOT EXISTS idx_beats_status ON beats (status);
+
+CREATE INDEX IF NOT EXISTS idx_beats_genre ON beats (genre);
+
+CREATE INDEX IF NOT EXISTS idx_beats_created_at ON beats (created_at DESC);
+
+CREATE INDEX IF NOT EXISTS idx_beats_play_count ON beats (play_count DESC);
 
 -- Licenses indexes
-CREATE INDEX IF NOT EXISTS idx_licenses_beat_id ON licenses(beat_id);
+CREATE INDEX IF NOT EXISTS idx_licenses_beat_id ON licenses (beat_id);
 
 -- Purchases indexes
-CREATE INDEX IF NOT EXISTS idx_purchases_buyer_id ON purchases(buyer_id);
-CREATE INDEX IF NOT EXISTS idx_purchases_producer_id ON purchases(producer_id);
-CREATE INDEX IF NOT EXISTS idx_purchases_created_at ON purchases(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_purchases_buyer_id ON purchases (buyer_id);
+
+CREATE INDEX IF NOT EXISTS idx_purchases_producer_id ON purchases (producer_id);
+
+CREATE INDEX IF NOT EXISTS idx_purchases_created_at ON purchases (created_at DESC);
 
 -- Fingerprints indexes
-CREATE INDEX IF NOT EXISTS idx_fingerprints_beat_id ON audio_fingerprints(beat_id);
-CREATE INDEX IF NOT EXISTS idx_detections_beat_id ON track_detections(beat_id);
-CREATE INDEX IF NOT EXISTS idx_detections_platform ON track_detections(platform);
+CREATE INDEX IF NOT EXISTS idx_fingerprints_beat_id ON audio_fingerprints (beat_id);
+
+CREATE INDEX IF NOT EXISTS idx_detections_beat_id ON track_detections (beat_id);
+
+CREATE INDEX IF NOT EXISTS idx_detections_platform ON track_detections (platform);
 
 -- =====================================================
 -- 15. HELPER FUNCTIONS
@@ -602,6 +653,7 @@ END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 DROP TRIGGER IF EXISTS on_favorite_change ON beat_favorites;
+
 CREATE TRIGGER on_favorite_change
   AFTER INSERT OR DELETE ON beat_favorites
   FOR EACH ROW EXECUTE FUNCTION update_favorite_count();

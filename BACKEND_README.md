@@ -1,10 +1,11 @@
-# The Beat Vault - Backend Implementation
+# AudioGenes - Backend Implementation
 
-This document describes the backend implementation completed for The Beat Vault platform.
+This document describes the backend implementation completed for the AudioGenes platform.
 
 ## Overview
 
 The backend is built using **Supabase** (PostgreSQL + Edge Functions) with integrations for:
+
 - Stripe Connect (payments)
 - Cloudflare R2 (file storage)
 - ACRCloud (audio fingerprinting)
@@ -17,6 +18,7 @@ The backend is built using **Supabase** (PostgreSQL + Edge Functions) with integ
 **File**: `supabase/complete_schema.sql`
 
 Complete PostgreSQL database with 25+ tables:
+
 - User authentication & profiles
 - Beat catalog & licensing
 - Payment & transaction processing
@@ -27,6 +29,7 @@ Complete PostgreSQL database with 25+ tables:
 - Newsletter system
 
 **Key Features**:
+
 - UUID primary keys
 - Proper foreign key relationships
 - JSONB columns for flexible data
@@ -39,6 +42,7 @@ Complete PostgreSQL database with 25+ tables:
 **File**: `supabase/complete_rls_policies.sql`
 
 Comprehensive security policies for all tables:
+
 - User can only access their own data
 - Producers manage their own beats/products
 - Public can view published content
@@ -46,6 +50,7 @@ Comprehensive security policies for all tables:
 - System (Edge Functions) can manage automated data
 
 **Security Principles**:
+
 - Least privilege access
 - Role-based permissions (artist, producer, admin, editor)
 - Separate policies for SELECT, INSERT, UPDATE, DELETE
@@ -56,6 +61,7 @@ Comprehensive security policies for all tables:
 **Location**: `supabase/functions/`
 
 #### Beat Management
+
 - `update-beat` - Update beat metadata
 - `delete-beat` - Soft delete (archive) beats
 - `toggle-favorite` - Add/remove beat favorites
@@ -63,6 +69,7 @@ Comprehensive security policies for all tables:
 - `create-beat-as-admin` - Admin beat creation (existing)
 
 #### Payment & Commerce
+
 - `create-checkout-session` - Stripe checkout for beat purchases
 - `stripe-webhook` - Handle Stripe payment events
 - `create-producer-account` - Stripe Connect onboarding
@@ -71,19 +78,23 @@ Comprehensive security policies for all tables:
 - `fulfill-order` - Order fulfillment (existing)
 
 #### Audio Fingerprinting
+
 - `process-fingerprint` - ACRCloud fingerprint generation (existing)
 - `sync-detections` - Sync detection data (existing)
 - `webhook-acrcloud` - ACRCloud webhook handler (existing)
 
 #### Analytics & Tracking
+
 - `track-event` - Record user analytics events
 - `sync-distribution-data` - Sync DSP streaming data
 
 #### Communication
+
 - `send-newsletter` - Send email newsletters
 - `submit-artist-questionnaire` - Artist onboarding form
 
 #### Merchandise
+
 - `process-merch-idea` - AI-generated merch (existing)
 
 ### 4. Helper SQL Functions ✅
@@ -91,6 +102,7 @@ Comprehensive security policies for all tables:
 **File**: `supabase/helper_functions.sql`
 
 Utility functions for common operations:
+
 - `increment_play_count()` - Track beat plays
 - `increment_view_count()` - Track beat views
 - `increment_purchase_count()` - Track purchases
@@ -161,6 +173,7 @@ Utility functions for common operations:
 ## API Endpoints
 
 All Edge Functions are available at:
+
 ```
 https://YOUR_PROJECT_REF.supabase.co/functions/v1/{function-name}
 ```
@@ -168,6 +181,7 @@ https://YOUR_PROJECT_REF.supabase.co/functions/v1/{function-name}
 ### Authentication Required
 
 Most endpoints require the `Authorization` header:
+
 ```typescript
 headers: {
   'Authorization': `Bearer ${userToken}`,
@@ -179,21 +193,21 @@ headers: {
 
 ```typescript
 const response = await fetch(
-  'https://YOUR_PROJECT.supabase.co/functions/v1/create-checkout-session',
+  "https://YOUR_PROJECT.supabase.co/functions/v1/create-checkout-session",
   {
-    method: 'POST',
+    method: "POST",
     headers: {
-      'Authorization': `Bearer ${session.access_token}`,
-      'Content-Type': 'application/json'
+      Authorization: `Bearer ${session.access_token}`,
+      "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      beat_id: 'uuid-here',
-      license_type: 'basic',
-      buyer_email: 'user@example.com',
-      success_url: 'https://app.com/success',
-      cancel_url: 'https://app.com/cancel'
-    })
-  }
+      beat_id: "uuid-here",
+      license_type: "basic",
+      buyer_email: "user@example.com",
+      success_url: "https://app.com/success",
+      cancel_url: "https://app.com/cancel",
+    }),
+  },
 );
 
 const { session_id, url } = await response.json();
@@ -204,20 +218,17 @@ window.location.href = url;
 ### Example: Track Analytics Event
 
 ```typescript
-await fetch(
-  'https://YOUR_PROJECT.supabase.co/functions/v1/track-event',
-  {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      event_type: 'beat_play',
-      beat_id: 'uuid-here',
-      user_id: 'uuid-here', // optional
-      session_id: 'session-id',
-      metadata: { duration: 120 }
-    })
-  }
-);
+await fetch("https://YOUR_PROJECT.supabase.co/functions/v1/track-event", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({
+    event_type: "beat_play",
+    beat_id: "uuid-here",
+    user_id: "uuid-here", // optional
+    session_id: "session-id",
+    metadata: { duration: 120 },
+  }),
+});
 ```
 
 ## Database Access
@@ -229,50 +240,47 @@ Supabase auto-generates REST APIs for all tables:
 ```typescript
 // Get published beats
 const { data, error } = await supabase
-  .from('beats')
-  .select('*, producer:profiles(*), licenses(*)')
-  .eq('status', 'published')
-  .order('created_at', { ascending: false })
+  .from("beats")
+  .select("*, producer:profiles(*), licenses(*)")
+  .eq("status", "published")
+  .order("created_at", { ascending: false })
   .limit(20);
 
 // Insert a beat favorite
-const { error } = await supabase
-  .from('beat_favorites')
-  .insert({ 
-    user_id: user.id,
-    beat_id: beatId 
-  });
+const { error } = await supabase.from("beat_favorites").insert({
+  user_id: user.id,
+  beat_id: beatId,
+});
 
 // Update producer profile
 const { error } = await supabase
-  .from('producers')
-  .update({ branding: { tagline: 'New tagline' } })
-  .eq('profile_id', user.id);
+  .from("producers")
+  .update({ branding: { tagline: "New tagline" } })
+  .eq("profile_id", user.id);
 ```
 
 ### Using Helper Functions
 
 ```typescript
 // Get beat analytics
-const { data } = await supabase
-  .rpc('get_beat_analytics', { beat_id_param: beatId });
+const { data } = await supabase.rpc("get_beat_analytics", {
+  beat_id_param: beatId,
+});
 
 // Search beats
-const { data } = await supabase
-  .rpc('search_beats', {
-    search_query: 'trap',
-    genre_filter: 'Trap',
-    min_bpm: 140,
-    max_bpm: 160,
-    sort_by: 'play_count',
-    sort_order: 'DESC',
-    limit_count: 20,
-    offset_count: 0
-  });
+const { data } = await supabase.rpc("search_beats", {
+  search_query: "trap",
+  genre_filter: "Trap",
+  min_bpm: 140,
+  max_bpm: 160,
+  sort_by: "play_count",
+  sort_order: "DESC",
+  limit_count: 20,
+  offset_count: 0,
+});
 
 // Get trending beats
-const { data } = await supabase
-  .rpc('get_trending_beats', { limit_count: 10 });
+const { data } = await supabase.rpc("get_trending_beats", { limit_count: 10 });
 ```
 
 ## Payment Flow
@@ -299,12 +307,14 @@ const { data } = await supabase
 Files are stored in Cloudflare R2 (S3-compatible):
 
 ### Upload Flow
+
 1. Frontend picks file (audio, image)
 2. Convert to Buffer
 3. Call `uploadToR2()` from Edge Function
 4. Store returned URL in database
 
 ### File Paths
+
 ```
 beats/{beat_id}/original.wav
 beats/{beat_id}/preview.mp3
@@ -328,6 +338,7 @@ beats/{beat_id}/stems/bass.wav
 ### Analytics Dashboard
 
 Producers can view:
+
 - Total plays, views, favorites
 - Revenue breakdown
 - Geographic data
@@ -381,6 +392,7 @@ curl -X POST http://localhost:54321/functions/v1/FUNCTION_NAME \
 ### Production Testing
 
 Use Stripe test mode:
+
 - Test cards: `4242 4242 4242 4242`
 - Test webhooks with Stripe CLI
 - Create test users and data
@@ -405,6 +417,7 @@ Use Stripe test mode:
 ## Support
 
 For issues:
+
 1. Check Supabase logs
 2. Review Stripe webhook events
 3. Test Edge Functions locally

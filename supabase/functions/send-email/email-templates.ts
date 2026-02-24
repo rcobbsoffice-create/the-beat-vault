@@ -1,4 +1,4 @@
-// Email templates for The Beat Vault
+// Email templates for AudioGenes
 
 export const templates = {
   purchase_confirmation: (data: {
@@ -42,7 +42,7 @@ export const templates = {
       <p><small>This link expires in 7 days. Make sure to download your files!</small></p>
     </div>
     <div class="footer">
-      <p>© The Beat Vault | Making music accessible</p>
+      <p>© AudioGenes | Making music accessible</p>
     </div>
   </div>
 </body>
@@ -51,7 +51,7 @@ export const templates = {
   }),
 
   welcome_producer: (data: { producer_name: string, store_url: string }) => ({
-    subject: 'Welcome to The Beat Vault Producer Program! 🎹',
+    subject: 'Welcome to the AudioGenes Producer Program! 🎹',
     html: `
 <!DOCTYPE html>
 <html>
@@ -71,7 +71,7 @@ export const templates = {
       <h1>Welcome, ${data.producer_name}! 🎉</h1>
     </div>
     <div class="content">
-      <p>You're now part of The Beat Vault producer community!</p>
+      <p>You're now part of the AudioGenes producer community!</p>
       <h3>Next Steps:</h3>
       <ol>
         <li>Complete your Stripe onboarding to receive payments</li>
